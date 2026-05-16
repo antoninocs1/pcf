@@ -53,7 +53,7 @@ PCF.Store = (() => {
   const createUser = (data) => {
     const users = getUsers();
     if (users.some(u => u.login === data.login)) return { ok: false, msg: 'Login já existe' };
-    if (users.some(u => u.cpf === data.cpf)) return { ok: false, msg: 'CPF já cadastrado' };
+    if (data.cpf && users.some(u => u.cpf === data.cpf)) return { ok: false, msg: 'CPF já cadastrado' };
     const user = { id: _uid(), dataCadastro: new Date().toISOString().split('T')[0], ...data };
     users.push(user);
     saveUsers(users);
@@ -94,6 +94,12 @@ PCF.Store = (() => {
     try { localStorage.removeItem('pcf_session'); } catch {}
   };
   const currentUserId = () => { const s = getSession(); return s ? s.userId : null; };
+  const currentUserIsAdmin = () => {
+    const uid = currentUserId();
+    if (!uid) return false;
+    const u = getUserById(uid);
+    return !!(u && u.isAdmin);
+  };
 
   /* ---------- TRANSAÇÕES ---------- */
   const _tkU = () => `pcf_transacoes_${currentUserId()}`;
@@ -273,6 +279,14 @@ PCF.Store = (() => {
   const updateFrase = (id, data) => { const all = getFrases(); const i = all.findIndex(f => f.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveFrases(all); } return all; };
   const deleteFrase = (id) => { const all = getFrases().filter(f => f.id !== id); saveFrases(all); return all; };
 
+  /* ---------- CONTATOS PESSOAIS ---------- */
+  const _ctkU = () => `pcf_contatos_${currentUserId()}`;
+  const getContatos = () => _get(_ctkU()) || [];
+  const saveContatos = (c) => _set(_ctkU(), c);
+  const addContato = (c) => { const all = getContatos(); all.push({ id: _uid(), dataCadastro: new Date().toISOString().split('T')[0], ...c }); saveContatos(all); return all; };
+  const updateContato = (id, data) => { const all = getContatos(); const i = all.findIndex(c => c.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveContatos(all); } return all; };
+  const deleteContato = (id) => { const all = getContatos().filter(c => c.id !== id); saveContatos(all); return all; };
+
   /* ---------- IMPORT / EXPORT ---------- */
   const exportData = (userId) => {
     const uid = userId || currentUserId();
@@ -293,7 +307,7 @@ PCF.Store = (() => {
 
   return {
     getUsers, saveUsers, getUserById, getUserByLogin, createUser, updateUser, deleteUser,
-    getSession, setSession, clearSession, currentUserId,
+    getSession, setSession, clearSession, currentUserId, currentUserIsAdmin,
     getTransacoes, saveTransacoes, addTransacao, updateTransacao, deleteTransacao,
     getCategorias, saveCategorias, addCategoria, updateCategoria, deleteCategoria,
     getEmocoes, saveEmocoes, addEmocao, updateEmocao, deleteEmocao,
@@ -303,6 +317,7 @@ PCF.Store = (() => {
     getHabitos, saveHabitos, addHabito, updateHabito, deleteHabito,
     getRegistrosHabitos, saveRegistrosHabitos, upsertRegistroHabito,
     getFrases, saveFrases, addFrase, updateFrase, deleteFrase,
+    getContatos, saveContatos, addContato, updateContato, deleteContato,
     exportData, importTransacoes, importCategorias,
     _uid,
   };

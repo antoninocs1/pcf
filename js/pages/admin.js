@@ -260,11 +260,12 @@ PCF.Pages = PCF.Pages || {};
             <button id="btn-add-user" class="btn btn-primary">+ Novo Usuário</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Login</th><th>Cadastro</th><th style="width:100px">Ações</th></tr></thead>
-            <tbody>${users.length === 0 ? '<tr><td colspan="8" class="empty-text">Nenhum usuário</td></tr>' :
+            <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Login</th><th>Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
+            <tbody>${users.length === 0 ? '<tr><td colspan="9" class="empty-text">Nenhum usuário</td></tr>' :
               users.map(u => `<tr>
                 <td>${H.esc(u.nome)}</td><td>${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td>${H.esc(u.telefone)}</td>
                 <td>${H.formatarData(u.dataNascimento)}</td><td>${H.esc(u.login)}</td><td>${H.formatarData(u.dataCadastro)}</td>
+                <td>${u.isAdmin ? '<span class="badge-admin">👑 Admin</span>' : '<span class="badge-padrao">Padrão</span>'}</td>
                 <td>
                   <button class="btn-icon" data-edit="${u.id}" title="Editar">✏️</button>
                   <button class="btn-icon btn-danger" data-del="${u.id}" title="Remover">🗑️</button>
@@ -311,6 +312,13 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group"><label>${isEdit ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}</label><input type="password" id="um-pass" ${isEdit ? '' : 'required'} minlength="4"></div>
               <div class="form-group"><label>Confirmar Senha</label><input type="password" id="um-pass2" ${isEdit ? '' : 'required'}></div>
             </div>
+            ${S.currentUserIsAdmin() ? `
+            <div class="form-row">
+              <div class="form-group">
+                <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> 👑 Administrador</label>
+                <small class="text-muted">Somente administradores podem criar outros administradores.</small>
+              </div>
+            </div>` : ''}
             <div id="um-error" class="alert alert-error" style="display:none"></div>
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="um-cancel">Cancelar</button>
@@ -340,6 +348,9 @@ PCF.Pages = PCF.Pages || {};
           login: document.getElementById('um-login').value.trim(),
         };
         if (p1) data.senhaHash = H.hashSenha(p1);
+        if (S.currentUserIsAdmin()) {
+          data.isAdmin = !!(document.getElementById('um-admin')?.checked);
+        }
 
         if (isEdit) {
           const res = S.updateUser(user.id, data);
@@ -558,5 +569,190 @@ PCF.Pages = PCF.Pages || {};
     const btnClearFrases = document.getElementById('clear-frases');
     if (btnClearFrases) btnClearFrases.onclick = () =>
       clearBase('Mensagens', () => S.getFrases().length, () => S.saveFrases([]));
+  };
+
+  /* ==================== CONTATOS PESSOAIS ==================== */
+  PCF.Pages.contatos = (container) => {
+    const render = () => {
+      const contatos = S.getContatos();
+      container.innerHTML = `
+        <div class="page">
+          <div class="page-header">
+            <h2>Contatos Pessoais</h2>
+            <button id="btn-add-contato" class="btn btn-primary">+ Novo Contato</button>
+          </div>
+          <div class="table-container"><table class="table">
+            <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Cadastro</th><th style="width:100px">Ações</th></tr></thead>
+            <tbody>${contatos.length === 0 ? '<tr><td colspan="7" class="empty-text">Nenhum contato cadastrado</td></tr>' :
+              contatos.map(c => `<tr>
+                <td>${H.esc(c.nome)}</td><td>${H.esc(c.cpf)}</td><td>${H.esc(c.email)}</td><td>${H.esc(c.telefone)}</td>
+                <td>${H.formatarData(c.dataNascimento)}</td><td>${H.formatarData(c.dataCadastro)}</td>
+                <td>
+                  <button class="btn-icon" data-edit="${c.id}" title="Editar">✏️</button>
+                  <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover">🗑️</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table></div>
+        </div>`;
+
+      document.getElementById('btn-add-contato').onclick = () => showContatoModal();
+      container.onclick = (e) => {
+        const edit = e.target.closest('[data-edit]');
+        if (edit) { const ct = contatos.find(c => c.id === edit.dataset.edit); if (ct) showContatoModal(ct); }
+        const del = e.target.closest('[data-del]');
+        if (del && confirm('Remover este contato?')) { S.deleteContato(del.dataset.del); render(); }
+      };
+    };
+
+    const showContatoModal = (contato) => {
+      const isEdit = !!contato;
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal modal-lg">
+          <h3>${isEdit ? 'Editar' : 'Novo'} Contato</h3>
+          <form id="contato-modal-form">
+            <div class="form-row">
+              <div class="form-group"><label>Nome Completo</label><input type="text" id="cm-nome" value="${H.esc(contato?.nome || '')}" required></div>
+              <div class="form-group"><label>CPF</label><input type="text" id="cm-cpf" value="${H.esc(contato?.cpf || '')}" placeholder="000.000.000-00"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>E-mail</label><input type="email" id="cm-email" value="${H.esc(contato?.email || '')}"></div>
+              <div class="form-group"><label>Telefone</label><input type="text" id="cm-tel" value="${H.esc(contato?.telefone || '')}" placeholder="(00) 00000-0000"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Data de Nascimento</label><input type="date" id="cm-nasc" value="${contato?.dataNascimento || ''}"></div>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="cm-cancel">Cancelar</button>
+              <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+      document.getElementById('cm-cpf').oninput = function() { this.value = H.formatarCPF(this.value); };
+      document.getElementById('cm-tel').oninput = function() { this.value = H.formatarTelefone(this.value); };
+      document.getElementById('cm-cancel').onclick = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+      document.getElementById('contato-modal-form').onsubmit = (e) => {
+        e.preventDefault();
+        const data = {
+          nome: document.getElementById('cm-nome').value.trim(),
+          cpf: document.getElementById('cm-cpf').value.trim(),
+          email: document.getElementById('cm-email').value.trim(),
+          telefone: document.getElementById('cm-tel').value.trim(),
+          dataNascimento: document.getElementById('cm-nasc').value,
+        };
+        if (isEdit) S.updateContato(contato.id, data);
+        else S.addContato(data);
+        overlay.remove();
+        render();
+      };
+    };
+    render();
+  };
+
+  /* ==================== DIÁRIO ==================== */
+  PCF.Pages.diario = (container) => {
+    const userId = S.currentUserId();
+    const KEY = `pcf_diario_${userId}`;
+    const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+    const saveDiary = (arr) => { try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch {} };
+    const fmtDate = (d) => { if (!d) return ''; const [y, m, dia] = d.split('-'); return `${dia}/${m}/${y}`; };
+    const today = new Date().toISOString().slice(0, 10);
+
+    const render = () => {
+      const entries = load().sort((a, b) => b.data.localeCompare(a.data));
+      const todayEntry = entries.find(e => e.data === today);
+      const past = entries.filter(e => e.data !== today);
+      container.innerHTML = `
+        <div class="page">
+          <h2>📓 Diário</h2>
+          <p class="subtitle">Registros pessoais do dia a dia.</p>
+          <div class="card diario-today">
+            <h3>📝 Hoje — ${fmtDate(today)}</h3>
+            <textarea id="diario-texto" class="diario-textarea" rows="6" placeholder="Escreva sobre o seu dia...">${H.esc(todayEntry?.texto || '')}</textarea>
+            <div class="diario-today-actions">
+              <button id="diario-salvar" class="btn btn-primary">💾 Salvar</button>
+              <span id="diario-ok" class="diario-saved-msg" style="display:none">✓ Salvo!</span>
+            </div>
+          </div>
+          ${past.length > 0 ? `
+          <h3 style="margin:24px 0 12px">📚 Registros Anteriores</h3>
+          <div id="diario-list">
+            ${past.map(e => `
+              <div class="diario-entry card">
+                <div class="diario-entry-header">
+                  <strong>${fmtDate(e.data)}</strong>
+                  <div>
+                    <button class="btn btn-sm btn-secondary" data-edit="${H.esc(e.data)}">✏️ Editar</button>
+                    <button class="btn btn-sm btn-danger" data-del="${H.esc(e.data)}">🗑️</button>
+                  </div>
+                </div>
+                <p class="diario-entry-text">${H.esc(e.texto || '').replace(/\n/g, '<br>')}</p>
+              </div>`).join('')}
+          </div>` : ''}
+        </div>`;
+
+      document.getElementById('diario-salvar').onclick = () => {
+        const texto = document.getElementById('diario-texto').value;
+        const arr = load().filter(e => e.data !== today);
+        if (texto.trim()) arr.push({ data: today, texto: texto.trim() });
+        saveDiary(arr);
+        const ok = document.getElementById('diario-ok');
+        if (ok) { ok.style.display = 'inline'; setTimeout(() => { if (ok) ok.style.display = 'none'; }, 2000); }
+        render();
+      };
+
+      container.addEventListener('click', (e) => {
+        const del = e.target.closest('[data-del]');
+        if (del) {
+          if (!confirm('Excluir este registro?')) return;
+          saveDiary(load().filter(x => x.data !== del.dataset.del));
+          render();
+          return;
+        }
+        const edit = e.target.closest('[data-edit]');
+        if (edit) {
+          const entry = load().find(x => x.data === edit.dataset.edit);
+          if (entry) openEditModal(entry);
+        }
+      });
+    };
+
+    const openEditModal = (entry) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal modal-lg">
+          <h3>✏️ Editar — ${fmtDate(entry.data)}</h3>
+          <div class="form-group">
+            <textarea id="edit-diario-texto" class="diario-textarea" rows="8">${H.esc(entry.texto || '')}</textarea>
+          </div>
+          <div id="edit-diario-error" class="alert alert-error" style="display:none"></div>
+          <div class="modal-actions">
+            <button id="edit-diario-cancel" class="btn btn-secondary">Cancelar</button>
+            <button id="edit-diario-save" class="btn btn-primary">Salvar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+      document.getElementById('edit-diario-cancel').onclick = () => overlay.remove();
+      document.getElementById('edit-diario-save').onclick = () => {
+        const texto = document.getElementById('edit-diario-texto').value.trim();
+        if (!texto) {
+          document.getElementById('edit-diario-error').textContent = 'O texto não pode estar vazio';
+          document.getElementById('edit-diario-error').style.display = 'block';
+          return;
+        }
+        saveDiary(load().map(x => x.data === entry.data ? { ...x, texto } : x));
+        overlay.remove();
+        render();
+      };
+    };
+
+    render();
   };
 })();

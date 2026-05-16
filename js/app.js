@@ -139,25 +139,34 @@ PCF.App = (() => {
         { hash: '#habitos-config',   icon: '⚙️', label: 'Config. Hábitos' },
       ]
     },
-    { standalone: true, hash: '#agenda',      icon: '📅', label: 'Agenda' },
-    { standalone: true, hash: '#imc',         icon: '❤️', label: 'IMC' },
-    { standalone: true, hash: '#usuarios',    icon: '👥', label: 'Usuários' },
-    { standalone: true, hash: '#importexport',icon: '📤', label: 'Importar / Exportar' },
+    { standalone: true, hash: '#diario',       icon: '📓', label: 'Diário' },
+    { standalone: true, hash: '#agenda',       icon: '📅', label: 'Agenda' },
+    { standalone: true, hash: '#imc',          icon: '❤️', label: 'IMC' },
+    { standalone: true, hash: '#contatos',     icon: '👤', label: 'Contatos Pessoais' },
+    { standalone: true, adminOnly: true, hash: '#usuarios',     icon: '👥', label: 'Conf. Usuários' },
+    { standalone: true, adminOnly: true, hash: '#importexport', icon: '📤', label: 'Importar / Exportar' },
   ];
 
   const _navCollapsed = () => { try { return JSON.parse(localStorage.getItem('pcf_nav_collapsed') || '{}'); } catch { return {}; } };
   const _navSaveCollapsed = (obj) => { try { localStorage.setItem('pcf_nav_collapsed', JSON.stringify(obj)); } catch {} };
 
+  /* Rotas que exigem perfil Administrador */
+  const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios']);
+
   const renderNav = () => {
+    const isAdmin = S.currentUserIsAdmin();
     let sepDone = false;
     return navGroups.map(g => {
       if (g.standalone) {
+        if (g.adminOnly && !isAdmin) return '';
         const sep = !sepDone ? '<hr class="nav-sep">' : '';
         sepDone = true;
         return `${sep}<a href="${g.hash}" class="nav-link" data-hash="${g.hash}"><span class="nav-icon">${g.icon}</span><span class="nav-label">${g.label}</span></a>`;
       }
+      const visibleItems = isAdmin ? g.items : g.items.filter(n => !ADMIN_ROUTES.has(n.hash));
+      if (visibleItems.length === 0) return '';
       const col = _navCollapsed()[g.id] ? 'collapsed' : '';
-      const links = g.items.map(n =>
+      const links = visibleItems.map(n =>
         `<a href="${n.hash}" class="nav-link" data-hash="${n.hash}"><span class="nav-icon">${n.icon}</span><span class="nav-label">${n.label}</span></a>`
       ).join('');
       return `<div class="nav-group ${col}" id="navgroup-${g.id}"><button class="nav-group-header" data-group="${g.id}"><span class="nav-group-title"><span>${g.icon}</span> ${g.label}</span><span class="nav-group-arrow">▾</span></button><div class="nav-group-items">${links}</div></div>`;
@@ -194,9 +203,74 @@ PCF.App = (() => {
     };
   };
 
+  /* ==================== MEU PERFIL (não-admin) ==================== */
+  const openMeuPerfil = () => {
+    const session = S.getSession();
+    const user = S.getUserById(session.userId);
+    if (!user) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal modal-lg">
+        <h3>⚙️ Meu Perfil</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Nome Completo</label><input type="text" id="mp-nome" value="${H.esc(user.nome || '')}"></div>
+          <div class="form-group"><label>CPF</label><input type="text" id="mp-cpf" value="${H.esc(user.cpf || '')}" disabled></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>E-mail</label><input type="email" id="mp-email" value="${H.esc(user.email || '')}"></div>
+          <div class="form-group"><label>Telefone</label><input type="text" id="mp-tel" value="${H.esc(user.telefone || '')}"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Data de Nascimento</label><input type="date" id="mp-nasc" value="${H.esc(user.dataNascimento || '')}"></div>
+        </div>
+        <hr style="margin:14px 0">
+        <p style="font-size:.85rem;color:var(--text-muted)">Alterar senha — deixe em branco para não alterar</p>
+        <div class="form-row">
+          <div class="form-group"><label>Senha Atual</label><input type="password" id="mp-pass-atual" autocomplete="current-password"></div>
+          <div class="form-group"><label>Nova Senha</label><input type="password" id="mp-pass-new" autocomplete="new-password" minlength="4"></div>
+          <div class="form-group"><label>Confirmar</label><input type="password" id="mp-pass-new2" autocomplete="new-password"></div>
+        </div>
+        <div id="mp-error" class="alert alert-error" style="display:none"></div>
+        <div class="modal-actions">
+          <button id="mp-cancel" class="btn btn-secondary">Cancelar</button>
+          <button id="mp-save" class="btn btn-primary">Salvar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('mp-tel').oninput = function () { this.value = H.formatarTelefone(this.value); };
+    const close = () => overlay.remove();
+    overlay.onclick = e => { if (e.target === overlay) close(); };
+    document.getElementById('mp-cancel').onclick = close;
+    document.getElementById('mp-save').onclick = () => {
+      const errEl = document.getElementById('mp-error');
+      errEl.style.display = 'none';
+      const nome = document.getElementById('mp-nome').value.trim();
+      const email = document.getElementById('mp-email').value.trim();
+      const tel = document.getElementById('mp-tel').value.trim();
+      const nasc = document.getElementById('mp-nasc').value;
+      const passAtual = document.getElementById('mp-pass-atual').value;
+      const passNew = document.getElementById('mp-pass-new').value;
+      const passNew2 = document.getElementById('mp-pass-new2').value;
+      if (!nome) { errEl.textContent = 'Nome é obrigatório'; errEl.style.display = 'block'; return; }
+      const updates = { nome, email, telefone: tel, dataNascimento: nasc };
+      if (passNew || passAtual) {
+        if (H.hashSenha(passAtual) !== user.senhaHash) { errEl.textContent = 'Senha atual incorreta'; errEl.style.display = 'block'; return; }
+        if (passNew.length < 4) { errEl.textContent = 'Nova senha deve ter ao menos 4 caracteres'; errEl.style.display = 'block'; return; }
+        if (passNew !== passNew2) { errEl.textContent = 'As senhas não coincidem'; errEl.style.display = 'block'; return; }
+        updates.senhaHash = H.hashSenha(passNew);
+      }
+      S.updateUser({ ...user, ...updates });
+      const nameEl = document.querySelector('.user-name');
+      if (nameEl) nameEl.textContent = nome;
+      close();
+    };
+  };
+
   const renderShell = () => {
     const session = S.getSession();
     const user = S.getUserById(session.userId);
+    const isAdmin = S.currentUserIsAdmin();
     document.getElementById('app').innerHTML = `
       <div class="app-layout">
         <aside class="sidebar" id="sidebar">
@@ -214,6 +288,7 @@ PCF.App = (() => {
             </div>
             <div class="user-info">
               <span class="user-name">${H.esc(user?.nome || session.login)}</span>
+              ${!isAdmin ? '<button id="btn-meu-perfil" class="btn-link btn-gear" title="Editar meu perfil">⚙️</button>' : ''}
               <button id="btn-logout" class="btn-link" title="Sair">🚪 Sair</button>
             </div>
           </div>
@@ -225,6 +300,8 @@ PCF.App = (() => {
         <main class="main-content" id="main-content"></main>
       </div>`;
     document.getElementById('btn-logout').onclick = () => { S.clearSession(); renderLogin(); };
+    const gearBtn = document.getElementById('btn-meu-perfil');
+    if (gearBtn) gearBtn.onclick = openMeuPerfil;
     document.getElementById('sidebar-toggle').onclick = () => {
       document.getElementById('sidebar').classList.toggle('open');
     };
@@ -257,6 +334,11 @@ PCF.App = (() => {
     if (!S.getSession()) { renderLogin(); return; }
     destroyCharts();
     const hash = location.hash.split('?')[0] || '#dashboard';
+    // Guarda rotas exclusivas de administrador
+    if (ADMIN_ROUTES.has(hash) && !S.currentUserIsAdmin()) {
+      location.hash = '#dashboard';
+      return;
+    }
     updateActiveNav();
     const mc = document.getElementById('main-content');
     if (!mc) { renderShell(); route(); return; }
@@ -279,7 +361,9 @@ PCF.App = (() => {
       '#frases': pages.frases,
       '#categorias': pages.categorias,
       '#emocoes-config': pages.emocoesConfig,
+      '#diario': pages.diario,
       '#usuarios': pages.usuarios,
+      '#contatos': pages.contatos,
       '#importexport': pages.importExport,
     };
     const renderFn = map[hash] || pages.dashboard;
@@ -314,6 +398,19 @@ PCF.App = (() => {
 
   const boot = () => {
     applyTheme();
+    // Cria usuário Administrador inicial se ainda não existir
+    if (!S.getUserByLogin('Admin')) {
+      S.createUser({
+        nome: 'Administrador',
+        cpf: '',
+        email: '',
+        telefone: '',
+        dataNascimento: '',
+        login: 'Admin',
+        senhaHash: H.hashSenha('Silva01'),
+        isAdmin: true,
+      });
+    }
     // Garante que qualquer sessão antiga salva no localStorage seja removida
     try { localStorage.removeItem('pcf_session'); } catch {}
     if (S.getSession()) initApp();

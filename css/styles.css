@@ -217,6 +217,8 @@ select { cursor: pointer; }
   cursor: pointer; font-size: .8rem; padding: 4px 8px; transition: .2s;
 }
 .btn-link:hover { color: var(--danger); }
+.btn-gear { font-size: .95rem; opacity: .7; transition: opacity .2s, transform .3s; }
+.btn-gear:hover { opacity: 1; transform: rotate(45deg); color: var(--primary) !important; }
 
 /* ==================== ALERTS ==================== */
 .alert {
@@ -262,6 +264,18 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .tipo-badge.receita { background: rgba(22,163,74,.15); color: #4ade80; }
 .tipo-badge.despesa { background: rgba(220,38,38,.15); color: #f87171; }
 .tipo-badge.investimento { background: rgba(139,92,246,.15); color: #a78bfa; }
+
+.badge-admin {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: .76rem; font-weight: 600;
+  background: rgba(234,179,8,.18); color: #fbbf24;
+}
+.badge-padrao {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: .76rem; font-weight: 600;
+  background: rgba(255,255,255,.06); color: var(--text-muted);
+}
+.check-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; }
 
 .valor { font-weight: 600; font-variant-numeric: tabular-nums; }
 
@@ -754,6 +768,20 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .theme-switch input:checked + .theme-switch-slider::before {
   transform: translateX(20px); background: #fff;
 }
+
+/* ==================== DIÁRIO ==================== */
+.diario-today { margin-bottom: 24px; }
+.diario-textarea {
+  width: 100%; min-height: 120px; padding: 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  font-size: .95rem; font-family: inherit; resize: vertical; box-sizing: border-box;
+}
+.diario-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+.diario-today-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.diario-saved-msg { color: var(--success); font-size: .9rem; }
+.diario-entry { margin-bottom: 14px; }
+.diario-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.diario-entry-text { margin: 0; font-size: .92rem; line-height: 1.6; white-space: pre-wrap; color: var(--text-muted); }
 
 /* ==================== LIGHT THEME ==================== */
 [data-theme="light"] {
