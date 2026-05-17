@@ -661,96 +661,74 @@ PCF.Pages = PCF.Pages || {};
     const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
     const saveDiary = (arr) => { try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch {} };
     const fmtDate = (d) => { if (!d) return ''; const [y, m, dia] = d.split('-'); return `${dia}/${m}/${y}`; };
-    const today = new Date().toISOString().slice(0, 10);
+
+    let selectedDate = new Date().toISOString().slice(0, 10);
 
     const render = () => {
-      const entries = load().sort((a, b) => b.data.localeCompare(a.data));
-      const todayEntry = entries.find(e => e.data === today);
-      const past = entries.filter(e => e.data !== today);
+      const today = new Date().toISOString().slice(0, 10);
+      const entries = load();
+      const entry = entries.find(e => e.data === selectedDate);
+      const isToday = selectedDate === today;
+      const sorted = [...entries].sort((a, b) => b.data.localeCompare(a.data));
+
       container.innerHTML = `
         <div class="page">
-          <h2>📓 Diário</h2>
-          <p class="subtitle">Registros pessoais do dia a dia.</p>
+          <div class="page-header">
+            <h2>📓 Diário</h2>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
+              <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
+            </div>
+          </div>
+
           <div class="card diario-today">
-            <h3>📝 Hoje — ${fmtDate(today)}</h3>
-            <textarea id="diario-texto" class="diario-textarea" rows="6" placeholder="Escreva sobre o seu dia...">${H.esc(todayEntry?.texto || '')}</textarea>
+            <div class="diario-day-title">
+              <h3>${isToday ? '📝 Hoje' : '📅 ' + fmtDate(selectedDate)}</h3>
+              ${entry && !isToday ? '<span class="badge badge-info">Editando registro salvo</span>' : ''}
+            </div>
+            <textarea id="diario-texto" class="diario-textarea" rows="8"
+              placeholder="Escreva sobre este dia...">${H.esc(entry?.texto || '')}</textarea>
             <div class="diario-today-actions">
               <button id="diario-salvar" class="btn btn-primary">💾 Salvar</button>
+              ${entry ? `<button id="diario-apagar" class="btn btn-danger">🗑️ Apagar</button>` : ''}
               <span id="diario-ok" class="diario-saved-msg" style="display:none">✓ Salvo!</span>
             </div>
           </div>
-          ${past.length > 0 ? `
-          <h3 style="margin:24px 0 12px">📚 Registros Anteriores</h3>
-          <div id="diario-list">
-            ${past.map(e => `
-              <div class="diario-entry card">
-                <div class="diario-entry-header">
-                  <strong>${fmtDate(e.data)}</strong>
-                  <div>
-                    <button class="btn btn-sm btn-secondary" data-edit="${H.esc(e.data)}">✏️ Editar</button>
-                    <button class="btn btn-sm btn-danger" data-del="${H.esc(e.data)}">🗑️</button>
-                  </div>
-                </div>
-                <p class="diario-entry-text">${H.esc(e.texto || '').replace(/\n/g, '<br>')}</p>
+
+          ${sorted.length > 0 ? `
+          <h3 style="margin:24px 0 10px">📚 Dias com Registro <span class="badge badge-neutral">${sorted.length}</span></h3>
+          <div class="diario-index">
+            ${sorted.map(e => `
+              <div class="diario-index-item ${e.data === selectedDate ? 'active' : ''}" data-goto="${e.data}">
+                <span class="diario-index-date">${fmtDate(e.data)}${e.data === today ? ' <small>(hoje)</small>' : ''}</span>
+                <span class="diario-index-preview">${H.esc((e.texto || '').slice(0, 90))}${(e.texto || '').length > 90 ? '…' : ''}</span>
               </div>`).join('')}
           </div>` : ''}
         </div>`;
 
+      document.getElementById('diario-data').onchange = (e) => { selectedDate = e.target.value; render(); };
+      document.getElementById('btn-diario-hoje').onclick = () => { selectedDate = today; render(); };
+
       document.getElementById('diario-salvar').onclick = () => {
         const texto = document.getElementById('diario-texto').value;
-        const arr = load().filter(e => e.data !== today);
-        if (texto.trim()) arr.push({ data: today, texto: texto.trim() });
+        const arr = load().filter(e => e.data !== selectedDate);
+        if (texto.trim()) arr.push({ data: selectedDate, texto: texto.trim() });
         saveDiary(arr);
         const ok = document.getElementById('diario-ok');
         if (ok) { ok.style.display = 'inline'; setTimeout(() => { if (ok) ok.style.display = 'none'; }, 2000); }
         render();
       };
 
-      container.addEventListener('click', (e) => {
-        const del = e.target.closest('[data-del]');
-        if (del) {
-          if (!confirm('Excluir este registro?')) return;
-          saveDiary(load().filter(x => x.data !== del.dataset.del));
-          render();
-          return;
-        }
-        const edit = e.target.closest('[data-edit]');
-        if (edit) {
-          const entry = load().find(x => x.data === edit.dataset.edit);
-          if (entry) openEditModal(entry);
-        }
-      });
-    };
-
-    const openEditModal = (entry) => {
-      const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay';
-      overlay.innerHTML = `
-        <div class="modal modal-lg">
-          <h3>✏️ Editar — ${fmtDate(entry.data)}</h3>
-          <div class="form-group">
-            <textarea id="edit-diario-texto" class="diario-textarea" rows="8">${H.esc(entry.texto || '')}</textarea>
-          </div>
-          <div id="edit-diario-error" class="alert alert-error" style="display:none"></div>
-          <div class="modal-actions">
-            <button id="edit-diario-cancel" class="btn btn-secondary">Cancelar</button>
-            <button id="edit-diario-save" class="btn btn-primary">Salvar</button>
-          </div>
-        </div>`;
-      document.body.appendChild(overlay);
-      overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
-      document.getElementById('edit-diario-cancel').onclick = () => overlay.remove();
-      document.getElementById('edit-diario-save').onclick = () => {
-        const texto = document.getElementById('edit-diario-texto').value.trim();
-        if (!texto) {
-          document.getElementById('edit-diario-error').textContent = 'O texto não pode estar vazio';
-          document.getElementById('edit-diario-error').style.display = 'block';
-          return;
-        }
-        saveDiary(load().map(x => x.data === entry.data ? { ...x, texto } : x));
-        overlay.remove();
+      const delBtn = document.getElementById('diario-apagar');
+      if (delBtn) delBtn.onclick = () => {
+        if (!confirm('Apagar este registro?')) return;
+        saveDiary(load().filter(e => e.data !== selectedDate));
         render();
       };
+
+      container.querySelectorAll('[data-goto]').forEach(item => {
+        item.onclick = () => { selectedDate = item.dataset.goto; render(); };
+      });
     };
 
     render();

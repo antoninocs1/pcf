@@ -771,17 +771,30 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 
 /* ==================== DIÁRIO ==================== */
 .diario-today { margin-bottom: 24px; }
+.diario-day-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.diario-day-title h3 { margin: 0; }
 .diario-textarea {
   width: 100%; min-height: 120px; padding: 12px; border-radius: 8px;
   border: 1px solid var(--border); background: var(--bg); color: var(--text);
   font-size: .95rem; font-family: inherit; resize: vertical; box-sizing: border-box;
 }
 .diario-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
-.diario-today-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.diario-today-actions { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 .diario-saved-msg { color: var(--success); font-size: .9rem; }
 .diario-entry { margin-bottom: 14px; }
 .diario-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .diario-entry-text { margin: 0; font-size: .92rem; line-height: 1.6; white-space: pre-wrap; color: var(--text-muted); }
+.diario-index { display: flex; flex-direction: column; gap: 6px; }
+.diario-index-item {
+  display: flex; flex-direction: column; gap: 4px; padding: 10px 14px;
+  border-radius: 8px; border: 1px solid var(--border); cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.diario-index-item:hover { background: var(--bg-hover, rgba(255,255,255,.04)); border-color: var(--primary); }
+.diario-index-item.active { border-color: var(--primary); background: rgba(59,130,246,.08); }
+.diario-index-date { font-weight: 600; font-size: .9rem; }
+.diario-index-preview { font-size: .83rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge-neutral { background: rgba(148,163,184,.2); color: var(--text-muted); font-size: .75rem; padding: 2px 8px; border-radius: 999px; }
 
 /* ==================== LIGHT THEME ==================== */
 [data-theme="light"] {
