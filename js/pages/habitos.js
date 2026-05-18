@@ -195,7 +195,7 @@ PCF.Pages = PCF.Pages || {};
                 </div>`;
               }).join('')}
             </div>
-            <button type="button" class="btn btn-primary" id="btn-salvar-obs" style="margin-top:16px">💾 Salvar Observações</button>
+            <button type="button" class="btn btn-primary" id="btn-salvar-obs" style="margin-top:16px"><i data-lucide="save"></i> Salvar Observações</button>
           `}
         </div>`;
 
@@ -302,9 +302,9 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>📅 Visão Mensal</h2>
             <div style="display:flex;gap:8px;align-items:center">
-              <button class="btn btn-secondary btn-sm" id="btn-mes-ant">◀</button>
+              <button class="btn btn-secondary btn-sm" id="btn-mes-ant"><i data-lucide="chevron-left"></i></button>
               <span style="font-weight:600;min-width:160px;text-align:center">${MESES_PT[viewMonth - 1]} ${viewYear}</span>
-              <button class="btn btn-secondary btn-sm" id="btn-mes-prox">▶</button>
+              <button class="btn btn-secondary btn-sm" id="btn-mes-prox"><i data-lucide="chevron-right"></i></button>
             </div>
           </div>
 
@@ -583,8 +583,8 @@ PCF.Pages = PCF.Pages || {};
                     <td>${H.esc(h.meta || '—')}</td>
                     <td><span class="tipo-badge ${h.ativo !== false ? 'receita' : 'despesa'}">${h.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
                     <td>
-                      <button class="btn-icon" data-edit="${h.id}" title="Editar">✏️</button>
-                      <button class="btn-icon btn-danger" data-del="${h.id}" title="Excluir">🗑️</button>
+                      <button class="btn-icon" data-edit="${h.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                      <button class="btn-icon btn-danger" data-del="${h.id}" title="Excluir"><i data-lucide="trash-2"></i></button>
                     </td>
                   </tr>`).join('')}
               </tbody>
@@ -759,8 +759,8 @@ PCF.Pages = PCF.Pages || {};
                     <td><span class="chip-small">${H.esc(f.categoria || 'Geral')}</span></td>
                     <td><span class="tipo-badge ${f.ativo !== false ? 'receita' : 'despesa'}">${f.ativo !== false ? 'Ativa' : 'Inativa'}</span></td>
                     <td>
-                      <button class="btn-icon" data-edit="${f.id}" title="Editar">✏️</button>
-                      <button class="btn-icon btn-danger" data-del="${f.id}" title="Excluir">🗑️</button>
+                      <button class="btn-icon" data-edit="${f.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                      <button class="btn-icon btn-danger" data-del="${f.id}" title="Excluir"><i data-lucide="trash-2"></i></button>
                     </td>
                   </tr>`).join('')}
               </tbody>

@@ -125,8 +125,8 @@ PCF.Pages = PCF.Pages || {};
                       <td>${c.hora || '—'}</td>
                       <td><span class="status-badge" style="background:${statusCor}">${c.status}</span></td>
                       <td class="actions-cell">
-                        <button class="btn-icon" data-edit-ag="${c.id}" title="Editar">✏️</button>
-                        <button class="btn-icon btn-danger" data-del-ag="${c.id}" title="Remover">🗑️</button>
+                        <button class="btn-icon" data-edit-ag="${c.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                        <button class="btn-icon btn-danger" data-del-ag="${c.id}" title="Remover"><i data-lucide="trash-2"></i></button>
                       </td>
                     </tr>`;
                   }).join('')}
@@ -262,7 +262,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="modal ag-clock-modal">
           <div class="ag-modal-header">
             <span>⏱ Timer</span>
-            <button class="btn-icon" id="ag-timer-close">✕</button>
+            <button class="btn-icon" id="ag-timer-close"><i data-lucide="x"></i></button>
           </div>
           <div class="ag-timer-display" id="ag-timer-display">00:00:00</div>
           <div class="ag-timer-setup" id="ag-timer-setup">
@@ -284,8 +284,8 @@ PCF.Pages = PCF.Pages || {};
             </div>
           </div>
           <div class="ag-modal-actions">
-            <button class="btn btn-primary" id="ag-timer-start">▶ Iniciar</button>
-            <button class="btn btn-secondary" id="ag-timer-reset">↺ Resetar</button>
+            <button class="btn btn-primary" id="ag-timer-start"><i data-lucide="play"></i> Iniciar</button>
+            <button class="btn btn-secondary" id="ag-timer-reset"><i data-lucide="rotate-ccw"></i> Resetar</button>
           </div>
           <div class="ag-timer-status" id="ag-timer-status"></div>
         </div>`;
@@ -305,7 +305,7 @@ PCF.Pages = PCF.Pages || {};
 
       const stopTimer = () => {
         clearInterval(timerInterval); timerInterval = null; running = false;
-        startBtn.textContent = '▶ Retomar';
+        startBtn.innerHTML = '<i data-lucide="play"></i> Retomar'; if(window.lucide) lucide.createIcons();
       };
 
       startBtn.onclick = () => {
@@ -320,7 +320,7 @@ PCF.Pages = PCF.Pages || {};
           setupEl.style.display = 'none';
         }
         running = true;
-        startBtn.textContent = '⏸ Pausar';
+        startBtn.innerHTML = '<i data-lucide="pause"></i> Pausar'; if(window.lucide) lucide.createIcons();
         statusEl.textContent = '';
         display.classList.remove('ag-timer-done');
         timerInterval = setInterval(() => {
@@ -355,7 +355,7 @@ PCF.Pages = PCF.Pages || {};
         display.textContent = '00:00:00';
         display.classList.remove('ag-timer-done');
         statusEl.textContent = '';
-        startBtn.textContent = '▶ Iniciar';
+        startBtn.innerHTML = '<i data-lucide="play"></i> Iniciar'; if(window.lucide) lucide.createIcons();
         setupEl.style.display = '';
       };
 
@@ -379,13 +379,13 @@ PCF.Pages = PCF.Pages || {};
         <div class="modal ag-clock-modal">
           <div class="ag-modal-header">
             <span>⏱ Cronômetro</span>
-            <button class="btn-icon" id="ag-crono-close">✕</button>
+            <button class="btn-icon" id="ag-crono-close"><i data-lucide="x"></i></button>
           </div>
           <div class="ag-crono-display" id="ag-crono-display">00:00:00.00</div>
           <div class="ag-modal-actions">
-            <button class="btn btn-primary" id="ag-crono-start">▶ Iniciar</button>
-            <button class="btn btn-secondary" id="ag-crono-lap" disabled>⊙ Volta</button>
-            <button class="btn btn-secondary" id="ag-crono-reset">↺ Resetar</button>
+            <button class="btn btn-primary" id="ag-crono-start"><i data-lucide="play"></i> Iniciar</button>
+            <button class="btn btn-secondary" id="ag-crono-lap" disabled><i data-lucide="flag"></i> Volta</button>
+            <button class="btn btn-secondary" id="ag-crono-reset"><i data-lucide="rotate-ccw"></i> Resetar</button>
           </div>
           <div class="ag-crono-laps" id="ag-crono-laps"></div>
         </div>`;
@@ -407,10 +407,10 @@ PCF.Pages = PCF.Pages || {};
       startBtn.onclick = () => {
         if (running) {
           clearInterval(cronoInterval); cronoInterval = null; running = false;
-          startBtn.textContent = '▶ Retomar';
+          startBtn.innerHTML = '<i data-lucide="play"></i> Retomar'; if(window.lucide) lucide.createIcons();
         } else {
           running = true;
-          startBtn.textContent = '⏸ Pausar';
+          startBtn.innerHTML = '<i data-lucide="pause"></i> Pausar'; if(window.lucide) lucide.createIcons();
           lapBtn.disabled = false;
           cronoInterval = setInterval(() => {
             elapsed++;
@@ -435,7 +435,7 @@ PCF.Pages = PCF.Pages || {};
         clearInterval(cronoInterval); cronoInterval = null; running = false;
         elapsed = 0; lapStart = 0; laps = [];
         display.textContent = '00:00:00.00';
-        startBtn.textContent = '▶ Iniciar';
+        startBtn.innerHTML = '<i data-lucide="play"></i> Iniciar'; if(window.lucide) lucide.createIcons();
         lapBtn.disabled = true;
         lapsEl.innerHTML = '';
       };

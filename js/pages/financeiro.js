@@ -208,7 +208,7 @@ PCF.Pages = PCF.Pages || {};
               <td><span class="tipo-badge ${t.tipoOperacao.toLowerCase()}">${t.tipoOperacao}</span></td>
               <td>${H.esc(t.categoria)}</td><td>${H.esc(t.subcategoria)}</td><td>${H.esc(t.item)}</td>
               <td class="valor">${H.formatarMoeda(t.valor)}</td><td>${H.esc(t.formaPagamento)}</td><td>${H.esc(t.tipo)}</td>
-              <td><button class="btn-icon" data-edit="${t.id}" title="Editar">✏️</button><button class="btn-icon btn-danger" data-del="${t.id}" title="Remover">🗑️</button></td>
+              <td><button class="btn-icon" data-edit="${t.id}" title="Editar"><i data-lucide="pencil"></i></button><button class="btn-icon btn-danger" data-del="${t.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
             </tr>`).join('');
       };
 

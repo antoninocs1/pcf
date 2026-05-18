@@ -240,11 +240,11 @@ PCF.Pages = PCF.Pages || {};
               <p class="subtitle">Avalie seu nível de satisfação em cada área de vida</p>
             </div>
             <div class="rv-nav-area">
-              <button id="rv-prev" class="btn btn-sm"${!prevDate ? ' disabled' : ''}>‹</button>
+              <button id="rv-prev" class="btn btn-sm"${!prevDate ? ' disabled' : ''}><i data-lucide="chevron-left"></i></button>
               <span class="rv-date-badge${saved ? ' is-saved' : ''}">
                 ${_fmt(curDate)}${saved ? ' ✓' : ''}
               </span>
-              <button id="rv-next" class="btn btn-sm"${!nextDate ? ' disabled' : ''}>›</button>
+              <button id="rv-next" class="btn btn-sm"${!nextDate ? ' disabled' : ''}><i data-lucide="chevron-right"></i></button>
               <button id="rv-nova" class="btn btn-primary btn-sm">+ Nova Avaliação</button>
             </div>
           </div>
@@ -289,8 +289,8 @@ PCF.Pages = PCF.Pages || {};
                 </div>`).join('')}
 
               <div class="rv-btns">
-                <button id="rv-salvar" class="btn btn-primary">💾 Salvar Avaliação</button>
-                ${saved ? `<button id="rv-excluir" class="btn btn-outline rv-del-btn">🗑️ Excluir</button>` : ''}
+                <button id="rv-salvar" class="btn btn-primary"><i data-lucide="save"></i> Salvar Avaliação</button>
+                ${saved ? `<button id="rv-excluir" class="btn btn-outline rv-del-btn"><i data-lucide="trash-2"></i> Excluir</button>` : ''}
               </div>
             </div>
           </div>
@@ -373,7 +373,7 @@ PCF.Pages = PCF.Pages || {};
             </div>
             <div class="page-actions">
               <button id="rvc-add-quad" class="btn btn-primary btn-sm">+ Quadrante</button>
-              <button id="rvc-restaurar" class="btn btn-outline btn-sm">↺ Restaurar Padrões</button>
+              <button id="rvc-restaurar" class="btn btn-outline btn-sm"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
             </div>
           </div>
 
@@ -384,10 +384,10 @@ PCF.Pages = PCF.Pages || {};
                   <span class="rvc-quad-dot" style="background:${q.cor}"></span>
                   <strong>${H.esc(q.label)}</strong>
                   <div class="rvc-quad-actions">
-                    <button class="btn btn-sm btn-outline rvc-edit-quad" data-qi="${qi}" title="Editar quadrante">✏️</button>
-                    <button class="btn btn-sm btn-outline rvc-move-quad-up" data-qi="${qi}" title="Mover acima" ${qi === 0 ? 'disabled' : ''}>⬆</button>
-                    <button class="btn btn-sm btn-outline rvc-move-quad-dn" data-qi="${qi}" title="Mover abaixo" ${qi === config.length - 1 ? 'disabled' : ''}>⬇</button>
-                    <button class="btn btn-sm btn-outline rvc-del-quad" data-qi="${qi}" title="Remover quadrante" style="color:var(--danger)" ${config.length <= 1 ? 'disabled' : ''}>🗑️</button>
+                    <button class="btn btn-sm btn-outline rvc-edit-quad" data-qi="${qi}" title="Editar quadrante"><i data-lucide="pencil"></i></button>
+                    <button class="btn btn-sm btn-outline rvc-move-quad-up" data-qi="${qi}" title="Mover acima" ${qi === 0 ? 'disabled' : ''}><i data-lucide="arrow-up"></i></button>
+                    <button class="btn btn-sm btn-outline rvc-move-quad-dn" data-qi="${qi}" title="Mover abaixo" ${qi === config.length - 1 ? 'disabled' : ''}><i data-lucide="arrow-down"></i></button>
+                    <button class="btn btn-sm btn-outline rvc-del-quad" data-qi="${qi}" title="Remover quadrante" style="color:var(--danger)" ${config.length <= 1 ? 'disabled' : ''}><i data-lucide="trash-2"></i></button>
                   </div>
                 </div>
                 <table class="table rvc-cat-table">
@@ -401,8 +401,8 @@ PCF.Pages = PCF.Pages || {};
                         <td><span class="rvc-cor-dot" style="background:${cat.cor}"></span></td>
                         <td><small>${INTEGRACAO_OPTS.find(o=>o.value===cat.integracaoFonte)?.label || '—'}</small></td>
                         <td class="rvc-cat-acts">
-                          <button class="btn btn-sm btn-outline rvc-edit-cat" data-qi="${qi}" data-ci="${ci}" title="Editar">✏️</button>
-                          <button class="btn btn-sm btn-outline rvc-del-cat" data-qi="${qi}" data-ci="${ci}" title="Remover" style="color:var(--danger)">🗑️</button>
+                          <button class="btn btn-sm btn-outline rvc-edit-cat" data-qi="${qi}" data-ci="${ci}" title="Editar"><i data-lucide="pencil"></i></button>
+                          <button class="btn btn-sm btn-outline rvc-del-cat" data-qi="${qi}" data-ci="${ci}" title="Remover" style="color:var(--danger)"><i data-lucide="trash-2"></i></button>
                         </td>
                       </tr>`).join('')}
                   </tbody>

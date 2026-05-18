@@ -111,53 +111,53 @@ PCF.App = (() => {
   /* ==================== SIDEBAR ==================== */
   const navGroups = [
     {
-      id: 'financeiro', label: 'Financeiro', icon: '💰',
+      id: 'financeiro', label: 'Financeiro', icon: 'wallet',
       items: [
-        { hash: '#dashboard',  icon: '📊', label: 'Dashboard Financeiro' },
-        { hash: '#inserir',    icon: '➕', label: 'Inserir Transação Financeira' },
-        { hash: '#base',       icon: '🗄️', label: 'Base de Dados Financeira' },
-        { hash: '#relatorios', icon: '📈', label: 'Relatório Financeiro' },
-        { hash: '#ciclo',      icon: '🔄', label: '4 Forças do Dinheiro' },
-        { hash: '#categorias', icon: '📁', label: 'Config. Categorias' },
+        { hash: '#dashboard',  icon: 'layout-dashboard', label: 'Dashboard Financeiro' },
+        { hash: '#inserir',    icon: 'plus-circle',       label: 'Inserir Transação Financeira' },
+        { hash: '#base',       icon: 'database',          label: 'Base de Dados Financeira' },
+        { hash: '#relatorios', icon: 'trending-up',       label: 'Relatório Financeiro' },
+        { hash: '#ciclo',      icon: 'refresh-cw',        label: '4 Forças do Dinheiro' },
+        { hash: '#categorias', icon: 'folder',            label: 'Config. Categorias' },
       ]
     },
     {
-      id: 'emocoes', label: 'Emoções', icon: '🧠',
+      id: 'emocoes', label: 'Emoções', icon: 'brain',
       items: [
-        { hash: '#emocoes',           icon: '🧠', label: 'Emoções' },
-        { hash: '#emocoes-relatorios', icon: '📉', label: 'Relatório Emoções' },
-        { hash: '#emocoes-config',    icon: '🎨', label: 'Config. Emoções' },
+        { hash: '#emocoes',            icon: 'brain',         label: 'Emoções' },
+        { hash: '#emocoes-relatorios', icon: 'trending-down', label: 'Relatório Emoções' },
+        { hash: '#emocoes-config',     icon: 'palette',       label: 'Config. Emoções' },
       ]
     },
     {
-      id: 'habitos', label: 'Hábitos', icon: '🌱',
+      id: 'habitos', label: 'Hábitos', icon: 'sprout',
       items: [
-        { hash: '#habitos',          icon: '🌱', label: 'Hábitos Diários' },
-        { hash: '#habitos-mensal',   icon: '📅', label: 'Visão Mensal Hábitos' },
-        { hash: '#habitos-relatorio',icon: '📊', label: 'Relatório Hábitos' },
-        { hash: '#frases',           icon: '💬', label: 'Base de Mensagens' },
-        { hash: '#habitos-config',   icon: '⚙️', label: 'Config. Hábitos' },
+        { hash: '#habitos',           icon: 'check-square',  label: 'Hábitos Diários' },
+        { hash: '#habitos-mensal',    icon: 'calendar',      label: 'Visão Mensal Hábitos' },
+        { hash: '#habitos-relatorio', icon: 'bar-chart-2',   label: 'Relatório Hábitos' },
+        { hash: '#frases',            icon: 'message-square',label: 'Base de Mensagens' },
+        { hash: '#habitos-config',    icon: 'settings',      label: 'Config. Hábitos' },
       ]
     },
     {
-      id: 'rodavida', label: 'Roda da Vida', icon: '🎯',
+      id: 'rodavida', label: 'Roda da Vida', icon: 'target',
       items: [
-        { hash: '#roda-vida',        icon: '🎯', label: 'Roda da Vida' },
-        { hash: '#roda-vida-config', icon: '⚙️', label: 'Config. Roda da Vida' },
+        { hash: '#roda-vida',        icon: 'target',   label: 'Roda da Vida' },
+        { hash: '#roda-vida-config', icon: 'settings', label: 'Config. Roda da Vida' },
       ]
     },
     {
-      id: 'diario', label: 'Diário', icon: '📓',
+      id: 'diario', label: 'Diário', icon: 'book-open',
       items: [
-        { hash: '#diario',        icon: '📓', label: 'Diário' },
-        { hash: '#diario-config', icon: '⚙️',  label: 'Config. Diário' },
+        { hash: '#diario',        icon: 'book-open', label: 'Diário' },
+        { hash: '#diario-config', icon: 'settings',  label: 'Config. Diário' },
       ]
     },
-    { standalone: true, hash: '#agenda',       icon: '📅', label: 'Agenda' },
-    { standalone: true, hash: '#imc',          icon: '❤️', label: 'IMC' },
-    { standalone: true, hash: '#contatos',     icon: '👤', label: 'Contatos Pessoais' },
-    { standalone: true, adminOnly: true, hash: '#usuarios',     icon: '👥', label: 'Conf. Usuários' },
-    { standalone: true, adminOnly: true, hash: '#importexport', icon: '📤', label: 'Importar / Exportar' },
+    { standalone: true, hash: '#agenda',       icon: 'calendar',  label: 'Agenda' },
+    { standalone: true, hash: '#imc',          icon: 'heart',     label: 'IMC' },
+    { standalone: true, hash: '#contatos',     icon: 'user',      label: 'Contatos Pessoais' },
+    { standalone: true, adminOnly: true, hash: '#usuarios',     icon: 'users',  label: 'Conf. Usuários' },
+    { standalone: true, adminOnly: true, hash: '#importexport', icon: 'upload', label: 'Importar / Exportar' },
   ];
 
   const _navCollapsed = () => { try { return JSON.parse(localStorage.getItem('pcf_nav_collapsed') || '{}'); } catch { return {}; } };
@@ -174,15 +174,15 @@ PCF.App = (() => {
         if (g.adminOnly && !isAdmin) return '';
         const sep = !sepDone ? '<hr class="nav-sep">' : '';
         sepDone = true;
-        return `${sep}<a href="${g.hash}" class="nav-link" data-hash="${g.hash}"><span class="nav-icon">${g.icon}</span><span class="nav-label">${g.label}</span></a>`;
+        return `${sep}<a href="${g.hash}" class="nav-link" data-hash="${g.hash}"><i data-lucide="${g.icon}" class="nav-icon"></i><span class="nav-label">${g.label}</span></a>`;
       }
       const visibleItems = isAdmin ? g.items : g.items.filter(n => !ADMIN_ROUTES.has(n.hash));
       if (visibleItems.length === 0) return '';
       const col = _navCollapsed()[g.id] ? 'collapsed' : '';
       const links = visibleItems.map(n =>
-        `<a href="${n.hash}" class="nav-link" data-hash="${n.hash}"><span class="nav-icon">${n.icon}</span><span class="nav-label">${n.label}</span></a>`
+        `<a href="${n.hash}" class="nav-link" data-hash="${n.hash}"><i data-lucide="${n.icon}" class="nav-icon"></i><span class="nav-label">${n.label}</span></a>`
       ).join('');
-      return `<div class="nav-group ${col}" id="navgroup-${g.id}"><button class="nav-group-header" data-group="${g.id}"><span class="nav-group-title"><span>${g.icon}</span> ${g.label}</span><span class="nav-group-arrow">▾</span></button><div class="nav-group-items">${links}</div></div>`;
+      return `<div class="nav-group ${col}" id="navgroup-${g.id}"><button class="nav-group-header" data-group="${g.id}"><span class="nav-group-title"><i data-lucide="${g.icon}" class="nav-group-icon"></i> ${g.label}</span><i data-lucide="chevron-down" class="nav-group-arrow"></i></button><div class="nav-group-items">${links}</div></div>`;
     }).join('');
   };
 
@@ -225,7 +225,7 @@ PCF.App = (() => {
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="modal modal-lg">
-        <h3>⚙️ Meu Perfil</h3>
+        <h3><i data-lucide="settings"></i> Meu Perfil</h3>
         <div class="form-row">
           <div class="form-group"><label>Nome Completo</label><input type="text" id="mp-nome" value="${H.esc(user.nome || '')}"></div>
           <div class="form-group"><label>CPF</label><input type="text" id="mp-cpf" value="${H.esc(user.cpf || '')}" disabled></div>
@@ -289,27 +289,27 @@ PCF.App = (() => {
         <aside class="sidebar" id="sidebar">
           <div class="sidebar-header">
             <div class="sidebar-header-top">
-              <h1>💰 PCF</h1>
+              <h1><i data-lucide="banknote" class="header-logo-icon"></i> PCF</h1>
               <div class="theme-toggle-wrap">
-                <span class="theme-toggle-icon">🌙</span>
+                <i data-lucide="moon" class="theme-toggle-icon"></i>
                 <label class="theme-switch" title="Alternar tema claro/escuro">
                   <input type="checkbox" id="theme-toggle-input">
                   <span class="theme-switch-slider"></span>
                 </label>
-                <span class="theme-toggle-icon">☀️</span>
+                <i data-lucide="sun" class="theme-toggle-icon"></i>
               </div>
             </div>
             <div class="user-info">
               <span class="user-name">${H.esc(user?.nome || session.login)}</span>
-              ${!isAdmin ? '<button id="btn-meu-perfil" class="btn-link btn-gear" title="Editar meu perfil">⚙️</button>' : ''}
-              <button id="btn-logout" class="btn-link" title="Sair">🚪 Sair</button>
+              ${!isAdmin ? '<button id="btn-meu-perfil" class="btn-link btn-gear" title="Editar meu perfil"><i data-lucide="settings"></i></button>' : ''}
+              <button id="btn-logout" class="btn-link" title="Sair"><i data-lucide="log-out"></i> Sair</button>
             </div>
           </div>
           <nav class="sidebar-nav" id="sidebar-nav">
             ${renderNav()}
           </nav>
         </aside>
-        <button id="sidebar-toggle" class="sidebar-toggle">☰</button>
+        <button id="sidebar-toggle" class="sidebar-toggle"><i data-lucide="menu"></i></button>
         <main class="main-content" id="main-content"></main>
       </div>`;
     document.getElementById('btn-logout').onclick = () => { S.clearSession(); renderLogin(); };
@@ -400,12 +400,16 @@ PCF.App = (() => {
   const initApp = () => {
     if (!S.getSession()) { renderLogin(); return; }
     renderShell();
+    if (window.lucide) lucide.createIcons();
     initThemeToggle();
     initNavGroups();
     // Ativa redimensionamento automático de colunas sempre que uma nova página for renderizada
     const mc = document.getElementById('main-content');
     if (mc) {
-      new MutationObserver(() => H.initResizableTables(mc)).observe(mc, { childList: true });
+      new MutationObserver(() => {
+        H.initResizableTables(mc);
+        if (window.lucide) lucide.createIcons();
+      }).observe(mc, { childList: true });
     }
     window.onhashchange = route;
     if (!location.hash) location.hash = '#dashboard';

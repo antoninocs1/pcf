@@ -118,8 +118,8 @@ PCF.Pages = PCF.Pages || {};
                     <div class="emocao-card-header">
                       <span class="emocao-data">${H.formatarData(em.data)} ${em.hora || ''}</span>
                       <div>
-                        <button class="btn-icon" data-edit-emo="${em.id}" title="Editar">✏️</button>
-                        <button class="btn-icon btn-danger" data-del="${em.id}" title="Remover">🗑️</button>
+                        <button class="btn-icon" data-edit-emo="${em.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                        <button class="btn-icon btn-danger" data-del="${em.id}" title="Remover"><i data-lucide="trash-2"></i></button>
                       </div>
                     </div>
                     <div class="emocao-tags">

@@ -37,8 +37,8 @@ PCF.Pages = PCF.Pages || {};
                 <td>${H.esc(c.categoria)}</td>
                 <td><div class="subcats-list">${(c.subcategorias || []).map(s => { const n = typeof s === 'string' ? s : s.nome; const tp = typeof s === 'string' ? '' : s.tipo; return `<span class="chip-small">${H.esc(n)}${tp ? ` <small style="opacity:.65;font-style:normal">(${H.esc(tp)})</small>` : ''}</span>`; }).join(' ') || '<em class="text-muted">Nenhuma</em>'}</div></td>
                 <td>
-                  <button class="btn-icon" data-edit="${c.id}" title="Editar">✏️</button>
-                  <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover">🗑️</button>
+                  <button class="btn-icon" data-edit="${c.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                  <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover"><i data-lucide="trash-2"></i></button>
                 </td>
               </tr>`).join('')}
             </tbody>
@@ -87,7 +87,7 @@ PCF.Pages = PCF.Pages || {};
       const addSubcatRow = (nome = '', tipo = '') => {
         const row = document.createElement('div');
         row.className = 'subcat-row';
-        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="Variável" ${tipo === 'Variável' ? 'selected' : ''}>Variável</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover">🗑️</button>`;
+        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="Variável" ${tipo === 'Variável' ? 'selected' : ''}>Variável</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover"><i data-lucide="trash-2"></i></button>`;
         row.querySelector('.subcat-del').onclick = () => row.remove();
         document.getElementById('subcat-list').appendChild(row);
       };
@@ -144,8 +144,8 @@ PCF.Pages = PCF.Pages || {};
                       <span class="text-muted">(Superior)</span>
                     </div>
                     <div>
-                      <button class="btn-icon" data-edit-sup="${sup.id}" title="Editar">✏️</button>
-                      <button class="btn-icon btn-danger" data-del-sup="${sup.id}" title="Remover">🗑️</button>
+                      <button class="btn-icon" data-edit-sup="${sup.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                      <button class="btn-icon btn-danger" data-del-sup="${sup.id}" title="Remover"><i data-lucide="trash-2"></i></button>
                       <button class="btn btn-sm btn-secondary" data-add-med="${sup.id}">+ Média</button>
                     </div>
                   </div>
@@ -154,8 +154,8 @@ PCF.Pages = PCF.Pages || {};
                       <div class="emo-config-sub-header">
                         <div><span class="emo-color-dot" style="background:${med.cor}"></span>${H.esc(med.nome)} <span class="text-muted">(Médio)</span></div>
                         <div>
-                          <button class="btn-icon" data-edit-med="${sup.id}|${med.id}" title="Editar">✏️</button>
-                          <button class="btn-icon btn-danger" data-del-med="${sup.id}|${med.id}" title="Remover">🗑️</button>
+                          <button class="btn-icon" data-edit-med="${sup.id}|${med.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                          <button class="btn-icon btn-danger" data-del-med="${sup.id}|${med.id}" title="Remover"><i data-lucide="trash-2"></i></button>
                           <button class="btn btn-sm btn-secondary" data-add-inf="${sup.id}|${med.id}">+ Inferior</button>
                         </div>
                       </div>
@@ -289,8 +289,8 @@ PCF.Pages = PCF.Pages || {};
                 <td>${H.formatarData(u.dataNascimento)}</td><td>${H.esc(u.login)}</td><td>${H.formatarData(u.dataCadastro)}</td>
                 <td>${u.isAdmin ? '<span class="badge-admin">👑 Admin</span>' : '<span class="badge-padrao">Padrão</span>'}</td>
                 <td>
-                  <button class="btn-icon" data-edit="${u.id}" title="Editar">✏️</button>
-                  <button class="btn-icon btn-danger" data-del="${u.id}" title="Remover">🗑️</button>
+                  <button class="btn-icon" data-edit="${u.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                  <button class="btn-icon btn-danger" data-del="${u.id}" title="Remover"><i data-lucide="trash-2"></i></button>
                 </td>
               </tr>`).join('')}
             </tbody>
@@ -399,7 +399,7 @@ PCF.Pages = PCF.Pages || {};
 
         <div class="ie-grid">
           <div class="ie-section">
-            <h3>📤 Exportar</h3>
+            <h3><i data-lucide="upload"></i> Exportar</h3>
             <div class="ie-buttons">
               <button id="exp-trans" class="btn btn-primary">Exportar Transações (CSV)</button>
               <button id="exp-users" class="btn btn-primary">Exportar Usuários (CSV)</button>
@@ -409,7 +409,7 @@ PCF.Pages = PCF.Pages || {};
             </div>
           </div>
           <div class="ie-section">
-            <h3>📥 Importar</h3>
+            <h3><i data-lucide="download"></i> Importar</h3>
             <div class="ie-import-block">
               <label>Importar Transações (CSV)</label>
               <input type="file" id="imp-trans" accept=".csv" class="input-file">
@@ -428,7 +428,7 @@ PCF.Pages = PCF.Pages || {};
             <div id="ie-msg"></div>
           </div>
           <div class="ie-section">
-            <h3>🗑️ Limpar Bases</h3>
+            <h3><i data-lucide="trash-2"></i> Limpar Bases</h3>
             <p class="text-muted">Remove todos os registros da base selecionada. Esta ação não pode ser desfeita.</p>
             <div class="ie-buttons">
               <button id="clear-trans" class="btn btn-danger">Limpar Transações</button>
@@ -610,8 +610,8 @@ PCF.Pages = PCF.Pages || {};
                 <td>${H.esc(c.nome)}</td><td>${H.esc(c.cpf)}</td><td>${H.esc(c.email)}</td><td>${H.esc(c.telefone)}</td>
                 <td>${H.formatarData(c.dataNascimento)}</td><td>${H.formatarData(c.dataCadastro)}</td>
                 <td>
-                  <button class="btn-icon" data-edit="${c.id}" title="Editar">✏️</button>
-                  <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover">🗑️</button>
+                  <button class="btn-icon" data-edit="${c.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                  <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover"><i data-lucide="trash-2"></i></button>
                 </td>
               </tr>`).join('')}
             </tbody>
@@ -699,7 +699,7 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>📓 Diário</h2>
+            <h2><i data-lucide="book-open"></i> Diário</h2>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
               <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
@@ -719,14 +719,14 @@ PCF.Pages = PCF.Pages || {};
 
           <div class="card diario-today">
             <div class="diario-day-title">
-              <h3>${isToday ? '📝 Hoje' : '📅 ' + fmtDate(selectedDate)}</h3>
+              <h3>${isToday ? '<i data-lucide="edit-3"></i> Hoje' : '<i data-lucide="calendar"></i> ' + fmtDate(selectedDate)}</h3>
               ${entry && !isToday ? '<span class="badge badge-info">Editando registro salvo</span>' : ''}
             </div>
             <textarea id="diario-texto" class="diario-textarea" rows="8"
               placeholder="Escreva sobre este dia...">${H.esc(entry?.texto || '')}</textarea>
             <div class="diario-today-actions">
-              <button id="diario-salvar" class="btn btn-primary">💾 Salvar</button>
-              ${entry ? `<button id="diario-apagar" class="btn btn-danger">🗑️ Apagar</button>` : ''}
+              <button id="diario-salvar" class="btn btn-primary"><i data-lucide="save"></i> Salvar</button>
+              ${entry ? `<button id="diario-apagar" class="btn btn-danger"><i data-lucide="trash-2"></i> Apagar</button>` : ''}
               <span id="diario-ok" class="diario-saved-msg" style="display:none">✓ Salvo!</span>
             </div>
           </div>
@@ -799,7 +799,7 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>⚙️ Config. Diário</h2>
+            <h2><i data-lucide="settings"></i> Config. Diário</h2>
             <button id="btn-add-dtab" class="btn btn-primary">+ Nova Aba</button>
           </div>
           <p class="subtitle">Configure as abas e perguntas de reflexão exibidas no banner do Diário.</p>
@@ -811,10 +811,10 @@ PCF.Pages = PCF.Pages || {};
                 <td>${H.esc(t.label)}</td>
                 <td><span class="badge badge-neutral">${(t.perguntas || []).length} pergunta(s)</span></td>
                 <td>
-                  ${idx > 0 ? `<button class="btn-icon" data-up="${idx}" title="Subir">⬆️</button>` : '<span style="display:inline-block;width:28px"></span>'}
-                  ${idx < tabs.length - 1 ? `<button class="btn-icon" data-down="${idx}" title="Descer">⬇️</button>` : '<span style="display:inline-block;width:28px"></span>'}
-                  <button class="btn-icon" data-edit="${idx}" title="Editar">✏️</button>
-                  <button class="btn-icon btn-danger" data-del="${idx}" title="Remover">🗑️</button>
+                  ${idx > 0 ? `<button class="btn-icon" data-up="${idx}" title="Subir"><i data-lucide="arrow-up"></i></button>` : '<span style="display:inline-block;width:28px"></span>'}
+                  ${idx < tabs.length - 1 ? `<button class="btn-icon" data-down="${idx}" title="Descer"><i data-lucide="arrow-down"></i></button>` : '<span style="display:inline-block;width:28px"></span>'}
+                  <button class="btn-icon" data-edit="${idx}" title="Editar"><i data-lucide="pencil"></i></button>
+                  <button class="btn-icon btn-danger" data-del="${idx}" title="Remover"><i data-lucide="trash-2"></i></button>
                 </td>
               </tr>`).join('')}
             </tbody>
@@ -875,7 +875,7 @@ PCF.Pages = PCF.Pages || {};
       const addRow = (texto = '') => {
         const row = document.createElement('div');
         row.className = 'subcat-row';
-        row.innerHTML = `<input type="text" class="dtab-perg-input" value="${H.esc(texto)}" placeholder="Escreva a pergunta..."><button type="button" class="btn-icon btn-danger" title="Remover">🗑️</button>`;
+        row.innerHTML = `<input type="text" class="dtab-perg-input" value="${H.esc(texto)}" placeholder="Escreva a pergunta..."><button type="button" class="btn-icon btn-danger" title="Remover"><i data-lucide="trash-2"></i></button>`;
         row.querySelector('.btn-danger').onclick = () => row.remove();
         document.getElementById('dtab-perg-list').appendChild(row);
       };
