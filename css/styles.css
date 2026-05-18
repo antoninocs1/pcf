@@ -308,6 +308,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .chip-del:hover { opacity: 1; }
 
+/* ==================== SUBCAT ROWS (Config. Categorias) ==================== */
+.subcat-list { display: flex; flex-direction: column; gap: 6px; }
+.subcat-row { display: flex; align-items: center; gap: 8px; }
+.subcat-row .subcat-nome { flex: 1; }
+.subcat-row .subcat-tipo { width: 110px; }
+
 /* ==================== CICLO DO DINHEIRO ==================== */
 .ciclo-container { max-width: 700px; }
 .ciclo-diagram {
@@ -770,6 +776,38 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 
 /* ==================== DIÁRIO ==================== */
+.diario-sugestoes {
+  background: var(--bg-card); border-radius: var(--radius);
+  border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden;
+}
+.diario-sugestoes-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: rgba(59,130,246,.06);
+}
+.diario-sugestoes-header small { font-size: .78rem; }
+.diario-tabs-bar {
+  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.diario-tab {
+  padding: 8px 16px; border: none; background: transparent;
+  color: var(--text-muted); font-size: .85rem; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: .15s; white-space: nowrap;
+}
+.diario-tab:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.diario-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(59,130,246,.06); }
+.diario-tab-content { display: none; list-style: none; margin: 0; padding: 10px 12px; }
+.diario-tab-content.active { display: flex; flex-direction: column; gap: 4px; }
+.diario-question-item {
+  padding: 7px 12px; border-radius: var(--radius-sm); font-size: .88rem;
+  color: var(--text-muted); cursor: pointer; transition: .15s;
+  border: 1px solid transparent;
+}
+.diario-question-item:hover {
+  background: rgba(59,130,246,.1); color: var(--text);
+  border-color: rgba(59,130,246,.3);
+}
 .diario-today { margin-bottom: 24px; }
 .diario-day-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .diario-day-title h3 { margin: 0; }
@@ -795,6 +833,112 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .diario-index-date { font-weight: 600; font-size: .9rem; }
 .diario-index-preview { font-size: .83rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .badge-neutral { background: rgba(148,163,184,.2); color: var(--text-muted); font-size: .75rem; padding: 2px 8px; border-radius: 999px; }
+
+/* ==================== RODA DA VIDA ==================== */
+.rv-page { padding-bottom: 40px; }
+
+.rv-topbar {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 14px; margin-bottom: 16px;
+}
+.rv-nav-area { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rv-date-badge {
+  padding: 5px 14px; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 999px; font-size: .9rem; font-weight: 500; white-space: nowrap;
+}
+.rv-date-badge.is-saved { border-color: var(--success); color: var(--success); }
+
+.rv-sugg-info {
+  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3);
+  border-radius: var(--radius-sm); padding: 10px 14px; font-size: .88rem;
+  color: var(--text-muted); margin-bottom: 16px;
+}
+
+.rv-layout {
+  display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;
+}
+.rv-wheel-area {
+  flex: 0 0 auto; width: clamp(280px, 42%, 500px);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.rv-canvas { width: 100%; height: auto; display: block; }
+.rv-form-area {
+  flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px; min-width: 280px;
+}
+
+.rv-quad-block {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+}
+.rv-quad-head {
+  padding: 4px 0 10px 10px; margin-bottom: 6px;
+}
+.rv-quad-lbl { font-weight: 600; font-size: .95rem; }
+
+.rv-cat-item { margin-bottom: 14px; }
+.rv-cat-item:last-child { margin-bottom: 0; }
+.rv-cat-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px; gap: 8px;
+}
+.rv-cat-name { font-size: .88rem; color: var(--text-muted); flex: 1; }
+.rv-cat-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.rv-sugg-badge {
+  font-size: .78rem; padding: 2px 7px; border-radius: 999px;
+  background: rgba(59,130,246,.15); color: #93c5fd; white-space: nowrap; cursor: default;
+}
+.rv-score-val {
+  font-size: 1.15rem; font-weight: 700; min-width: 28px; text-align: right; color: var(--text);
+}
+
+.rv-slider-track { margin-bottom: 2px; }
+.rv-range {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; border-radius: 999px; cursor: pointer; outline: none;
+  background: linear-gradient(to right,
+    var(--rv-fill, var(--accent)) calc((var(--value, 5) - 1) / 9 * 100%),
+    rgba(255,255,255,.12) calc((var(--value, 5) - 1) / 9 * 100%)
+  );
+}
+.rv-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--rv-fill, var(--accent));
+  box-shadow: 0 1px 4px rgba(0,0,0,.4); transition: transform .1s;
+}
+.rv-range::-webkit-slider-thumb:active { transform: scale(1.2); }
+.rv-range::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--rv-fill, var(--accent));
+  background: #fff; cursor: pointer;
+}
+.rv-range-labels {
+  display: flex; justify-content: space-between; margin-top: 2px;
+}
+.rv-range-labels small { font-size: .73rem; color: var(--text-dim); }
+
+.rv-btns { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.rv-del-btn { color: var(--danger) !important; }
+
+.rv-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1e293b; color: #e2e8f0; padding: 10px 20px;
+  border-radius: 999px; font-size: .9rem; z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0,0,0,.4); transition: opacity .4s;
+}
+
+/* Config. Roda da Vida */
+.rvc-quads { display: flex; flex-direction: column; gap: 20px; }
+.rvc-quad-card { padding: 16px; }
+.rvc-quad-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.rvc-quad-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.rvc-quad-head strong { flex: 1; font-size: 1rem; }
+.rvc-quad-actions { display: flex; gap: 4px; }
+.rvc-cat-table { margin-bottom: 10px; }
+.rvc-cat-acts { white-space: nowrap; }
+.rvc-cor-dot { display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: middle; }
+.rvc-add-cat-wrap { padding: 4px 0; }
 
 /* ==================== LIGHT THEME ==================== */
 [data-theme="light"] {

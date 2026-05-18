@@ -129,8 +129,21 @@ PCF.Pages = PCF.Pages || {};
     document.getElementById('ins-cat').onchange = () => {
       const tipo = document.querySelector('input[name="tipoOp"]:checked').value;
       const cat = cats.find(c => c.tipoOperacao === tipo && c.categoria === document.getElementById('ins-cat').value);
+      const subs = (cat?.subcategorias || []).map(s => typeof s === 'string' ? { nome: s, tipo: '' } : s);
+      document.getElementById('ins-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>' + subs.map(s => `<option value="${H.esc(s.nome)}">${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>';
+      const tipoSel = document.getElementById('ins-tipo');
+      if (tipoSel) tipoSel.value = '';
+    };
+
+    document.getElementById('ins-subcat').onchange = () => {
+      const tipo = document.querySelector('input[name="tipoOp"]:checked').value;
+      const cat = cats.find(c => c.tipoOperacao === tipo && c.categoria === document.getElementById('ins-cat').value);
+      const subcatNome = document.getElementById('ins-subcat').value;
       const subs = cat?.subcategorias || [];
-      document.getElementById('ins-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>' + subs.map(s => `<option value="${H.esc(s)}">${H.esc(s)}</option>`).join('') : '<option value="">N/A</option>';
+      const subcat = subs.find(s => (typeof s === 'string' ? s : s.nome) === subcatNome);
+      const tipoSubcat = (subcat && typeof subcat !== 'string') ? subcat.tipo : '';
+      const tipoSel = document.getElementById('ins-tipo');
+      if (tipoSel && tipoSubcat) tipoSel.value = tipoSubcat;
     };
 
     updateCats();
@@ -216,7 +229,7 @@ PCF.Pages = PCF.Pages || {};
     const tipoAtual = t.tipoOperacao;
     const catsDoTipo = cats.filter(c => c.tipoOperacao === tipoAtual);
     const catObj = catsDoTipo.find(c => c.categoria === t.categoria);
-    const subsDoObj = catObj?.subcategorias || [];
+    const subsDoObj = (catObj?.subcategorias || []).map(s => typeof s === 'string' ? { nome: s, tipo: '' } : s);
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
@@ -236,7 +249,7 @@ PCF.Pages = PCF.Pages || {};
           </div>
           <div class="form-row">
             <div class="form-group"><label>Categoria</label><select id="et-cat">${catsDoTipo.map(c=>`<option value="${H.esc(c.categoria)}" ${c.categoria===t.categoria?'selected':''}>${H.esc(c.categoria)}</option>`).join('')}</select></div>
-            <div class="form-group"><label>Subcategoria</label><select id="et-subcat">${subsDoObj.length ? '<option value="">Selecione...</option>'+subsDoObj.map(s=>`<option value="${H.esc(s)}" ${s===t.subcategoria?'selected':''}>${H.esc(s)}</option>`).join('') : '<option value="">N/A</option>'}</select></div>
+            <div class="form-group"><label>Subcategoria</label><select id="et-subcat">${subsDoObj.length ? '<option value="">Selecione...</option>'+subsDoObj.map(s=>`<option value="${H.esc(s.nome)}" ${s.nome===t.subcategoria?'selected':''}>${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>'}</select></div>
           </div>
           <div class="form-group"><label>Item / Descrição</label><input type="text" id="et-item" value="${H.esc(t.item||'')}"></div>
           <div class="form-row" id="et-desp-fields" style="${tipoAtual==='DESPESA'?'':'display:none'}">
@@ -267,8 +280,17 @@ PCF.Pages = PCF.Pages || {};
     document.getElementById('et-cat').onchange = function() {
       const tipo = document.getElementById('et-tipo-op').value;
       const catObj = cats.find(c => c.tipoOperacao === tipo && c.categoria === this.value);
+      const subs = (catObj?.subcategorias || []).map(s => typeof s === 'string' ? { nome: s, tipo: '' } : s);
+      document.getElementById('et-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>'+subs.map(s=>`<option value="${H.esc(s.nome)}">${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>';
+      document.getElementById('et-ftipo').value = '';
+    };
+    document.getElementById('et-subcat').onchange = function() {
+      const tipo = document.getElementById('et-tipo-op').value;
+      const catObj = cats.find(c => c.tipoOperacao === tipo && c.categoria === document.getElementById('et-cat').value);
       const subs = catObj?.subcategorias || [];
-      document.getElementById('et-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>'+subs.map(s=>`<option value="${H.esc(s)}">${H.esc(s)}</option>`).join('') : '<option value="">N/A</option>';
+      const subcat = subs.find(s => (typeof s === 'string' ? s : s.nome) === this.value);
+      const tipoSubcat = (subcat && typeof subcat !== 'string') ? subcat.tipo : '';
+      if (tipoSubcat) document.getElementById('et-ftipo').value = tipoSubcat;
     };
 
     document.getElementById('edit-trans-form').onsubmit = (e) => {

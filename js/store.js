@@ -287,6 +287,78 @@ PCF.Store = (() => {
   const updateContato = (id, data) => { const all = getContatos(); const i = all.findIndex(c => c.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveContatos(all); } return all; };
   const deleteContato = (id) => { const all = getContatos().filter(c => c.id !== id); saveContatos(all); return all; };
 
+  /* ---------- DIÁRIO TABS (sugestões de reflexão) ---------- */
+  const _dtU = () => `pcf_diario_tabs_${currentUserId()}`;
+  const DIARIO_TABS_DEFAULT = [
+    { id: 'relacionamentos', icon: '👥', label: 'Relacionamentos', perguntas: [
+      'Como eu tenho descrito as pessoas mais próximas no meu diário?',
+      'Como tenho lidado com os conflitos nos meus relacionamentos?',
+      'Como tenho demonstrado meu carinho por aqueles que são importantes para mim?',
+      'Quem são as pessoas que eu mais escrevo sobre?',
+    ]},
+    { id: 'trabalho', icon: '💼', label: 'Trabalho / Rotina', perguntas: [
+      'Como tem sido minha relação com o trabalho?',
+      'O que aprendi com os desafios que enfrentei até agora?',
+      'O que posso aprender com os momentos que já passei?',
+      'Como foi o meu dia?',
+    ]},
+    { id: 'reflexao', icon: '🔮', label: 'Reflexão / Futuro', perguntas: [
+      'Como posso usar o que escrevi no diário hoje para crescer no futuro?',
+      'O que já me fez sentir satisfeito de mim mesmo?',
+      'O que tem me feito feliz?',
+    ]},
+    { id: 'passado', icon: '📖', label: 'Passado', perguntas: [
+      'Que memórias do passado me trazem alegria e como posso valorizá-las?',
+      'Que lembrete positivo posso guardar para superar dias difíceis?',
+    ]},
+  ];
+  const getDiarioTabs = () => _get(_dtU()) || DIARIO_TABS_DEFAULT;
+  const saveDiarioTabs = (tabs) => _set(_dtU(), tabs);
+
+  /* ---------- RODA DA VIDA CONFIG ---------- */
+  const _rvCfgU = () => `pcf_rodavida_config_${currentUserId()}`;
+  const RODA_VIDA_CONFIG_DEFAULT = [
+    {
+      id: 'pessoal', label: 'Pessoal', cor: '#22c55e',
+      categorias: [
+        { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',      icon: '❤️',  cor: '#86efac', integracaoFonte: 'imc'          },
+        { id: 'intelecto',   label: 'Intelecto – Conhecimento',           labelCurto: 'Intelecto',  icon: '🧠',  cor: '#22c55e', integracaoFonte: 'habitos_mente' },
+        { id: 'emocoes_rv',  label: 'Emoções – Equilíbrio Emocional',     labelCurto: 'Emoções',    icon: '😊',  cor: '#166534', integracaoFonte: 'emocoes'       },
+      ],
+    },
+    {
+      id: 'profissional', label: 'Profissional', cor: '#f97316',
+      categorias: [
+        { id: 'carreira',    label: 'Carreira – Realização e Propósito',  labelCurto: 'Carreira',   icon: '💼',  cor: '#0d9488', integracaoFonte: '' },
+        { id: 'contribuicao',label: 'Contribuição Social',                labelCurto: 'Contribuição',icon: '🤝', cor: '#f472b6', integracaoFonte: '' },
+        { id: 'financas_rv', label: 'Finanças – Recursos Financeiros',    labelCurto: 'Finanças',   icon: '💰',  cor: '#f97316', integracaoFonte: 'financas'      },
+      ],
+    },
+    {
+      id: 'relacionamentos', label: 'Relacionamentos', cor: '#3b82f6',
+      categorias: [
+        { id: 'familia',     label: 'Amizade e Família',                  labelCurto: 'Família',    icon: '👨‍👩‍👧', cor: '#1e40af', integracaoFonte: '' },
+        { id: 'afeicao',     label: 'Afeição e Amor',                     labelCurto: 'Amor',       icon: '💕',  cor: '#db2777', integracaoFonte: '' },
+        { id: 'social',      label: 'Vida Social',                        labelCurto: 'Social',     icon: '🎉',  cor: '#3b82f6', integracaoFonte: '' },
+      ],
+    },
+    {
+      id: 'qualidade', label: 'Qualidade de Vida', cor: '#a78bfa',
+      categorias: [
+        { id: 'lazer',       label: 'Lazer – Criatividade e Hobbies',     labelCurto: 'Lazer',      icon: '🎨',  cor: '#bef264', integracaoFonte: '' },
+        { id: 'plenitude',   label: 'Conquista, Plenitude e Felicidade',  labelCurto: 'Plenitude',  icon: '🌟',  cor: '#22d3ee', integracaoFonte: '' },
+        { id: 'espiritualidade', label: 'Espiritualidade',                labelCurto: 'Espirit.',   icon: '✨',  cor: '#cbd5e1', integracaoFonte: '' },
+      ],
+    },
+  ];
+  const getRodaVidaConfig = () => _get(_rvCfgU()) || RODA_VIDA_CONFIG_DEFAULT;
+  const saveRodaVidaConfig = (cfg) => _set(_rvCfgU(), cfg);
+
+  /* ---------- RODA DA VIDA REGISTROS ---------- */
+  const _rvRegU = () => `pcf_rodavida_reg_${currentUserId()}`;
+  const getRodaVidaRegistros = () => _get(_rvRegU()) || [];
+  const saveRodaVidaRegistros = (regs) => _set(_rvRegU(), regs);
+
   /* ---------- IMPORT / EXPORT ---------- */
   const exportData = (userId) => {
     const uid = userId || currentUserId();
@@ -318,6 +390,9 @@ PCF.Store = (() => {
     getRegistrosHabitos, saveRegistrosHabitos, upsertRegistroHabito,
     getFrases, saveFrases, addFrase, updateFrase, deleteFrase,
     getContatos, saveContatos, addContato, updateContato, deleteContato,
+    getDiarioTabs, saveDiarioTabs,
+    getRodaVidaConfig, saveRodaVidaConfig,
+    getRodaVidaRegistros, saveRodaVidaRegistros,
     exportData, importTransacoes, importCategorias,
     _uid,
   };

@@ -35,7 +35,7 @@ PCF.Pages = PCF.Pages || {};
               filtered.map(c => `<tr>
                 <td><span class="tipo-badge ${c.tipoOperacao.toLowerCase()}">${c.tipoOperacao}</span></td>
                 <td>${H.esc(c.categoria)}</td>
-                <td><div class="subcats-list">${(c.subcategorias || []).map(s => `<span class="chip-small">${H.esc(s)}</span>`).join(' ') || '<em class="text-muted">Nenhuma</em>'}</div></td>
+                <td><div class="subcats-list">${(c.subcategorias || []).map(s => { const n = typeof s === 'string' ? s : s.nome; const tp = typeof s === 'string' ? '' : s.tipo; return `<span class="chip-small">${H.esc(n)}${tp ? ` <small style="opacity:.65;font-style:normal">(${H.esc(tp)})</small>` : ''}</span>`; }).join(' ') || '<em class="text-muted">Nenhuma</em>'}</div></td>
                 <td>
                   <button class="btn-icon" data-edit="${c.id}" title="Editar">✏️</button>
                   <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover">🗑️</button>
@@ -57,7 +57,6 @@ PCF.Pages = PCF.Pages || {};
 
     const showCatModal = (cat) => {
       const isEdit = !!cat;
-      const subs = cat ? (cat.subcategorias || []).join('\n') : '';
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
@@ -72,7 +71,11 @@ PCF.Pages = PCF.Pages || {};
               </select>
             </div>
             <div class="form-group"><label>Nome da Categoria</label><input type="text" id="cat-m-nome" value="${H.esc(cat?.categoria || '')}" required></div>
-            <div class="form-group"><label>Subcategorias (uma por linha)</label><textarea id="cat-m-subs" rows="6" placeholder="Subcategoria 1\nSubcategoria 2\n...">${H.esc(subs)}</textarea></div>
+            <div class="form-group">
+              <label>Subcategorias</label>
+              <div id="subcat-list" class="subcat-list"></div>
+              <button type="button" id="btn-add-subcat" class="btn btn-secondary" style="margin-top:8px">+ Subcategoria</button>
+            </div>
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="cat-m-cancel">Cancelar</button>
               <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
@@ -80,6 +83,22 @@ PCF.Pages = PCF.Pages || {};
           </form>
         </div>`;
       document.body.appendChild(overlay);
+
+      const addSubcatRow = (nome = '', tipo = '') => {
+        const row = document.createElement('div');
+        row.className = 'subcat-row';
+        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="Variável" ${tipo === 'Variável' ? 'selected' : ''}>Variável</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover">🗑️</button>`;
+        row.querySelector('.subcat-del').onclick = () => row.remove();
+        document.getElementById('subcat-list').appendChild(row);
+      };
+
+      (cat?.subcategorias || []).forEach(s => {
+        const nome = typeof s === 'string' ? s : s.nome;
+        const tipo = typeof s === 'string' ? '' : (s.tipo || '');
+        addSubcatRow(nome, tipo);
+      });
+
+      document.getElementById('btn-add-subcat').onclick = () => addSubcatRow();
       document.getElementById('cat-m-cancel').onclick = () => overlay.remove();
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
@@ -88,7 +107,10 @@ PCF.Pages = PCF.Pages || {};
         const data = {
           tipoOperacao: document.getElementById('cat-m-tipo').value,
           categoria: document.getElementById('cat-m-nome').value.trim(),
-          subcategorias: document.getElementById('cat-m-subs').value.split('\n').map(s => s.trim()).filter(Boolean),
+          subcategorias: [...document.querySelectorAll('#subcat-list .subcat-row')].map(row => ({
+            nome: row.querySelector('.subcat-nome').value.trim(),
+            tipo: row.querySelector('.subcat-tipo').value,
+          })).filter(s => s.nome),
         };
         if (isEdit) S.updateCategoria(cat.id, data);
         else S.addCategoria(data);
@@ -663,8 +685,11 @@ PCF.Pages = PCF.Pages || {};
     const fmtDate = (d) => { if (!d) return ''; const [y, m, dia] = d.split('-'); return `${dia}/${m}/${y}`; };
 
     let selectedDate = new Date().toISOString().slice(0, 10);
+    let sugestoesTab = '';
 
     const render = () => {
+      const TABS_SUGESTOES = S.getDiarioTabs();
+      if (!TABS_SUGESTOES.find(t => t.id === sugestoesTab)) sugestoesTab = TABS_SUGESTOES[0]?.id || '';
       const today = new Date().toISOString().slice(0, 10);
       const entries = load();
       const entry = entries.find(e => e.data === selectedDate);
@@ -679,6 +704,17 @@ PCF.Pages = PCF.Pages || {};
               <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
               <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
             </div>
+          </div>
+
+          <div class="diario-sugestoes">
+            <div class="diario-sugestoes-header">
+              <span>💡 <strong>Sugestões de reflexão</strong></span>
+              <small class="text-muted">Clique em uma pergunta para inserir no diário</small>
+            </div>
+            <div class="diario-tabs-bar">
+              ${TABS_SUGESTOES.map(t => `<button class="diario-tab${t.id === sugestoesTab ? ' active' : ''}" data-tab="${t.id}">${t.icon} ${t.label}</button>`).join('')}
+            </div>
+            ${TABS_SUGESTOES.map(t => `<ul class="diario-tab-content${t.id === sugestoesTab ? ' active' : ''}" id="tab-${t.id}">${t.perguntas.map(p => `<li class="diario-question-item" data-question="${H.esc(p)}">${H.esc(p)}</li>`).join('')}</ul>`).join('')}
           </div>
 
           <div class="card diario-today">
@@ -729,6 +765,142 @@ PCF.Pages = PCF.Pages || {};
       container.querySelectorAll('[data-goto]').forEach(item => {
         item.onclick = () => { selectedDate = item.dataset.goto; render(); };
       });
+
+      container.querySelectorAll('.diario-tab').forEach(tab => {
+        tab.onclick = () => {
+          sugestoesTab = tab.dataset.tab;
+          container.querySelectorAll('.diario-tab').forEach(t => t.classList.remove('active'));
+          container.querySelectorAll('.diario-tab-content').forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          const panel = container.querySelector(`#tab-${sugestoesTab}`);
+          if (panel) panel.classList.add('active');
+        };
+      });
+
+      container.querySelectorAll('.diario-question-item').forEach(item => {
+        item.onclick = () => {
+          const textarea = document.getElementById('diario-texto');
+          if (!textarea) return;
+          const q = item.dataset.question;
+          textarea.value = textarea.value.trim() ? textarea.value.trimEnd() + '\n\n' + q + '\n' : q + '\n';
+          textarea.focus();
+          textarea.scrollTop = textarea.scrollHeight;
+        };
+      });
+    };
+
+    render();
+  };
+
+  /* ==================== CONFIG DIÁRIO ==================== */
+  PCF.Pages.diarioConfig = (container) => {
+    const render = () => {
+      const tabs = S.getDiarioTabs();
+      container.innerHTML = `
+        <div class="page">
+          <div class="page-header">
+            <h2>⚙️ Config. Diário</h2>
+            <button id="btn-add-dtab" class="btn btn-primary">+ Nova Aba</button>
+          </div>
+          <p class="subtitle">Configure as abas e perguntas de reflexão exibidas no banner do Diário.</p>
+          <div class="table-container"><table class="table">
+            <thead><tr><th style="width:60px">Ícone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
+            <tbody>${tabs.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma aba configurada</td></tr>' :
+              tabs.map((t, idx) => `<tr>
+                <td style="font-size:1.4rem;text-align:center">${H.esc(t.icon || '')}</td>
+                <td>${H.esc(t.label)}</td>
+                <td><span class="badge badge-neutral">${(t.perguntas || []).length} pergunta(s)</span></td>
+                <td>
+                  ${idx > 0 ? `<button class="btn-icon" data-up="${idx}" title="Subir">⬆️</button>` : '<span style="display:inline-block;width:28px"></span>'}
+                  ${idx < tabs.length - 1 ? `<button class="btn-icon" data-down="${idx}" title="Descer">⬇️</button>` : '<span style="display:inline-block;width:28px"></span>'}
+                  <button class="btn-icon" data-edit="${idx}" title="Editar">✏️</button>
+                  <button class="btn-icon btn-danger" data-del="${idx}" title="Remover">🗑️</button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table></div>
+        </div>`;
+
+      document.getElementById('btn-add-dtab').onclick = () => showTabModal();
+      container.onclick = (e) => {
+        const up = e.target.closest('[data-up]');
+        if (up) {
+          const i = parseInt(up.dataset.up);
+          const arr = S.getDiarioTabs();
+          [arr[i], arr[i - 1]] = [arr[i - 1], arr[i]];
+          S.saveDiarioTabs(arr); render(); return;
+        }
+        const down = e.target.closest('[data-down]');
+        if (down) {
+          const i = parseInt(down.dataset.down);
+          const arr = S.getDiarioTabs();
+          [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+          S.saveDiarioTabs(arr); render(); return;
+        }
+        const edit = e.target.closest('[data-edit]');
+        if (edit) { showTabModal(S.getDiarioTabs()[parseInt(edit.dataset.edit)], parseInt(edit.dataset.edit)); return; }
+        const del = e.target.closest('[data-del]');
+        if (del && confirm('Remover esta aba e todas as suas perguntas?')) {
+          S.saveDiarioTabs(S.getDiarioTabs().filter((_, i) => i !== parseInt(del.dataset.del)));
+          render();
+        }
+      };
+    };
+
+    const showTabModal = (tab, idx) => {
+      const isEdit = idx !== undefined;
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <h3>${isEdit ? 'Editar' : 'Nova'} Aba de Reflexão</h3>
+          <form id="dtab-form">
+            <div class="form-row">
+              <div class="form-group" style="flex:0 0 100px"><label>Ícone</label><input type="text" id="dtab-icon" value="${H.esc(tab?.icon || '')}" placeholder="💡" maxlength="4"></div>
+              <div class="form-group"><label>Nome da Aba</label><input type="text" id="dtab-label" value="${H.esc(tab?.label || '')}" required placeholder="Ex: Relacionamentos"></div>
+            </div>
+            <div class="form-group">
+              <label>Perguntas</label>
+              <div id="dtab-perg-list" class="subcat-list"></div>
+              <button type="button" id="btn-add-perg" class="btn btn-secondary" style="margin-top:8px">+ Pergunta</button>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="dtab-cancel">Cancelar</button>
+              <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      const addRow = (texto = '') => {
+        const row = document.createElement('div');
+        row.className = 'subcat-row';
+        row.innerHTML = `<input type="text" class="dtab-perg-input" value="${H.esc(texto)}" placeholder="Escreva a pergunta..."><button type="button" class="btn-icon btn-danger" title="Remover">🗑️</button>`;
+        row.querySelector('.btn-danger').onclick = () => row.remove();
+        document.getElementById('dtab-perg-list').appendChild(row);
+      };
+
+      (tab?.perguntas || []).forEach(p => addRow(p));
+      document.getElementById('btn-add-perg').onclick = () => addRow();
+      document.getElementById('dtab-cancel').onclick = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+      document.getElementById('dtab-form').onsubmit = (e) => {
+        e.preventDefault();
+        const novaAba = {
+          id: tab?.id || S._uid(),
+          icon: document.getElementById('dtab-icon').value.trim(),
+          label: document.getElementById('dtab-label').value.trim(),
+          perguntas: [...document.querySelectorAll('#dtab-perg-list .dtab-perg-input')]
+            .map(inp => inp.value.trim()).filter(Boolean),
+        };
+        const arr = S.getDiarioTabs();
+        if (isEdit) arr[idx] = novaAba;
+        else arr.push(novaAba);
+        S.saveDiarioTabs(arr);
+        overlay.remove();
+        render();
+      };
     };
 
     render();
