@@ -156,15 +156,16 @@ PCF.App = (() => {
     { standalone: true, hash: '#agenda',       icon: 'calendar',  label: 'Agenda' },
     { standalone: true, hash: '#imc',          icon: 'heart',     label: 'IMC' },
     { standalone: true, hash: '#contatos',     icon: 'user',      label: 'Contatos Pessoais' },
-    { standalone: true, adminOnly: true, hash: '#usuarios',     icon: 'users',  label: 'Conf. Usuários' },
-    { standalone: true, adminOnly: true, hash: '#importexport', icon: 'upload', label: 'Importar / Exportar' },
+    { standalone: true, adminOnly: true, hash: '#usuarios',       icon: 'users',    label: 'Conf. Usuários' },
+    { standalone: true, adminOnly: true, hash: '#gerenciar-bases', icon: 'database', label: 'Gerenciar Bases de Dados' },
+    { standalone: true, adminOnly: true, hash: '#importexport',    icon: 'upload',   label: 'Importar / Exportar' },
   ];
 
   const _navCollapsed = () => { try { return JSON.parse(localStorage.getItem('pcf_nav_collapsed') || '{}'); } catch { return {}; } };
   const _navSaveCollapsed = (obj) => { try { localStorage.setItem('pcf_nav_collapsed', JSON.stringify(obj)); } catch {} };
 
   /* Rotas que exigem perfil Administrador */
-  const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios', '#diario-config', '#roda-vida-config']);
+  const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios', '#diario-config', '#roda-vida-config', '#gerenciar-bases']);
 
   const renderNav = () => {
     const isAdmin = S.currentUserIsAdmin();
@@ -381,6 +382,7 @@ PCF.App = (() => {
       '#usuarios': pages.usuarios,
       '#contatos': pages.contatos,
       '#importexport': pages.importExport,
+      '#gerenciar-bases': pages.gerenciarBases,
     };
     const renderFn = map[hash] || pages.dashboard;
     if (renderFn) {

@@ -372,8 +372,8 @@ PCF.Pages = PCF.Pages || {};
               <p class="subtitle">Gerencie os quadrantes e categorias da Roda da Vida</p>
             </div>
             <div class="page-actions">
-              <button id="rvc-add-quad" class="btn btn-primary btn-sm">+ Quadrante</button>
               <button id="rvc-restaurar" class="btn btn-outline btn-sm"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
+              <button id="rvc-add-quad" class="btn btn-primary btn-sm">+ Quadrante</button>
             </div>
           </div>
 

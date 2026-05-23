@@ -556,7 +556,10 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>⚙️ Meus Hábitos</h2>
-            <button id="btn-add-hab" class="btn btn-primary">+ Novo Hábito</button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="btn-restaurar-habitos" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
+              <button id="btn-add-hab" class="btn btn-primary">+ Novo Hábito</button>
+            </div>
           </div>
           <div class="table-container">
             <table class="table">
@@ -593,6 +596,12 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       document.getElementById('btn-add-hab').onclick = () => showHabitoModal(null, CATEGORIAS_HAB, ICONES_HAB, render);
+      document.getElementById('btn-restaurar-habitos').onclick = () => {
+        if (confirm('Restaurar hábitos padrão? Os hábitos atuais serão substituídos pelos hábitos padrão.')) {
+          S.restoreDefaultHabitos();
+          render();
+        }
+      };
       container.onclick = (e) => {
         const edit = e.target.closest('[data-edit]');
         if (edit) {
@@ -726,7 +735,10 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>💬 Base de Mensagens</h2>
-            <button id="btn-add-frase" class="btn btn-primary">+ Nova Mensagem</button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="btn-restaurar-frases" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
+              <button id="btn-add-frase" class="btn btn-primary">+ Nova Mensagem</button>
+            </div>
           </div>
 
           ${frase ? `
@@ -770,6 +782,12 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       document.getElementById('btn-add-frase').onclick = () => showFraseModal(null, CATEGORIAS_FRASE, render);
+      document.getElementById('btn-restaurar-frases').onclick = () => {
+        if (confirm('Restaurar base de mensagens padrão? As mensagens atuais serão substituídas pelas mensagens padrão.')) {
+          S.restoreDefaultFrases();
+          render();
+        }
+      };
       container.onclick = (e) => {
         const edit = e.target.closest('[data-edit]');
         if (edit) {

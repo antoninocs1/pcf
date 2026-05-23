@@ -19,7 +19,10 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>Config. Categorias</h2>
-            <button id="btn-add-cat" class="btn btn-primary">+ Nova Categoria</button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
+              <button id="btn-add-cat" class="btn btn-primary">+ Nova Categoria</button>
+            </div>
           </div>
           <div class="filters">
             <select id="cat-filtro-tipo">
@@ -47,6 +50,13 @@ PCF.Pages = PCF.Pages || {};
 
       document.getElementById('cat-filtro-tipo').onchange = function() { filtroTipo = this.value; render(); };
       document.getElementById('btn-add-cat').onclick = () => showCatModal();
+      document.getElementById('btn-restaurar-cats').onclick = () => {
+        if (confirm('Restaurar categorias padrão? As categorias atuais serão substituídas pelas categorias padrão.')) {
+          S.restoreDefaultCategorias();
+          filtroTipo = '';
+          render();
+        }
+      };
       container.onclick = (e) => {
         const edit = e.target.closest('[data-edit]');
         if (edit) { const cat = cats.find(c => c.id === edit.dataset.edit); if (cat) showCatModal(cat); }
@@ -129,7 +139,10 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>Configuração de Emoções</h2>
-            <button id="btn-add-emo-sup" class="btn btn-primary">+ Nova Emoção Superior</button>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button id="btn-restaurar-emocoes" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
+              <button id="btn-add-emo-sup" class="btn btn-primary">+ Nova Emoção Superior</button>
+            </div>
           </div>
           <p class="subtitle">Gerencie as emoções em 3 níveis: Superior → Médio → Inferior. Defina cores para cada nível.</p>
           <div class="emo-config-list">
@@ -176,6 +189,12 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       document.getElementById('btn-add-emo-sup').onclick = () => showEmoModal('sup');
+      document.getElementById('btn-restaurar-emocoes').onclick = () => {
+        if (confirm('Restaurar emoções padrão? A configuração atual de emoções será substituída pela padrão.')) {
+          S.restoreDefaultEmocoesConfig();
+          render();
+        }
+      };
 
       container.onclick = (e) => {
         const t = e.target.closest('[data-edit-sup]');
@@ -431,11 +450,15 @@ PCF.Pages = PCF.Pages || {};
             <h3><i data-lucide="trash-2"></i> Limpar Bases</h3>
             <p class="text-muted">Remove todos os registros da base selecionada. Esta ação não pode ser desfeita.</p>
             <div class="ie-buttons">
-              <button id="clear-trans" class="btn btn-danger">Limpar Transações</button>
+              <button id="clear-trans" class="btn btn-danger">Limpar Transações Financeiras</button>
               <button id="clear-emocoes" class="btn btn-danger">Limpar Registros de Emoções</button>
               <button id="clear-agenda" class="btn btn-danger">Limpar Agenda</button>
               <button id="clear-imc" class="btn btn-danger">Limpar IMC</button>
-              <button id="clear-frases" class="btn btn-danger">Limpar Mensagens</button>
+              <button id="clear-frases" class="btn btn-danger">Limpar Base de Mensagens</button>
+              <button id="clear-habitos-def" class="btn btn-danger">Limpar Hábitos (Definições)</button>
+              <button id="clear-reg-hab" class="btn btn-danger">Limpar Registros de Hábitos</button>
+              <button id="clear-rodavida" class="btn btn-danger">Limpar Roda da Vida</button>
+              <button id="clear-diario" class="btn btn-danger">Limpar Diário</button>
             </div>
           </div>
         </div>
@@ -591,6 +614,18 @@ PCF.Pages = PCF.Pages || {};
     const btnClearFrases = document.getElementById('clear-frases');
     if (btnClearFrases) btnClearFrases.onclick = () =>
       clearBase('Mensagens', () => S.getFrases().length, () => S.saveFrases([]));
+    const btnClearHabDef = document.getElementById('clear-habitos-def');
+    if (btnClearHabDef) btnClearHabDef.onclick = () =>
+      clearBase('Hábitos (Definições + Registros)', () => S.getHabitos().length + S.getRegistrosHabitos().length, () => { S.saveHabitos([]); S.saveRegistrosHabitos([]); });
+    const btnClearRegHab = document.getElementById('clear-reg-hab');
+    if (btnClearRegHab) btnClearRegHab.onclick = () =>
+      clearBase('Registros de Hábitos', () => S.getRegistrosHabitos().length, () => S.saveRegistrosHabitos([]));
+    const btnClearRV = document.getElementById('clear-rodavida');
+    if (btnClearRV) btnClearRV.onclick = () =>
+      clearBase('Roda da Vida', () => S.getRodaVidaRegistros().length, () => S.saveRodaVidaRegistros([]));
+    const btnClearDiario = document.getElementById('clear-diario');
+    if (btnClearDiario) btnClearDiario.onclick = () =>
+      clearBase('Diário', () => S.getDiario().length, () => S.saveDiario([]));
   };
 
   /* ==================== CONTATOS PESSOAIS ==================== */
@@ -898,6 +933,483 @@ PCF.Pages = PCF.Pages || {};
         if (isEdit) arr[idx] = novaAba;
         else arr.push(novaAba);
         S.saveDiarioTabs(arr);
+        overlay.remove();
+        render();
+      };
+    };
+
+    render();
+  };
+
+  /* ==================== GERENCIAR BASES DE DADOS ==================== */
+  PCF.Pages.gerenciarBases = (container) => {
+    let activeTab = 'emocoes';
+
+    const TABS = [
+      { id: 'emocoes',  icon: '🧠', label: 'Emoções'      },
+      { id: 'habitos',  icon: '🌱', label: 'Hábitos'      },
+      { id: 'rodavida', icon: '🎯', label: 'Roda da Vida' },
+      { id: 'agenda',   icon: '📅', label: 'Agenda'       },
+      { id: 'diario',   icon: '📖', label: 'Diário'       },
+    ];
+
+    const _fmtDate = (d) => H.formatarData ? H.formatarData(d) : (d || '—');
+
+    /* ---- Seção: Emoções ---- */
+    const renderEmocoes = () => {
+      const config = S.getEmocoesConfig();
+      const emocoes = [...S.getEmocoes()].reverse();
+      const getCorSup = (nome) => { const s = config.find(c => c.nome === nome); return s ? s.cor : '#6b7280'; };
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>🧠 Registros de Emoções <span class="badge badge-neutral">${emocoes.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="gb-add-emocao" class="btn btn-primary btn-sm">+ Novo</button>
+              <button id="gb-clear-emocoes" class="btn btn-danger btn-sm"${emocoes.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${emocoes.length === 0 ? '<p class="empty-text">Nenhum registro encontrado</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Data</th><th>Hora</th><th>Emoção Principal</th><th>Média / Inferior</th><th>Intensidade</th><th>Situação</th><th style="width:90px">Ações</th></tr></thead>
+              <tbody>
+                ${emocoes.map(em => {
+                  const cor = getCorSup(em.emocaoSuperior);
+                  return `<tr>
+                    <td>${_fmtDate(em.data)}</td>
+                    <td>${em.hora || '—'}</td>
+                    <td><span class="chip-small" style="background:${cor}22;border-color:${cor}">${H.esc(em.emocaoSuperior || '—')}</span></td>
+                    <td>${em.emocaoMedia ? H.esc(em.emocaoMedia) : ''}${em.emocaoInferior ? ' › ' + H.esc(em.emocaoInferior) : ''}</td>
+                    <td>${em.intensidade || '—'}/10</td>
+                    <td>${H.esc((em.situacao || '').slice(0, 40))}${(em.situacao || '').length > 40 ? '…' : ''}</td>
+                    <td>
+                      <button class="btn-icon" data-gb-edit-emo="${em.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                      <button class="btn-icon btn-danger" data-gb-del-emo="${em.id}" title="Remover"><i data-lucide="trash-2"></i></button>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    /* ---- Seção: Hábitos ---- */
+    const renderHabitos = () => {
+      const habitos = S.getHabitos();
+      const registros = [...S.getRegistrosHabitos()].sort((a, b) => b.data.localeCompare(a.data));
+      const habitosMap = Object.fromEntries(habitos.map(h => [h.id, h]));
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>🌱 Definições de Hábitos <span class="badge badge-neutral">${habitos.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#habitos-config" class="btn btn-secondary btn-sm">⚙️ Gerenciar</a>
+              <button id="gb-clear-habitos-def" class="btn btn-danger btn-sm"${habitos.length === 0 ? ' disabled' : ''}>🗑 Limpar Definições</button>
+            </div>
+          </div>
+          ${habitos.length === 0 ? '<p class="empty-text">Nenhum hábito definido</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th style="width:50px">Ícone</th><th>Nome</th><th>Categoria</th><th>Meta</th><th>Status</th><th style="width:60px">Ações</th></tr></thead>
+              <tbody>
+                ${habitos.map(h => `<tr>
+                  <td style="text-align:center;font-size:1.3rem">${h.icone || '⭐'}</td>
+                  <td><strong>${H.esc(h.nome)}</strong>${h.descricao ? `<br><small class="text-muted">${H.esc(h.descricao)}</small>` : ''}</td>
+                  <td><span class="chip-small">${H.esc(h.categoria || '—')}</span></td>
+                  <td>${H.esc(h.meta || '—')}</td>
+                  <td><span class="tipo-badge ${h.ativo !== false ? 'receita' : 'despesa'}">${h.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
+                  <td><button class="btn-icon btn-danger" data-gb-del-hab="${h.id}" title="Excluir"><i data-lucide="trash-2"></i></button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`}
+          <hr style="margin:20px 0">
+          <div class="gb-section-header">
+            <h3>📋 Registros Diários de Hábitos <span class="badge badge-neutral">${registros.length}</span></h3>
+            <button id="gb-clear-reg-hab" class="btn btn-danger btn-sm"${registros.length === 0 ? ' disabled' : ''}>🗑 Limpar Registros</button>
+          </div>
+          ${registros.length === 0 ? '<p class="empty-text">Nenhum registro diário</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Data</th><th>Hábito</th><th>Concluído</th><th>Momento</th><th>Intensidade</th><th>Observação</th><th style="width:60px">Ações</th></tr></thead>
+              <tbody>
+                ${registros.map(r => {
+                  const h = habitosMap[r.habitoId];
+                  return `<tr>
+                    <td>${_fmtDate(r.data)}</td>
+                    <td>${h ? `${h.icone || '⭐'} ${H.esc(h.nome)}` : '<em class="text-muted">Removido</em>'}</td>
+                    <td>${r.completo ? '<span class="tipo-badge receita">✅ Sim</span>' : '<span class="tipo-badge despesa">❌ Não</span>'}</td>
+                    <td>${r.momento ? H.esc(r.momento) : '—'}</td>
+                    <td>${r.intensidade !== undefined ? r.intensidade + '%' : '—'}</td>
+                    <td>${H.esc((r.observacao || '').slice(0, 40))}${(r.observacao || '').length > 40 ? '…' : ''}</td>
+                    <td><button class="btn-icon btn-danger" data-gb-del-rh="${r.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    /* ---- Seção: Roda da Vida ---- */
+    const renderRodaVida = () => {
+      const config = S.getRodaVidaConfig();
+      const registros = [...S.getRodaVidaRegistros()].sort((a, b) => b.data.localeCompare(a.data));
+      const allCats = config.flatMap(q => q.categorias);
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>🎯 Avaliações da Roda da Vida <span class="badge badge-neutral">${registros.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#roda-vida" class="btn btn-secondary btn-sm">+ Nova Avaliação</a>
+              <button id="gb-clear-rv" class="btn btn-danger btn-sm"${registros.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${registros.length === 0 ? '<p class="empty-text">Nenhuma avaliação registrada</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Data</th><th>Média</th>${allCats.map(c => `<th title="${H.esc(c.label)}">${c.icon}</th>`).join('')}<th style="width:60px">Ações</th></tr></thead>
+              <tbody>
+                ${registros.map(r => {
+                  const scores = r.scores || {};
+                  const vals = allCats.map(c => scores[c.id] || 0);
+                  const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
+                  return `<tr>
+                    <td>${_fmtDate(r.data)}</td>
+                    <td><strong>${avg}</strong>/10</td>
+                    ${allCats.map(c => `<td style="text-align:center;font-size:.8rem">${scores[c.id] || '—'}</td>`).join('')}
+                    <td><button class="btn-icon btn-danger" data-gb-del-rv="${r.id}" title="Excluir"><i data-lucide="trash-2"></i></button></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    /* ---- Seção: Agenda ---- */
+    const renderAgenda = () => {
+      const STATUS_COLORS = { 'Pendente': '#f59e0b', 'Concluído': '#16a34a', 'Cancelado': '#dc2626' };
+      const compromissos = [...S.getCompromissos()].sort((a, b) => a.data.localeCompare(b.data) || (a.hora || '').localeCompare(b.hora || ''));
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>📅 Compromissos da Agenda <span class="badge badge-neutral">${compromissos.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="gb-add-agenda" class="btn btn-primary btn-sm">+ Novo</button>
+              <button id="gb-clear-agenda" class="btn btn-danger btn-sm"${compromissos.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${compromissos.length === 0 ? '<p class="empty-text">Nenhum compromisso cadastrado</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Compromisso</th><th>Data</th><th>Hora</th><th>Status</th><th style="width:90px">Ações</th></tr></thead>
+              <tbody>
+                ${compromissos.map(c => {
+                  const cor = STATUS_COLORS[c.status] || '#6b7280';
+                  return `<tr>
+                    <td>${H.esc(c.compromisso)}</td>
+                    <td>${_fmtDate(c.data)}</td>
+                    <td>${c.hora || '—'}</td>
+                    <td><span class="status-badge" style="background:${cor}">${H.esc(c.status || '—')}</span></td>
+                    <td>
+                      <button class="btn-icon" data-gb-edit-ag="${c.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                      <button class="btn-icon btn-danger" data-gb-del-ag="${c.id}" title="Remover"><i data-lucide="trash-2"></i></button>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    /* ---- Seção: Diário ---- */
+    const renderDiario = () => {
+      const entries = [...S.getDiario()].sort((a, b) => b.data.localeCompare(a.data));
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>📖 Registros do Diário <span class="badge badge-neutral">${entries.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#diario" class="btn btn-secondary btn-sm">✏️ Ir ao Diário</a>
+              <button id="gb-clear-diario" class="btn btn-danger btn-sm"${entries.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${entries.length === 0 ? '<p class="empty-text">Nenhum registro no diário</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th style="width:120px">Data</th><th>Prévia do Texto</th><th style="width:90px">Ações</th></tr></thead>
+              <tbody>
+                ${entries.map(e => `<tr>
+                  <td><strong>${_fmtDate(e.data)}</strong></td>
+                  <td>${H.esc((e.texto || '').slice(0, 120))}${(e.texto || '').length > 120 ? '…' : ''}</td>
+                  <td>
+                    <button class="btn-icon" data-gb-edit-diario="${H.esc(e.data)}" title="Editar"><i data-lucide="pencil"></i></button>
+                    <button class="btn-icon btn-danger" data-gb-del-diario="${H.esc(e.data)}" title="Remover"><i data-lucide="trash-2"></i></button>
+                  </td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, rodavida: renderRodaVida, agenda: renderAgenda, diario: renderDiario };
+
+    /* ---- Render principal ---- */
+    const render = () => {
+      container.innerHTML = `
+        <div class="page">
+          <div class="page-header">
+            <h2><i data-lucide="database"></i> Gerenciar Bases de Dados</h2>
+          </div>
+          <div class="gb-tabs">
+            ${TABS.map(t => `<button class="gb-tab${t.id === activeTab ? ' active' : ''}" data-gbtab="${t.id}">${t.icon} ${t.label}</button>`).join('')}
+          </div>
+          <div id="gb-content">${RENDERERS[activeTab]?.() || ''}</div>
+        </div>`;
+
+      if (window.lucide) lucide.createIcons();
+
+      /* ---- Troca de abas ---- */
+      container.querySelectorAll('.gb-tab').forEach(btn => {
+        btn.onclick = () => { activeTab = btn.dataset.gbtab; render(); };
+      });
+
+      /* ---- Botões de limpar ---- */
+      const confirmClear = (label, countFn, clearFn) => {
+        const n = countFn();
+        if (!confirm(`Deseja realmente APAGAR todos os registros de "${label}"?\n\n${n} registro(s) serão removidos.\n\nEsta ação não pode ser desfeita.`)) return;
+        clearFn();
+        render();
+      };
+
+      const q = (id) => document.getElementById(id);
+
+      if (q('gb-clear-emocoes')) q('gb-clear-emocoes').onclick = () =>
+        confirmClear('Registros de Emoções', () => S.getEmocoes().length, () => S.saveEmocoes([]));
+      if (q('gb-add-emocao')) q('gb-add-emocao').onclick = () => showEmoModal(null);
+
+      if (q('gb-clear-habitos-def')) q('gb-clear-habitos-def').onclick = () =>
+        confirmClear('Hábitos (definições + registros)', () => S.getHabitos().length + S.getRegistrosHabitos().length, () => { S.saveHabitos([]); S.saveRegistrosHabitos([]); });
+      if (q('gb-clear-reg-hab')) q('gb-clear-reg-hab').onclick = () =>
+        confirmClear('Registros Diários de Hábitos', () => S.getRegistrosHabitos().length, () => S.saveRegistrosHabitos([]));
+
+      if (q('gb-clear-rv')) q('gb-clear-rv').onclick = () =>
+        confirmClear('Avaliações da Roda da Vida', () => S.getRodaVidaRegistros().length, () => S.saveRodaVidaRegistros([]));
+
+      if (q('gb-add-agenda')) q('gb-add-agenda').onclick = () => showAgendaModal(null);
+      if (q('gb-clear-agenda')) q('gb-clear-agenda').onclick = () =>
+        confirmClear('Agenda', () => S.getCompromissos().length, () => S.saveCompromissos([]));
+
+      if (q('gb-clear-diario')) q('gb-clear-diario').onclick = () =>
+        confirmClear('Diário', () => S.getDiario().length, () => S.saveDiario([]));
+
+      /* ---- Delegação de eventos nas linhas da tabela ---- */
+      container.onclick = (e) => {
+        /* Troca de aba */
+        const tabBtn = e.target.closest('.gb-tab');
+        if (tabBtn) { activeTab = tabBtn.dataset.gbtab; render(); return; }
+
+        /* Emoções */
+        const delEmo = e.target.closest('[data-gb-del-emo]');
+        if (delEmo && confirm('Remover este registro de emoção?')) { S.deleteEmocao(delEmo.dataset.gbDelEmo); render(); return; }
+        const editEmo = e.target.closest('[data-gb-edit-emo]');
+        if (editEmo) { const em = S.getEmocoes().find(x => x.id === editEmo.dataset.gbEditEmo); if (em) showEmoModal(em); return; }
+
+        /* Hábitos */
+        const delHab = e.target.closest('[data-gb-del-hab]');
+        if (delHab && confirm('Excluir este hábito e seus registros diários?')) {
+          const id = delHab.dataset.gbDelHab;
+          S.deleteHabito(id);
+          S.saveRegistrosHabitos(S.getRegistrosHabitos().filter(r => r.habitoId !== id));
+          render(); return;
+        }
+        const delRh = e.target.closest('[data-gb-del-rh]');
+        if (delRh && confirm('Remover este registro diário?')) { S.deleteRegistroHabito(delRh.dataset.gbDelRh); render(); return; }
+
+        /* Roda da Vida */
+        const delRv = e.target.closest('[data-gb-del-rv]');
+        if (delRv && confirm('Excluir esta avaliação da Roda da Vida?')) { S.deleteRodaVidaRegistro(delRv.dataset.gbDelRv); render(); return; }
+
+        /* Agenda */
+        const editAg = e.target.closest('[data-gb-edit-ag]');
+        if (editAg) { const c = S.getCompromissos().find(x => x.id === editAg.dataset.gbEditAg); if (c) showAgendaModal(c); return; }
+        const delAg = e.target.closest('[data-gb-del-ag]');
+        if (delAg && confirm('Remover este compromisso?')) { S.deleteCompromisso(delAg.dataset.gbDelAg); render(); return; }
+
+        /* Diário */
+        const editDiario = e.target.closest('[data-gb-edit-diario]');
+        if (editDiario) { const date = editDiario.dataset.gbEditDiario; const entry = S.getDiario().find(x => x.data === date); showDiarioModal(date, entry?.texto || ''); return; }
+        const delDiario = e.target.closest('[data-gb-del-diario]');
+        if (delDiario && confirm('Remover este registro do diário?')) { S.saveDiario(S.getDiario().filter(x => x.data !== delDiario.dataset.gbDelDiario)); render(); return; }
+      };
+    };
+
+    /* ---- Modal: Emoção ---- */
+    const showEmoModal = (em) => {
+      const isEdit = !!em;
+      const config = S.getEmocoesConfig();
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal modal-lg">
+          <h3>${isEdit ? 'Editar' : 'Novo'} Registro de Emoção</h3>
+          <form id="gb-emo-form">
+            <div class="form-row">
+              <div class="form-group"><label>Data</label><input type="date" id="gb-emo-data" value="${em?.data || H.hoje()}" required></div>
+              <div class="form-group"><label>Hora</label><input type="time" id="gb-emo-hora" value="${em?.hora || H.horaAtual()}"></div>
+            </div>
+            <div class="form-group"><label>Situação</label><input type="text" id="gb-emo-situacao" value="${H.esc(em?.situacao || '')}" placeholder="O que estava acontecendo?"></div>
+            <div class="form-row">
+              <div class="form-group"><label>Emoção Principal</label>
+                <select id="gb-emo-sup" required>
+                  <option value="">Selecione...</option>
+                  ${config.map(c => `<option value="${H.esc(c.nome)}"${em?.emocaoSuperior === c.nome ? ' selected' : ''}>${H.esc(c.nome)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group"><label>Emoção Média</label>
+                <select id="gb-emo-med"><option value="">Selecione...</option>
+                  ${em?.emocaoMedia ? `<option value="${H.esc(em.emocaoMedia)}" selected>${H.esc(em.emocaoMedia)}</option>` : ''}
+                </select>
+              </div>
+              <div class="form-group"><label>Emoção Inferior</label>
+                <select id="gb-emo-inf"><option value="">Selecione...</option>
+                  ${em?.emocaoInferior ? `<option value="${H.esc(em.emocaoInferior)}" selected>${H.esc(em.emocaoInferior)}</option>` : ''}
+                </select>
+              </div>
+            </div>
+            <div class="form-group"><label>Intensidade: <span id="gb-emo-int-val">${em?.intensidade || 5}</span>/10</label>
+              <input type="range" id="gb-emo-int" min="1" max="10" value="${em?.intensidade || 5}">
+            </div>
+            <div class="form-group"><label>Descrição</label><textarea id="gb-emo-desc" rows="3">${H.esc(em?.descricao || '')}</textarea></div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="gb-emo-cancel">Cancelar</button>
+              <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      const supSel = document.getElementById('gb-emo-sup');
+      const medSel = document.getElementById('gb-emo-med');
+      const infSel = document.getElementById('gb-emo-inf');
+
+      const populateMed = (supNome) => {
+        const sup = config.find(c => c.nome === supNome);
+        medSel.innerHTML = '<option value="">Selecione...</option>' + (sup?.medias || []).map(m => `<option value="${H.esc(m.nome)}">${H.esc(m.nome)}</option>`).join('');
+        infSel.innerHTML = '<option value="">Selecione...</option>';
+      };
+      const populateInf = (supNome, medNome) => {
+        const sup = config.find(c => c.nome === supNome);
+        const med = sup?.medias.find(m => m.nome === medNome);
+        infSel.innerHTML = '<option value="">Selecione...</option>' + (med?.inferiores || []).map(i => `<option value="${H.esc(i.nome)}">${H.esc(i.nome)}</option>`).join('');
+      };
+
+      if (em?.emocaoSuperior) {
+        populateMed(em.emocaoSuperior);
+        medSel.value = em.emocaoMedia || '';
+        if (em.emocaoMedia) { populateInf(em.emocaoSuperior, em.emocaoMedia); infSel.value = em.emocaoInferior || ''; }
+      }
+
+      supSel.onchange = () => { populateMed(supSel.value); };
+      medSel.onchange = () => { populateInf(supSel.value, medSel.value); };
+      document.getElementById('gb-emo-int').oninput = function () { document.getElementById('gb-emo-int-val').textContent = this.value; };
+      document.getElementById('gb-emo-cancel').onclick = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+      document.getElementById('gb-emo-form').onsubmit = (e) => {
+        e.preventDefault();
+        if (!supSel.value) { alert('Selecione uma emoção principal'); return; }
+        const data = {
+          data: document.getElementById('gb-emo-data').value,
+          hora: document.getElementById('gb-emo-hora').value,
+          situacao: document.getElementById('gb-emo-situacao').value.trim(),
+          emocaoSuperior: supSel.value,
+          emocaoMedia: medSel.value,
+          emocaoInferior: infSel.value,
+          intensidade: parseInt(document.getElementById('gb-emo-int').value),
+          descricao: document.getElementById('gb-emo-desc').value.trim(),
+        };
+        if (isEdit) S.updateEmocao(em.id, data);
+        else S.addEmocao(data);
+        overlay.remove();
+        render();
+      };
+    };
+
+    /* ---- Modal: Agenda ---- */
+    const showAgendaModal = (comp) => {
+      const isEdit = !!comp;
+      const STATUS_OPTS = ['Pendente', 'Concluído', 'Cancelado'];
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <h3>${isEdit ? 'Editar' : 'Novo'} Compromisso</h3>
+          <form id="gb-ag-form">
+            <div class="form-group"><label>Compromisso</label><input type="text" id="gb-ag-desc" value="${H.esc(comp?.compromisso || '')}" required placeholder="Descrição do compromisso"></div>
+            <div class="form-row">
+              <div class="form-group"><label>Data</label><input type="date" id="gb-ag-data" value="${comp?.data || H.hoje()}" required></div>
+              <div class="form-group"><label>Hora</label><input type="time" id="gb-ag-hora" value="${comp?.hora || ''}"></div>
+            </div>
+            <div class="form-group"><label>Status</label>
+              <select id="gb-ag-status">${STATUS_OPTS.map(s => `<option value="${s}"${comp?.status === s ? ' selected' : ''}>${s}</option>`).join('')}</select>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="gb-ag-cancel">Cancelar</button>
+              <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Adicionar'}</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+      document.getElementById('gb-ag-cancel').onclick = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.getElementById('gb-ag-form').onsubmit = (e) => {
+        e.preventDefault();
+        const data = {
+          compromisso: document.getElementById('gb-ag-desc').value.trim(),
+          data: document.getElementById('gb-ag-data').value,
+          hora: document.getElementById('gb-ag-hora').value,
+          status: document.getElementById('gb-ag-status').value,
+        };
+        if (isEdit) S.updateCompromisso(comp.id, data);
+        else S.addCompromisso(data);
+        overlay.remove();
+        render();
+      };
+    };
+
+    /* ---- Modal: Diário ---- */
+    const showDiarioModal = (date, texto) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal modal-lg">
+          <h3>📖 Editar Diário — ${_fmtDate(date)}</h3>
+          <form id="gb-diario-form">
+            <div class="form-group">
+              <label>Texto</label>
+              <textarea id="gb-diario-texto" rows="12" style="width:100%;resize:vertical">${H.esc(texto)}</textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="gb-diario-cancel">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+      document.getElementById('gb-diario-cancel').onclick = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.getElementById('gb-diario-form').onsubmit = (e) => {
+        e.preventDefault();
+        const novoTexto = document.getElementById('gb-diario-texto').value.trim();
+        const arr = S.getDiario().filter(x => x.data !== date);
+        if (novoTexto) arr.push({ data: date, texto: novoTexto });
+        S.saveDiario(arr);
         overlay.remove();
         render();
       };
