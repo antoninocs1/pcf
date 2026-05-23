@@ -14,19 +14,139 @@ PCF.App = (() => {
   const registerChart = (c) => { _chartInstances.push(c); return c; };
 
   /* ==================== AUTH ==================== */
+
+  const _githubSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>`;
+  const _githubSvgSm = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>`;
+
+  const _featuresData = [
+    { icon: 'wallet',        title: 'Financeiro',    desc: 'Dashboard, controle de transações, relatórios, categorias e análise das 4 Forças do Dinheiro.' },
+    { icon: 'brain',         title: 'Emoções',        desc: 'Registro diário de emoções com relatórios gráficos e configurações personalizadas.' },
+    { icon: 'check-square',  title: 'Hábitos',        desc: 'Acompanhe hábitos diários, visualização mensal e relatórios de consistência.' },
+    { icon: 'target',        title: 'Roda da Vida',   desc: 'Avalie e visualize as principais áreas da sua vida em um gráfico radial interativo.' },
+    { icon: 'book-open',     title: 'Diário',          desc: 'Diário pessoal para registrar reflexões, pensamentos e acompanhar sua evolução.' },
+    { icon: 'calendar',      title: 'Agenda',          desc: 'Gerencie compromissos e eventos de forma prática em uma agenda interativa.' },
+    { icon: 'heart',         title: 'Saúde / IMC',    desc: 'Cálculo de IMC e acompanhamento de métricas de saúde e bem-estar pessoal.' },
+    { icon: 'user',          title: 'Contatos',        desc: 'Organize seus contatos pessoais com informações de acesso rápido e fácil consulta.' },
+  ];
+
   const renderLogin = () => {
+    const featureCards = _featuresData.map(f => `
+      <div class="landing-feature-card">
+        <div class="landing-feature-icon"><i data-lucide="${f.icon}"></i></div>
+        <h3>${f.title}</h3>
+        <p>${f.desc}</p>
+      </div>`).join('');
+
     document.getElementById('app').innerHTML = `
-      <div class="auth-container">
-        <div class="auth-card">
-          <h1>💰 PCF</h1>
-          <h2>Controle Financeiro Pessoal</h2>
-          <div id="auth-tab-bar" class="auth-tabs">
-            <button class="auth-tab active" data-tab="login">Entrar</button>
-            <button class="auth-tab" data-tab="register">Cadastrar</button>
+      <div class="landing-page">
+
+        <header class="landing-header" id="landing-header">
+          <div class="landing-header-inner">
+            <a class="landing-brand" href="#inicio-section">
+              <span class="landing-brand-icon">💰</span>
+              <span>
+                <span class="landing-brand-name">PCF</span>
+                <span class="landing-brand-sub">Controle Financeiro Pessoal</span>
+              </span>
+            </a>
+            <nav class="landing-nav" id="landing-nav">
+              <a href="#inicio-section"        class="landing-nav-link active" data-section="inicio-section">Início</a>
+              <a href="#funcionalidades-section" class="landing-nav-link" data-section="funcionalidades-section">Funcionalidades</a>
+              <a href="#sobre-section"          class="landing-nav-link" data-section="sobre-section">Sobre</a>
+              <span class="landing-nav-divider"></span>
+              <a href="mailto:antoninocs@yahoo.com.br" class="landing-nav-contact" title="Enviar e-mail para antoninocs@yahoo.com.br">
+                <i data-lucide="mail"></i>
+              </a>
+              <a href="https://github.com/antoninocs1" target="_blank" rel="noopener noreferrer" class="landing-nav-contact" title="Perfil no GitHub">
+                ${_githubSvg}
+              </a>
+            </nav>
+            <button class="landing-nav-toggle" id="landing-nav-toggle" aria-label="Abrir menu">
+              <i data-lucide="menu"></i>
+            </button>
           </div>
-          <div id="auth-content"></div>
-        </div>
+        </header>
+
+        <section id="inicio-section" class="landing-hero">
+          <div class="auth-container">
+            <div class="auth-card">
+              <h1>💰 PCF</h1>
+              <h2>Controle Financeiro Pessoal</h2>
+              <div id="auth-tab-bar" class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Entrar</button>
+                <button class="auth-tab" data-tab="register">Cadastrar</button>
+              </div>
+              <div id="auth-content"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="funcionalidades-section" class="landing-section landing-features-section">
+          <div class="landing-container">
+            <span class="landing-badge">Funcionalidades</span>
+            <h2 class="landing-section-title">Principais módulos do sistema</h2>
+            <p class="landing-section-desc">Uma plataforma completa para organizar sua vida financeira, emocional e pessoal — tudo em um só lugar.</p>
+            <div class="landing-features-grid">${featureCards}</div>
+          </div>
+        </section>
+
+        <section id="sobre-section" class="landing-section landing-about-section">
+          <div class="landing-container landing-about-inner">
+            <div>
+              <span class="landing-badge">Sobre</span>
+              <h2 class="landing-section-title">Sobre o PCF</h2>
+              <p class="landing-about-text">
+                O <strong>PCF — Controle Financeiro Pessoal</strong> é uma aplicação web completa desenvolvida
+                para ajudar no controle e organização da vida financeira, emocional e de bem-estar.
+              </p>
+              <p class="landing-about-text">
+                O sistema reúne módulos integrados de finanças, hábitos, roda da vida, agenda, saúde e muito mais.
+              </p>
+              <div class="landing-about-contacts">
+                <a href="mailto:antoninocs@yahoo.com.br" class="landing-contact-btn">
+                  <i data-lucide="mail"></i> antoninocs@yahoo.com.br
+                </a>
+                <a href="https://github.com/antoninocs1" target="_blank" rel="noopener noreferrer" class="landing-contact-btn">
+                  ${_githubSvgSm} GitHub
+                </a>
+              </div>
+            </div>
+            <div class="landing-about-stats">
+              <div class="landing-stat">
+                <span class="landing-stat-number">8+</span>
+                <span class="landing-stat-label">Módulos</span>
+              </div>
+              <div class="landing-stat">
+                <span class="landing-stat-number">100%</span>
+                <span class="landing-stat-label">Offline</span>
+              </div>
+              <div class="landing-stat">
+                <span class="landing-stat-number">∞</span>
+                <span class="landing-stat-label">Registros</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="landing-footer">
+          <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
+          <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
+        </footer>
+
       </div>`;
+
+    /* Contador de acessos */
+    (() => {
+      try {
+        const key = 'pcf_visit_count';
+        const count = (parseInt(localStorage.getItem(key) || '0', 10) || 0) + 1;
+        localStorage.setItem(key, count);
+        const el = document.getElementById('visit-count-label');
+        if (el) el.textContent = count === 1 ? '1 acesso registrado' : `${count.toLocaleString('pt-BR')} acessos registrados`;
+      } catch (_) {}
+    })();
+
+    /* Tabs */
     document.querySelectorAll('.auth-tab').forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
@@ -35,6 +155,48 @@ PCF.App = (() => {
       };
     });
     renderLoginForm();
+
+    /* Lucide icons */
+    if (window.lucide) lucide.createIcons();
+
+    /* Mobile nav toggle */
+    document.getElementById('landing-nav-toggle').onclick = () => {
+      document.getElementById('landing-nav').classList.toggle('open');
+    };
+
+    /* Smooth scroll */
+    document.querySelectorAll('.landing-nav-link').forEach(a => {
+      a.onclick = (e) => {
+        e.preventDefault();
+        const target = document.getElementById(a.dataset.section);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('landing-nav').classList.remove('open');
+      };
+    });
+    document.querySelector('.landing-brand').onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('inicio-section').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    /* Active nav on scroll */
+    const _sections = ['inicio-section', 'funcionalidades-section', 'sobre-section'];
+    const _obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          document.querySelectorAll('.landing-nav-link').forEach(a => {
+            a.classList.toggle('active', a.dataset.section === e.target.id);
+          });
+        }
+      });
+    }, { threshold: 0.35 });
+    _sections.forEach(id => { const el = document.getElementById(id); if (el) _obs.observe(el); });
+
+    /* Header shadow on scroll */
+    const _onScroll = () => {
+      const h = document.getElementById('landing-header');
+      if (h) h.classList.toggle('scrolled', window.scrollY > 10);
+    };
+    window.addEventListener('scroll', _onScroll, { passive: true });
   };
 
   const renderLoginForm = () => {
