@@ -118,7 +118,7 @@ PCF.App = (() => {
               </div>
               <div class="landing-stat">
                 <span class="landing-stat-number">100%</span>
-                <span class="landing-stat-label">Offline</span>
+                <span class="landing-stat-label">Amigável</span>
               </div>
               <div class="landing-stat">
                 <span class="landing-stat-number">∞</span>
