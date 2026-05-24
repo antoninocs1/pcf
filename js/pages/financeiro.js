@@ -177,7 +177,7 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>Base de Dados</h2>
+            <h2>Base de Dados Financeira</h2>
             <span class="badge" id="base-subtotal"></span>
           </div>
           <div class="filters">

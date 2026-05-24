@@ -8,9 +8,13 @@ PCF.App = (() => {
   const S = PCF.Store;
   const H = PCF.Helpers;
   let _chartInstances = [];
+  let _homeClockInterval = null;
 
   /* ---- Destruir gráficos antes de trocar de página ---- */
-  const destroyCharts = () => { _chartInstances.forEach(c => c.destroy()); _chartInstances = []; };
+  const destroyCharts = () => {
+    _chartInstances.forEach(c => c.destroy()); _chartInstances = [];
+    if (_homeClockInterval) { clearInterval(_homeClockInterval); _homeClockInterval = null; }
+  };
   const registerChart = (c) => { _chartInstances.push(c); return c; };
 
   /* ==================== AUTH ==================== */
@@ -219,6 +223,7 @@ PCF.App = (() => {
         return;
       }
       S.setSession(user.id, user.login);
+      history.replaceState(null, '', location.pathname);
       initApp();
     };
   };
@@ -266,12 +271,83 @@ PCF.App = (() => {
       });
       if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
       S.setSession(res.user.id, res.user.login);
+      history.replaceState(null, '', location.pathname);
       initApp();
+    };
+  };
+
+  /* ==================== HOME PAGE ==================== */
+  const renderHome = (mc) => {
+    const frases = S.getFrases().filter(f => f.ativo !== false && f.categoria === 'Minutos de Sabedoria');
+    const randomFrase = () => frases.length
+      ? frases[Math.floor(Math.random() * frases.length)]
+      : { texto: 'Que este dia seja repleto de sabedoria e paz.', autor: '' };
+
+    const modules = [
+      { icon: 'wallet',       label: 'Financeiro',       hash: '#dashboard', color: '#16a34a' },
+      { icon: 'brain',        label: 'Emoções',           hash: '#emocoes',   color: '#8b5cf6' },
+      { icon: 'check-square', label: 'Hábitos',           hash: '#habitos',   color: '#f59e0b' },
+      { icon: 'book-open',    label: 'Diário',            hash: '#diario',    color: '#3b82f6' },
+      { icon: 'calendar',     label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
+      { icon: 'target',       label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
+      { icon: 'heart',        label: 'IMC',               hash: '#imc',       color: '#dc2626' },
+      { icon: 'users',        label: 'Contatos Pessoais', hash: '#contatos',  color: '#64748b' },
+    ];
+
+    const dateStr = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const frase = randomFrase();
+
+    mc.innerHTML = `
+      <div class="page home-page">
+        <div class="home-banner">
+          <div class="home-clock" id="home-clock"></div>
+          <div class="home-date">${H.esc(dateStr.charAt(0).toUpperCase() + dateStr.slice(1))}</div>
+          <div class="home-message-wrap">
+            <div class="home-message-content">
+              <i data-lucide="sparkles" class="home-message-icon"></i>
+              <div class="home-message-body">
+                <p class="home-message-text" id="home-msg-text"><span class="home-message-cat">Minutos de Sabedoria</span> — ${H.esc(frase.texto)}</p>
+                <p class="home-message-author" id="home-msg-author">${frase.autor ? '— ' + H.esc(frase.autor) : ''}</p>
+              </div>
+            </div>
+            <button class="home-msg-refresh" id="home-msg-refresh" title="Outra mensagem aleatória">
+              <i data-lucide="refresh-cw"></i>
+            </button>
+          </div>
+        </div>
+        <div class="home-modules-title">Módulos</div>
+        <div class="home-modules-grid">
+          ${modules.map(m => `
+            <a href="${m.hash}" class="home-module-btn" style="--module-color:${m.color}">
+              <span class="home-module-icon"><i data-lucide="${m.icon}"></i></span>
+              <span class="home-module-label">${m.label}</span>
+            </a>`).join('')}
+        </div>
+      </div>`;
+
+    if (window.lucide) lucide.createIcons();
+
+    if (_homeClockInterval) { clearInterval(_homeClockInterval); _homeClockInterval = null; }
+    const tick = () => {
+      const el = document.getElementById('home-clock');
+      if (!el) { clearInterval(_homeClockInterval); _homeClockInterval = null; return; }
+      el.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+    tick();
+    _homeClockInterval = setInterval(tick, 1000);
+
+    document.getElementById('home-msg-refresh').onclick = () => {
+      const f = randomFrase();
+      const textEl = document.getElementById('home-msg-text');
+      const authEl = document.getElementById('home-msg-author');
+      if (textEl) textEl.innerHTML = `<span class="home-message-cat">Minutos de Sabedoria</span> \u2014 ${H.esc(f.texto)}`;
+      if (authEl) authEl.textContent = f.autor ? '— ' + f.autor : '';
     };
   };
 
   /* ==================== SIDEBAR ==================== */
   const navGroups = [
+    { standalone: true, hash: '#home', icon: 'home', label: 'Início' },
     {
       id: 'financeiro', label: 'Financeiro', icon: 'wallet',
       items: [
@@ -323,8 +399,8 @@ PCF.App = (() => {
     { standalone: true, adminOnly: true, hash: '#importexport',    icon: 'upload',   label: 'Importar / Exportar' },
   ];
 
-  const _navCollapsed = () => { try { return JSON.parse(localStorage.getItem('pcf_nav_collapsed') || '{}'); } catch { return {}; } };
-  const _navSaveCollapsed = (obj) => { try { localStorage.setItem('pcf_nav_collapsed', JSON.stringify(obj)); } catch {} };
+  const _navExpanded = () => { try { return JSON.parse(localStorage.getItem('pcf_nav_expanded') || '{}'); } catch { return {}; } };
+  const _navSaveExpanded = (obj) => { try { localStorage.setItem('pcf_nav_expanded', JSON.stringify(obj)); } catch {} };
 
   /* Rotas que exigem perfil Administrador */
   const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios', '#diario-config', '#roda-vida-config', '#gerenciar-bases']);
@@ -341,7 +417,7 @@ PCF.App = (() => {
       }
       const visibleItems = isAdmin ? g.items : g.items.filter(n => !ADMIN_ROUTES.has(n.hash));
       if (visibleItems.length === 0) return '';
-      const col = _navCollapsed()[g.id] ? 'collapsed' : '';
+      const col = _navExpanded()[g.id] ? '' : 'collapsed';
       const links = visibleItems.map(n =>
         `<a href="${n.hash}" class="nav-link" data-hash="${n.hash}"><i data-lucide="${n.icon}" class="nav-icon"></i><span class="nav-label">${n.label}</span></a>`
       ).join('');
@@ -354,10 +430,10 @@ PCF.App = (() => {
       btn.onclick = () => {
         const groupEl = btn.closest('.nav-group');
         groupEl.classList.toggle('collapsed');
-        const stored = _navCollapsed();
-        if (groupEl.classList.contains('collapsed')) stored[btn.dataset.group] = true;
-        else delete stored[btn.dataset.group];
-        _navSaveCollapsed(stored);
+        const stored = _navExpanded();
+        if (groupEl.classList.contains('collapsed')) delete stored[btn.dataset.group];
+        else stored[btn.dataset.group] = true;
+        _navSaveExpanded(stored);
       };
     });
   };
@@ -473,11 +549,13 @@ PCF.App = (() => {
           </nav>
         </aside>
         <button id="sidebar-toggle" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+        <button id="btn-home-back" class="btn-home-back" title="Tela Inicial"><i data-lucide="home"></i></button>
         <main class="main-content" id="main-content"></main>
       </div>`;
     document.getElementById('btn-logout').onclick = () => { S.clearSession(); renderLogin(); };
     const gearBtn = document.getElementById('btn-meu-perfil');
     if (gearBtn) gearBtn.onclick = openMeuPerfil;
+    document.getElementById('btn-home-back').onclick = () => { location.hash = '#home'; };
     document.getElementById('sidebar-toggle').onclick = () => {
       document.getElementById('sidebar').classList.toggle('open');
     };
@@ -489,7 +567,7 @@ PCF.App = (() => {
   };
 
   const updateActiveNav = () => {
-    const hash = location.hash || '#dashboard';
+    const hash = location.hash || '#home';
     document.querySelectorAll('.nav-link').forEach(a => {
       const isActive = a.dataset.hash === hash;
       a.classList.toggle('active', isActive);
@@ -497,12 +575,14 @@ PCF.App = (() => {
         const group = a.closest('.nav-group');
         if (group && group.classList.contains('collapsed')) {
           group.classList.remove('collapsed');
-          const stored = _navCollapsed();
-          delete stored[group.id.replace('navgroup-', '')];
-          _navSaveCollapsed(stored);
+          const stored = _navExpanded();
+          stored[group.id.replace('navgroup-', '')] = true;
+          _navSaveExpanded(stored);
         }
       }
     });
+    const backBtn = document.getElementById('btn-home-back');
+    if (backBtn) backBtn.style.display = hash === '#home' ? 'none' : '';
   };
 
   /* ==================== ROUTER ==================== */
@@ -521,6 +601,7 @@ PCF.App = (() => {
 
     const pages = PCF.Pages;
     const map = {
+      '#home': (mc) => renderHome(mc),
       '#dashboard': pages.dashboard,
       '#inserir': pages.inserir,
       '#base': pages.base,
@@ -546,7 +627,7 @@ PCF.App = (() => {
       '#importexport': pages.importExport,
       '#gerenciar-bases': pages.gerenciarBases,
     };
-    const renderFn = map[hash] || pages.dashboard;
+    const renderFn = map[hash] || ((mc) => renderHome(mc));
     if (renderFn) {
       try { renderFn(mc); }
       catch (err) {
@@ -576,7 +657,7 @@ PCF.App = (() => {
       }).observe(mc, { childList: true });
     }
     window.onhashchange = route;
-    if (!location.hash) location.hash = '#dashboard';
+    if (!location.hash) location.hash = '#home';
     else route();
   };
 

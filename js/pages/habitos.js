@@ -52,7 +52,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="hab-frase-texto">"${H.esc(frase.texto)}"</div>
           ${frase.autor ? `<div class="hab-frase-autor">— ${H.esc(frase.autor)}</div>` : ''}
         </div>
-        <button type="button" id="btn-outra-frase" class="btn btn-secondary btn-sm" title="Exibir outra mensagem aleatória" style="flex-shrink:0;align-self:center">🔀 Outra</button>
+        <button type="button" id="btn-outra-frase" class="home-msg-refresh" title="Exibir outra frase aleatória"><i data-lucide="refresh-cw"></i></button>
       </div>`;
   };
 
@@ -102,6 +102,7 @@ PCF.Pages = PCF.Pages || {};
       const tmp = document.createElement('div');
       tmp.innerHTML = htmlFraseBanner(fraseExibida);
       banner.replaceWith(tmp.firstElementChild);
+      if (window.lucide) lucide.createIcons();
       const btn = document.getElementById('btn-outra-frase');
       if (btn) btn.onclick = () => { fraseExibida = _sortearFrase(fraseExibida); atualizarBanner(); };
     };
@@ -409,7 +410,7 @@ PCF.Pages = PCF.Pages || {};
 
       container.innerHTML = `
         <div class="page">
-          <h2>📊 Relatório de Hábitos</h2>
+          <h2 style="margin-bottom:20px">📊 Relatório de Hábitos</h2>
 
           <div class="cards-grid" style="margin-bottom:20px">
             <div class="card card-receita">
