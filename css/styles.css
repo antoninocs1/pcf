@@ -525,6 +525,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 
 @media (max-width: 768px) {
   .form-grid-agenda { grid-template-columns: 1fr 1fr; }
+  .form-grid-agenda .form-group:first-child { grid-column: 1 / -1; }
 }
 
 /* ---- Agenda: Banner Relógio ---- */
@@ -840,6 +841,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   background: rgba(59,130,246,.1); color: var(--text);
   border-color: rgba(59,130,246,.3);
 }
+.diario-header-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .diario-today { margin-bottom: 24px; }
 .diario-day-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .diario-day-title h3 { margin: 0; }
@@ -867,9 +869,17 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .badge-neutral { background: rgba(148,163,184,.2); color: var(--text-muted); font-size: .75rem; padding: 2px 8px; border-radius: 999px; }
 
 @media (max-width: 600px) {
+  /* Header: empilha título e controles verticalmente */
+  .page-header:has(.diario-header-controls) { flex-direction: column; align-items: flex-start; padding-right: 56px; }
+  .diario-header-controls { width: 100%; gap: 8px; }
+  #diario-data { flex: 1; min-width: 0; min-height: 44px; font-size: 1rem; padding: 6px 10px; box-sizing: border-box; }
+  #btn-diario-hoje { flex-shrink: 0; min-height: 44px; padding: 0 16px; font-size: .95rem; }
+
+  /* Sugestões */
   .diario-sugestoes-header {
     flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 12px;
   }
+  .diario-sugestoes-header small { font-size: .8rem; }
   .diario-tabs-bar {
     flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory; padding-bottom: 2px;
@@ -878,18 +888,23 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     flex: 0 0 auto; padding: 10px 14px; font-size: .82rem;
     scroll-snap-align: start; min-height: 44px;
   }
+  .diario-tab-content.active { gap: 2px; }
   .diario-question-item {
     padding: 10px 12px; font-size: .9rem; min-height: 44px;
-    display: flex; align-items: center;
+    display: flex; align-items: center; line-height: 1.4;
   }
-  .diario-textarea { min-height: 160px; font-size: 1rem; }
+
+  /* Editor */
+  .diario-day-title { flex-wrap: wrap; gap: 6px; }
+  .diario-textarea { min-height: 180px; font-size: 1rem; padding: 10px; }
   .diario-today-actions { gap: 8px; }
   .diario-today-actions .btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
+
+  /* Índice de registros */
+  .diario-index { gap: 8px; }
   .diario-index-item { padding: 12px 14px; }
   .diario-index-date { font-size: .95rem; }
-  .diario-index-preview { font-size: .85rem; white-space: normal; overflow: visible; text-overflow: unset; }
-  #diario-data { width: 100%; min-height: 44px; font-size: 1rem; padding: 6px 10px; box-sizing: border-box; }
-  .page-header #btn-diario-hoje { min-height: 44px; padding: 0 14px; }
+  .diario-index-preview { font-size: .85rem; white-space: normal; overflow: visible; text-overflow: unset; line-height: 1.4; }
 }
 
 /* ==================== RODA DA VIDA ==================== */
