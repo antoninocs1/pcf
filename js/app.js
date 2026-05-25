@@ -629,7 +629,7 @@ PCF.App = (() => {
     };
     const renderFn = map[hash] || ((mc) => renderHome(mc));
     if (renderFn) {
-      try { renderFn(mc); }
+      try { renderFn(mc); window.scrollTo(0, 0); }
       catch (err) {
         console.error('[PCF] Erro ao renderizar página', hash, err);
         mc.innerHTML = `<div class="page"><div class="alert alert-error">

@@ -734,7 +734,7 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2><i data-lucide="book-open"></i> Diário</h2>
+            <h2><i data-lucide="book-open"></i> Meu Diario</h2>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
               <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
