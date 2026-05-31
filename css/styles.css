@@ -480,17 +480,22 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .imc-layout { grid-template-columns: 1fr; }
   .emocoes-layout { grid-template-columns: 1fr; }
   .cards-grid { grid-template-columns: 1fr 1fr; }
-  .auth-card { padding: 28px 20px; }
   .ciclo-middle { flex-direction: column; }
   /* Modal responsivo */
   .modal { padding: 20px 16px; }
   .modal-actions { flex-wrap: wrap; }
   .modal-actions .btn { flex: 1 1 auto; min-width: 100px; }
+  /* Landing hero: alinhar ao topo para evitar clipping do card no cadastro */
+  .landing-hero { align-items: flex-start; padding: 80px 12px 32px; }
+  .landing-hero .auth-container { padding: 0; width: 100%; }
+  .auth-card { padding: 24px 18px; width: 100%; max-width: 100%; box-sizing: border-box; }
 }
 
 @media (max-width: 480px) {
   .cards-grid { grid-template-columns: 1fr; }
   html { font-size: 13px; }
+  .landing-hero { padding: 72px 8px 24px; }
+  .auth-card { padding: 20px 14px; }
   /* Modal como bottom-sheet em telas muito pequenas */
   .modal-overlay { align-items: flex-end; padding: 0; }
   .modal { border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
