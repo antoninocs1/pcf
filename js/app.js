@@ -260,11 +260,11 @@ PCF.App = (() => {
           <div class="form-group"><label>CPF</label><input type="text" id="reg-cpf" placeholder="000.000.000-00" required></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>E-mail</label><input type="email" id="reg-email" required autocomplete="email"></div>
           <div class="form-group"><label>Telefone</label><input type="text" id="reg-tel" placeholder="(00) 00000-0000"></div>
+          <div class="form-group"><label>Data de Nascimento</label><input type="date" id="reg-nasc" required></div>
         </div>
         <div class="form-group">
-          <label>Data de Nascimento</label><input type="date" id="reg-nasc" required>
+          <label>E-mail</label><input type="email" id="reg-email" required autocomplete="email">
         </div>
         <div class="form-row">
           <div class="form-group"><label>Senha</label><input type="password" id="reg-pass" required minlength="4" autocomplete="new-password"></div>

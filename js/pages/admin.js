@@ -364,11 +364,11 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00" required></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required></div>
               <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
+              <div class="form-group"><label>Data de Nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
             </div>
             <div class="form-group">
-              <label>Data de Nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}">
+              <label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required>
             </div>
             <div class="form-row">
               <div class="form-group"><label>${isEdit ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}</label><input type="password" id="um-pass" ${isEdit ? '' : 'required'} minlength="4"></div>
