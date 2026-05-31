@@ -2,25 +2,43 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Verifica se o usuário autenticado é administrador
+    // Verifica se o usuário autenticado é administrador.
+    // NOTA: `.data` é o acessor de campos do documento /users/{uid} (sintaxe de Security Rules),
+    //       NÃO a subcoleção /users/{uid}/data/. O campo isAdmin fica direto no documento.
     function isAdmin() {
       return request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
+    // Retorna true se o doc de bootstrap já foi criado (≥ 1 usuário registrado)
+    function bootstrapExists() {
+      return exists(/databases/$(database)/documents/meta/bootstrap);
+    }
+
     // Perfis de usuário
     match /users/{userId} {
-      // Leitura de perfil próprio: qualquer autenticado
-      // Leitura de outros perfis: apenas admin
       allow get:  if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow list: if request.auth != null && isAdmin();
 
-      // Criação: pelo próprio (auto-registro) ou por admin
-      allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      // Criação: pelo próprio (auto-registro) ou por admin.
+      // Regra anti-escalada: um usuário não-admin só pode criar com isAdmin == false,
+      // EXCETO quando é o primeiro usuário (bootstrap ainda não existe).
+      allow create: if request.auth != null &&
+        (request.auth.uid == userId || isAdmin()) &&
+        (isAdmin() ||
+          request.resource.data.isAdmin == false ||
+          !bootstrapExists());
 
-      // Atualização/exclusão: próprio ou admin
-      allow update, delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      // Atualização: próprio usuário pode editar o perfil, MAS não pode alterar isAdmin.
+      // Apenas admin pode mudar o campo isAdmin.
+      allow update: if request.auth != null && (
+        isAdmin() ||
+        (request.auth.uid == userId &&
+          request.resource.data.isAdmin == resource.data.isAdmin)
+      );
+
+      allow delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
 
       // Subcoleções de dados
       match /data/{document} {
@@ -28,13 +46,14 @@ service cloud.firestore {
       }
     }
 
-    // Metadados internos do sistema (ex: bootstrap do primeiro usuário)
-    // Leitura pública — necessário para detectar primeiro usuário antes do login
-    // Escrita apenas por usuário autenticado (criação única do bootstrap)
+    // Metadados internos do sistema.
+    // Leitura pública — necessário para detectar primeiro usuário antes do login.
+    // Bootstrap pode ser criado UMA vez por qualquer usuário autenticado.
+    // Somente admin pode atualizar ou deletar.
     match /meta/{docId} {
-      allow read:             if true;
-      allow create:           if request.auth != null;
-      allow update, delete:   if isAdmin();
+      allow read:           if true;
+      allow create:         if request.auth != null && docId == 'bootstrap' && !bootstrapExists();
+      allow update, delete: if isAdmin();
     }
   }
 }

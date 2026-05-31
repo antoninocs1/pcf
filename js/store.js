@@ -155,6 +155,8 @@ PCF.Store = (() => {
     if (data.login && data.login !== users[idx].login && users.some(u => u.login === data.login))
       return { ok: false, msg: 'Login já existe' };
     const { newPassword, senhaHash, ...profileData } = data;
+    // Apenas admin pode alterar o campo isAdmin (defesa em código + regras Firestore)
+    if (!currentUserIsAdmin()) delete profileData.isAdmin;
     users[idx] = { ...users[idx], ...profileData };
     _cache['pcf_users'] = users;
     await _db().collection('users').doc(id).update(profileData);
