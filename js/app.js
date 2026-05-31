@@ -139,12 +139,16 @@ PCF.App = (() => {
 
       </div>`;
 
-    /* Contador de acessos */
-    (() => {
+    /* Contador de acessos globais via Firestore */
+    (async () => {
       try {
-        const key = 'pcf_visit_count';
-        const count = (parseInt(localStorage.getItem(key) || '0', 10) || 0) + 1;
-        localStorage.setItem(key, count);
+        const visitsRef = PCF.Firebase.db.collection('meta').doc('visits');
+        await visitsRef.set(
+          { count: firebase.firestore.FieldValue.increment(1) },
+          { merge: true }
+        );
+        const snap = await visitsRef.get();
+        const count = snap.exists ? (snap.data().count || 1) : 1;
         const el = document.getElementById('visit-count-label');
         if (el) el.textContent = count === 1 ? '1 acesso registrado' : `${count.toLocaleString('pt-BR')} acessos registrados`;
       } catch (_) {}

@@ -48,12 +48,23 @@ service cloud.firestore {
 
     // Metadados internos do sistema.
     // Leitura pública — necessário para detectar primeiro usuário antes do login.
-    // Bootstrap pode ser criado UMA vez por qualquer usuário autenticado.
-    // Somente admin pode atualizar ou deletar.
     match /meta/{docId} {
-      allow read:           if true;
-      allow create:         if request.auth != null && docId == 'bootstrap' && !bootstrapExists();
-      allow update, delete: if isAdmin();
+      allow read: if true;
+
+      // Bootstrap: apenas autenticado, somente quando ainda não existe
+      // Visits: qualquer visitante pode criar/incrementar APENAS o campo count
+      allow create: if
+        (request.auth != null && docId == 'bootstrap' && !bootstrapExists()) ||
+        (docId == 'visits' && request.resource.data.keys().hasOnly(['count']));
+
+      // Visits: qualquer um pode atualizar, mas SOMENTE o campo count
+      // Outros docs (ex: bootstrap): somente admin pode atualizar
+      allow update: if
+        isAdmin() ||
+        (docId == 'visits' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count']));
+
+      allow delete: if isAdmin();
     }
   }
 }
