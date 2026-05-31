@@ -346,7 +346,7 @@ PCF.Pages = PCF.Pages || {};
         if (del) {
           const uid = del.dataset.del;
           if (uid === S.currentUserId()) { alert('Não é possível remover o usuário logado.'); return; }
-          if (confirm('Remover este usuário e todos os seus dados?')) { S.deleteUser(uid); render(); }
+          if (confirm('Remover este usuário e todos os seus dados?')) { S.deleteUser(uid).then(() => render()); }
         }
       };
     };
@@ -395,7 +395,7 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('um-cancel').onclick = () => overlay.remove();
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
-      document.getElementById('user-modal-form').onsubmit = (e) => {
+      document.getElementById('user-modal-form').onsubmit = async (e) => {
         e.preventDefault();
         const errEl = document.getElementById('um-error');
         const p1 = document.getElementById('um-pass').value;
@@ -410,18 +410,17 @@ PCF.Pages = PCF.Pages || {};
           dataNascimento: document.getElementById('um-nasc').value,
           login: document.getElementById('um-login').value.trim(),
         };
-        if (p1) data.senhaHash = H.hashSenha(p1);
+        if (p1) data.newPassword = p1;
         if (S.currentUserIsAdmin()) {
           data.isAdmin = !!(document.getElementById('um-admin')?.checked);
         }
 
         if (isEdit) {
-          const res = S.updateUser(user.id, data);
+          const res = await S.updateUser(user.id, data);
           if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
         } else {
           if (!p1) { errEl.textContent = 'Senha é obrigatória'; errEl.style.display = 'block'; return; }
-          data.senhaHash = H.hashSenha(p1);
-          const res = S.createUser(data);
+          const res = await S.createUser(data, p1);
           if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
         }
         overlay.remove();
@@ -566,19 +565,19 @@ PCF.Pages = PCF.Pages || {};
       const file = this.files[0];
       if (!file) return;
       const inputEl = this;
-      H.readFileAutoEncoding(file, (text) => {
+      H.readFileAutoEncoding(file, async (text) => {
         try {
           const rows = H.parseCSV(text);
           let count = 0;
-          rows.forEach(r => {
-            if (!r.login || !r.nome) return;
-            const res = S.createUser({
-              nome: r.nome, cpf: r.cpf || '', email: r.email || '', telefone: r.telefone || '',
-              dataNascimento: r.dataNascimento || '', login: r.login,
-              senhaHash: r.senha ? H.hashSenha(r.senha) : H.hashSenha('1234'),
-            });
+          for (const r of rows) {
+            if (!r.email || !r.nome) continue;
+            const pass = r.senha || '123456';
+            const res = await S.createUser({
+              nome: r.nome, cpf: r.cpf || '', email: r.email, telefone: r.telefone || '',
+              dataNascimento: r.dataNascimento || '', login: r.login || r.email,
+            }, pass);
             if (res.ok) count++;
-          });
+          }
           showMsg(`✅ ${count} usuários importados!`, 'success');
         } catch (err) { showMsg('❌ Erro ao importar: ' + err.message, 'error'); }
       });
@@ -754,8 +753,8 @@ PCF.Pages = PCF.Pages || {};
   PCF.Pages.diario = (container) => {
     const userId = S.currentUserId();
     const KEY = `pcf_diario_${userId}`;
-    const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
-    const saveDiary = (arr) => { try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch {} };
+    const load = () => S.getDiario();
+    const saveDiary = (arr) => S.saveDiario(arr);
     const fmtDate = (d) => { if (!d) return ''; const [y, m, dia] = d.split('-'); return `${dia}/${m}/${y}`; };
 
     let selectedDate = new Date().toISOString().slice(0, 10);

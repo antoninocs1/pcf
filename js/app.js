@@ -206,25 +206,24 @@ PCF.App = (() => {
   const renderLoginForm = () => {
     document.getElementById('auth-content').innerHTML = `
       <form id="login-form" class="auth-form">
-        <div class="form-group"><label>Usuário (Login)</label><input type="text" id="login-user" required autocomplete="username"></div>
+        <div class="form-group"><label>E-mail</label><input type="email" id="login-email" required autocomplete="email"></div>
         <div class="form-group"><label>Senha</label><input type="password" id="login-pass" required autocomplete="current-password"></div>
         <div id="login-error" class="alert alert-error" style="display:none"></div>
         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
       </form>`;
-    document.getElementById('login-form').onsubmit = (e) => {
+    document.getElementById('login-form').onsubmit = async (e) => {
       e.preventDefault();
-      const login = document.getElementById('login-user').value.trim();
-      const senha = H.hashSenha(document.getElementById('login-pass').value);
-      const user = S.getUserByLogin(login);
-      if (!user || user.senhaHash !== senha) {
+      const email = document.getElementById('login-email').value.trim();
+      const pass  = document.getElementById('login-pass').value;
+      try {
+        await PCF.Firebase.auth.signInWithEmailAndPassword(email, pass);
+        // onAuthStateChanged cuida do loadAll + initApp
+      } catch (err) {
         const el = document.getElementById('login-error');
-        el.textContent = 'Usuário ou senha inválidos';
+        el.textContent = ['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(err.code)
+          ? 'E-mail ou senha inválidos' : err.message;
         el.style.display = 'block';
-        return;
       }
-      S.setSession(user.id, user.login);
-      history.replaceState(null, '', location.pathname);
-      initApp();
     };
   };
 
@@ -254,25 +253,22 @@ PCF.App = (() => {
     document.getElementById('reg-cpf').oninput = function() { this.value = H.formatarCPF(this.value); };
     document.getElementById('reg-tel').oninput = function() { this.value = H.formatarTelefone(this.value); };
 
-    document.getElementById('register-form').onsubmit = (e) => {
+    document.getElementById('register-form').onsubmit = async (e) => {
       e.preventDefault();
       const errEl = document.getElementById('reg-error');
       const p1 = document.getElementById('reg-pass').value;
       const p2 = document.getElementById('reg-pass2').value;
       if (p1 !== p2) { errEl.textContent = 'As senhas não coincidem'; errEl.style.display = 'block'; return; }
-      const res = S.createUser({
+      const res = await S.registerSelf({
         nome: document.getElementById('reg-nome').value.trim(),
         cpf: document.getElementById('reg-cpf').value.trim(),
         email: document.getElementById('reg-email').value.trim(),
         telefone: document.getElementById('reg-tel').value.trim(),
         dataNascimento: document.getElementById('reg-nasc').value,
         login: document.getElementById('reg-login').value.trim(),
-        senhaHash: H.hashSenha(p1),
-      });
+      }, p1);
       if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
-      S.setSession(res.user.id, res.user.login);
-      history.replaceState(null, '', location.pathname);
-      initApp();
+      // onAuthStateChanged trata loadAll + initApp automaticamente
     };
   };
 
@@ -506,16 +502,18 @@ PCF.App = (() => {
       const passNew2 = document.getElementById('mp-pass-new2').value;
       if (!nome) { errEl.textContent = 'Nome é obrigatório'; errEl.style.display = 'block'; return; }
       const updates = { nome, email, telefone: tel, dataNascimento: nasc };
-      if (passNew || passAtual) {
-        if (H.hashSenha(passAtual) !== user.senhaHash) { errEl.textContent = 'Senha atual incorreta'; errEl.style.display = 'block'; return; }
-        if (passNew.length < 4) { errEl.textContent = 'Nova senha deve ter ao menos 4 caracteres'; errEl.style.display = 'block'; return; }
+      if (passNew) {
+        if (passNew.length < 6) { errEl.textContent = 'Nova senha deve ter ao menos 6 caracteres'; errEl.style.display = 'block'; return; }
         if (passNew !== passNew2) { errEl.textContent = 'As senhas não coincidem'; errEl.style.display = 'block'; return; }
-        updates.senhaHash = H.hashSenha(passNew);
+        updates.newPassword = passNew;
       }
-      S.updateUser({ ...user, ...updates });
-      const nameEl = document.querySelector('.user-name');
-      if (nameEl) nameEl.textContent = nome;
-      close();
+      S.updateUser(session.userId, updates).then(() => {
+        const nameEl = document.querySelector('.user-name');
+        if (nameEl) nameEl.textContent = nome;
+        close();
+      }).catch(err => {
+        errEl.textContent = err.message || 'Erro ao salvar'; errEl.style.display = 'block';
+      });
     };
   };
 
@@ -552,7 +550,8 @@ PCF.App = (() => {
         <button id="btn-home-back" class="btn-home-back" title="Tela Inicial"><i data-lucide="home"></i></button>
         <main class="main-content" id="main-content"></main>
       </div>`;
-    document.getElementById('btn-logout').onclick = () => { S.clearSession(); renderLogin(); };
+    document.getElementById('btn-logout').onclick = () => { S.clearSession(); };
+    // onAuthStateChanged cuidará do renderLogin após signOut
     const gearBtn = document.getElementById('btn-meu-perfil');
     if (gearBtn) gearBtn.onclick = openMeuPerfil;
     document.getElementById('btn-home-back').onclick = () => { location.hash = '#home'; };
@@ -667,23 +666,19 @@ PCF.App = (() => {
 
   const boot = () => {
     applyTheme();
-    // Cria usuário Administrador inicial se ainda não existir
-    if (!S.getUserByLogin('Admin')) {
-      S.createUser({
-        nome: 'Administrador',
-        cpf: '',
-        email: '',
-        telefone: '',
-        dataNascimento: '',
-        login: 'Admin',
-        senhaHash: H.hashSenha('Silva01'),
-        isAdmin: true,
-      });
-    }
-    // Garante que qualquer sessão antiga salva no localStorage seja removida
-    try { localStorage.removeItem('pcf_session'); } catch {}
-    if (S.getSession()) initApp();
-    else renderLogin();
+    document.getElementById('app').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px"><div class="spinner"></div><p>Carregando...</p></div>`;
+    PCF.Firebase.auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          await PCF.Store.loadAll(firebaseUser.uid);
+          initApp();
+        } catch (err) {
+          document.getElementById('app').innerHTML = `<div style="padding:2rem"><div class="alert alert-error"><strong>Erro ao carregar dados.</strong><br>${err.message}</div></div>`;
+        }
+      } else {
+        renderLogin();
+      }
+    });
   };
 
   return { boot, route, registerChart, destroyCharts, applyTheme };

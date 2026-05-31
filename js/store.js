@@ -1,105 +1,187 @@
 /* ========================================================
    PCF - Personal Financial Control
-   store.js — Camada de persistência (localStorage) multi-usuário
+   store.js — Camada de persistência: Firebase Firestore + Firebase Auth
    ======================================================== */
 window.PCF = window.PCF || {};
 
 PCF.Store = (() => {
-  /* ---------- helpers internos ---------- */
-  const _memory = {};
-  const _storageAvailable = (() => {
-    try {
-      const testKey = '__pcf_storage_test__';
-      localStorage.setItem(testKey, '1');
-      localStorage.removeItem(testKey);
-      return true;
-    } catch {
-      return false;
-    }
-  })();
+  /* ---------- Referências Firebase ---------- */
+  const _auth = () => PCF.Firebase.auth;
+  const _db   = () => PCF.Firebase.db;
 
-  const _get = (key) => {
-    if (_storageAvailable) {
-      try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+  /* ---------- Cache em memória (mantém API síncrona das páginas) ---------- */
+  const _cache = {};
+
+  /* ---------- Colunas de dados por usuário ---------- */
+  const DATA_COLS = [
+    'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
+    'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
+    'rodavida_reg', 'rodavida_config'
+  ];
+
+  /* ---------- Resolve chave de cache → {col, uid} ---------- */
+  const _parseKey = (key) => {
+    for (const col of DATA_COLS) {
+      const prefix = `pcf_${col}_`;
+      if (key.startsWith(prefix)) {
+        const uid = key.slice(prefix.length);
+        if (uid) return { col, uid };
+      }
     }
-    try { return JSON.parse(_memory[key]); } catch { return null; }
+    return null;
+  };
+
+  /* ---------- Primitivos: cache síncrono + Firestore assíncrono ---------- */
+  const _get = (key) => {
+    const v = _cache[key];
+    return v !== undefined ? v : null;
   };
 
   const _set = (key, val) => {
-    const payload = JSON.stringify(val);
-    if (_storageAvailable) {
-      try { localStorage.setItem(key, payload); return true; } catch { }
+    _cache[key] = val;
+    const parsed = _parseKey(key);
+    if (parsed && _auth().currentUser) {
+      _db().collection('users').doc(parsed.uid).collection('data').doc(parsed.col)
+        .set({ value: val })
+        .catch(err => console.warn('[PCF] Firestore write:', parsed.col, err.message));
     }
-    _memory[key] = payload;
-    return false;
   };
 
   const _del = (key) => {
-    if (_storageAvailable) {
-      try { localStorage.removeItem(key); return true; } catch { }
+    delete _cache[key];
+    const parsed = _parseKey(key);
+    if (parsed) {
+      _db().collection('users').doc(parsed.uid).collection('data').doc(parsed.col)
+        .delete().catch(() => {});
     }
-    delete _memory[key];
-    return false;
   };
 
   const _uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
   /* ---------- USERS ---------- */
-  const getUsers = () => _get('pcf_users') || [];
-  const saveUsers = (u) => _set('pcf_users', u);
+  const getUsers = () => _cache['pcf_users'] || [];
+  const saveUsers = () => {}; // noop — gerenciado individualmente no Firestore
   const getUserById = (id) => getUsers().find(u => u.id === id);
   const getUserByLogin = (login) => getUsers().find(u => u.login === login);
 
-  const createUser = (data) => {
-    const users = getUsers();
-    if (users.some(u => u.login === data.login)) return { ok: false, msg: 'Login já existe' };
-    if (data.cpf && users.some(u => u.cpf === data.cpf)) return { ok: false, msg: 'CPF já cadastrado' };
-    const user = { id: _uid(), dataCadastro: new Date().toISOString().split('T')[0], ...data };
-    users.push(user);
-    saveUsers(users);
-    _seedDefaults(user.id);
-    return { ok: true, user };
+  /* ---- loadAll: popula cache com dados do Firestore após login ---- */
+  const loadAll = async (uid) => {
+    const profileSnap = await _db().collection('users').doc(uid).get();
+    const profile = profileSnap.exists ? profileSnap.data() : {};
+    if (profile.isAdmin) {
+      const snap = await _db().collection('users').get();
+      const users = [];
+      snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+      _cache['pcf_users'] = users;
+    } else {
+      _cache['pcf_users'] = [{ id: uid, ...profile }];
+    }
+    const snaps = await Promise.all(
+      DATA_COLS.map(col => _db().collection('users').doc(uid).collection('data').doc(col).get())
+    );
+    DATA_COLS.forEach((col, i) => {
+      _cache[`pcf_${col}_${uid}`] = snaps[i].exists ? snaps[i].data().value : null;
+    });
+    _seedDefaults(uid);
   };
 
-  const updateUser = (id, data) => {
+  /* ---- registerSelf: auto-cadastro via Firebase Auth ---- */
+  const registerSelf = async (data, password) => {
+    try {
+      const cred = await _auth().createUserWithEmailAndPassword(data.email, password);
+      const snap  = await _db().collection('users').limit(2).get();
+      const profile = {
+        nome: data.nome || '', cpf: data.cpf || '', email: data.email,
+        telefone: data.telefone || '', dataNascimento: data.dataNascimento || '',
+        login: data.login || data.email,
+        isAdmin: snap.size <= 1,
+        dataCadastro: new Date().toISOString().split('T')[0],
+      };
+      await _db().collection('users').doc(cred.user.uid).set(profile);
+      return { ok: true };
+    } catch (err) {
+      if (err.code === 'auth/email-already-in-use') return { ok: false, msg: 'E-mail já cadastrado' };
+      if (err.code === 'auth/weak-password')        return { ok: false, msg: 'Senha fraca (mín. 6 caracteres)' };
+      return { ok: false, msg: err.message };
+    }
+  };
+
+  /* ---- createUser: admin cria usuário via app Firebase secundário ---- */
+  const createUser = async (data, password) => {
+    if (!data.email) return { ok: false, msg: 'E-mail é obrigatório' };
+    if (!password)   return { ok: false, msg: 'Senha é obrigatória' };
+    const users = getUsers();
+    if (data.login && users.some(u => u.login === data.login)) return { ok: false, msg: 'Login já existe' };
+    if (data.cpf   && users.some(u => u.cpf   === data.cpf))   return { ok: false, msg: 'CPF já cadastrado' };
+    try {
+      const secApp  = firebase.initializeApp(PCF.Firebase.config, 'pcf_sec_' + Date.now());
+      const secAuth = firebase.auth(secApp);
+      let cred;
+      try   { cred = await secAuth.createUserWithEmailAndPassword(data.email, password); }
+      finally { await secAuth.signOut().catch(() => {}); await secApp.delete().catch(() => {}); }
+      const profile = {
+        nome: data.nome || '', cpf: data.cpf || '', email: data.email,
+        telefone: data.telefone || '', dataNascimento: data.dataNascimento || '',
+        login: data.login || data.email,
+        isAdmin: !!data.isAdmin,
+        dataCadastro: new Date().toISOString().split('T')[0],
+      };
+      await _db().collection('users').doc(cred.user.uid).set(profile);
+      DATA_COLS.forEach(col => { _cache[`pcf_${col}_${cred.user.uid}`] = null; });
+      _seedDefaults(cred.user.uid);
+      const user = { id: cred.user.uid, ...profile };
+      _cache['pcf_users'] = [...getUsers(), user];
+      return { ok: true, user };
+    } catch (err) {
+      if (err.code === 'auth/email-already-in-use') return { ok: false, msg: 'E-mail já cadastrado' };
+      if (err.code === 'auth/weak-password')        return { ok: false, msg: 'Senha fraca (mín. 6 caracteres)' };
+      return { ok: false, msg: err.message };
+    }
+  };
+
+  const updateUser = async (id, data) => {
     const users = getUsers();
     const idx = users.findIndex(u => u.id === id);
     if (idx === -1) return { ok: false, msg: 'Usuário não encontrado' };
-    if (data.login && data.login !== users[idx].login && users.some(u => u.login === data.login)) return { ok: false, msg: 'Login já existe' };
-    users[idx] = { ...users[idx], ...data };
-    saveUsers(users);
+    if (data.login && data.login !== users[idx].login && users.some(u => u.login === data.login))
+      return { ok: false, msg: 'Login já existe' };
+    const { newPassword, senhaHash, ...profileData } = data;
+    users[idx] = { ...users[idx], ...profileData };
+    _cache['pcf_users'] = users;
+    await _db().collection('users').doc(id).update(profileData);
+    if (newPassword && id === currentUserId()) {
+      try { await _auth().currentUser.updatePassword(newPassword); }
+      catch (e) { console.warn('[PCF] Falha ao alterar senha:', e.message); }
+    }
     return { ok: true };
   };
 
-  const deleteUser = (id) => {
-    const users = getUsers().filter(u => u.id !== id);
-    saveUsers(users);
-    // limpa dados do usuário
-    ['transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda', 'habitos', 'reg_habitos', 'frases', 'diario', 'rodavida_reg', 'rodavida_config', 'diario_tabs', 'contatos'].forEach(k => _del(`pcf_${k}_${id}`));
+  const deleteUser = async (id) => {
+    await _db().collection('users').doc(id).delete();
+    await Promise.all(DATA_COLS.map(col =>
+      _db().collection('users').doc(id).collection('data').doc(col).delete().catch(() => {})
+    ));
+    _cache['pcf_users'] = getUsers().filter(u => u.id !== id);
+    DATA_COLS.forEach(col => { delete _cache[`pcf_${col}_${id}`]; });
   };
 
-  /* ---------- SESSÃO ----------
-     Usa sessionStorage para que a sessão expire ao fechar a aba/navegador,
-     garantindo que o acesso sempre exija usuário e senha em nova abertura.
-  ------------------------------------------ */
+  /* ---------- SESSÃO (gerenciada pelo Firebase Auth) ---------- */
   const getSession = () => {
-    try { return JSON.parse(sessionStorage.getItem('pcf_session')); } catch { return null; }
+    const u = _auth().currentUser;
+    if (!u) return null;
+    const profile = getUserById(u.uid) || {};
+    return { userId: u.uid, login: profile.login || u.email };
   };
-  const setSession = (userId, login) => {
-    try { localStorage.removeItem('pcf_session'); } catch {} // limpa sessão antiga do localStorage
-    try { sessionStorage.setItem('pcf_session', JSON.stringify({ userId, login })); } catch {}
-    _seedDefaults(userId);
-  };
+  const setSession = () => {}; // noop — Firebase Auth gerencia a sessão
   const clearSession = () => {
-    try { sessionStorage.removeItem('pcf_session'); } catch {}
-    try { localStorage.removeItem('pcf_session'); } catch {}
+    Object.keys(_cache).forEach(k => delete _cache[k]);
+    return _auth().signOut();
   };
-  const currentUserId = () => { const s = getSession(); return s ? s.userId : null; };
+  const currentUserId = () => _auth().currentUser?.uid || null;
   const currentUserIsAdmin = () => {
     const uid = currentUserId();
     if (!uid) return false;
-    const u = getUserById(uid);
-    return !!(u && u.isAdmin);
+    return !!(getUserById(uid)?.isAdmin);
   };
 
   /* ---------- TRANSAÇÕES ---------- */
@@ -1631,6 +1713,7 @@ PCF.Store = (() => {
   const importCategorias = (data) => { _set(_ckU(), data); };
 
   return {
+    loadAll, registerSelf,
     getUsers, saveUsers, getUserById, getUserByLogin, createUser, updateUser, deleteUser,
     getSession, setSession, clearSession, currentUserId, currentUserIsAdmin,
     getTransacoes, saveTransacoes, addTransacao, updateTransacao, deleteTransacao,

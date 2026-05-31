@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Verifica se o usuário autenticado é administrador
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Perfis de usuário
+    match /users/{userId} {
+      // Leitura de perfil próprio: qualquer autenticado
+      // Leitura de outros perfis: apenas admin
+      allow get:  if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow list: if request.auth != null && isAdmin();
+
+      // Criação: pelo próprio (auto-registro) ou por admin
+      allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+
+      // Atualização/exclusão: próprio ou admin
+      allow update, delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+
+      // Subcoleções de dados
+      match /data/{document} {
+        allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      }
+    }
+  }
+}
