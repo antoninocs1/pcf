@@ -482,11 +482,20 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .cards-grid { grid-template-columns: 1fr 1fr; }
   .auth-card { padding: 28px 20px; }
   .ciclo-middle { flex-direction: column; }
+  /* Modal responsivo */
+  .modal { padding: 20px 16px; }
+  .modal-actions { flex-wrap: wrap; }
+  .modal-actions .btn { flex: 1 1 auto; min-width: 100px; }
 }
 
 @media (max-width: 480px) {
   .cards-grid { grid-template-columns: 1fr; }
   html { font-size: 13px; }
+  /* Modal como bottom-sheet em telas muito pequenas */
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal { border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
+  .modal.modal-lg { max-width: 100%; }
+  .modal-actions .btn { flex: 1 1 100%; }
 }
 
 /* ==================== FAROL FINANCEIRO ==================== */

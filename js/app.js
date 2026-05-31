@@ -260,12 +260,11 @@ PCF.App = (() => {
           <div class="form-group"><label>CPF</label><input type="text" id="reg-cpf" placeholder="000.000.000-00" required></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>E-mail</label><input type="email" id="reg-email" required></div>
+          <div class="form-group"><label>E-mail</label><input type="email" id="reg-email" required autocomplete="email"></div>
           <div class="form-group"><label>Telefone</label><input type="text" id="reg-tel" placeholder="(00) 00000-0000"></div>
         </div>
-        <div class="form-row">
-          <div class="form-group"><label>Data de Nascimento</label><input type="date" id="reg-nasc" required></div>
-          <div class="form-group"><label>Usuário (Login)</label><input type="text" id="reg-login" required autocomplete="username"></div>
+        <div class="form-group">
+          <label>Data de Nascimento</label><input type="date" id="reg-nasc" required>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Senha</label><input type="password" id="reg-pass" required minlength="4" autocomplete="new-password"></div>
@@ -284,13 +283,14 @@ PCF.App = (() => {
       const p1 = document.getElementById('reg-pass').value;
       const p2 = document.getElementById('reg-pass2').value;
       if (p1 !== p2) { errEl.textContent = 'As senhas não coincidem'; errEl.style.display = 'block'; return; }
+      const regEmail = document.getElementById('reg-email').value.trim();
       const res = await S.registerSelf({
         nome: document.getElementById('reg-nome').value.trim(),
         cpf: document.getElementById('reg-cpf').value.trim(),
-        email: document.getElementById('reg-email').value.trim(),
+        email: regEmail,
         telefone: document.getElementById('reg-tel').value.trim(),
         dataNascimento: document.getElementById('reg-nasc').value,
-        login: document.getElementById('reg-login').value.trim(),
+        login: regEmail,
       }, p1);
       if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
       // onAuthStateChanged trata loadAll + initApp automaticamente

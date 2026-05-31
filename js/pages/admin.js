@@ -300,7 +300,7 @@ PCF.Pages = PCF.Pages || {};
       const users = term
         ? todos.filter(u =>
             (u.nome  && u.nome.toLowerCase().includes(term)) ||
-            (u.login && u.login.toLowerCase().includes(term))
+            (u.email && u.email.toLowerCase().includes(term))
           )
         : todos;
       container.innerHTML = `
@@ -308,18 +308,18 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>Gerenciar Usuários</h2>
             <div class="contatos-search-wrap">
-              <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou login…" value="${H.esc(_searchTerm)}">
+              <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou e-mail…" value="${H.esc(_searchTerm)}">
               <button id="btn-usuarios-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-usuarios-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
             <button id="btn-add-user" class="btn btn-primary">+ Novo Usuário</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Login</th><th>Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
-            <tbody>${users.length === 0 ? `<tr><td colspan="9" class="empty-text">${term ? 'Nenhum usuário encontrado para "' + H.esc(term) + '"' : 'Nenhum usuário'}</td></tr>` :
+            <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
+            <tbody>${users.length === 0 ? `<tr><td colspan="8" class="empty-text">${term ? 'Nenhum usuário encontrado para "' + H.esc(term) + '"' : 'Nenhum usuário'}</td></tr>` :
               users.map(u => `<tr>
                 <td>${H.esc(u.nome)}</td><td>${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td>${H.esc(u.telefone)}</td>
-                <td>${H.formatarData(u.dataNascimento)}</td><td>${H.esc(u.login)}</td><td>${H.formatarData(u.dataCadastro)}</td>
+                <td>${H.formatarData(u.dataNascimento)}</td><td>${H.formatarData(u.dataCadastro)}</td>
                 <td>${u.isAdmin ? '<span class="badge-admin">👑 Admin</span>' : '<span class="badge-padrao">Padrão</span>'}</td>
                 <td>
                   <button class="btn-icon" data-edit="${u.id}" title="Editar"><i data-lucide="pencil"></i></button>
@@ -367,9 +367,8 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group"><label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required></div>
               <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
             </div>
-            <div class="form-row">
-              <div class="form-group"><label>Data de Nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
-              <div class="form-group"><label>Login</label><input type="text" id="um-login" value="${H.esc(user?.login || '')}" required></div>
+            <div class="form-group">
+              <label>Data de Nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}">
             </div>
             <div class="form-row">
               <div class="form-group"><label>${isEdit ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}</label><input type="password" id="um-pass" ${isEdit ? '' : 'required'} minlength="4"></div>
@@ -408,7 +407,7 @@ PCF.Pages = PCF.Pages || {};
           email: document.getElementById('um-email').value.trim(),
           telefone: document.getElementById('um-tel').value.trim(),
           dataNascimento: document.getElementById('um-nasc').value,
-          login: document.getElementById('um-login').value.trim(),
+          login: document.getElementById('um-email').value.trim(),
         };
         if (p1) data.newPassword = p1;
         if (S.currentUserIsAdmin()) {
