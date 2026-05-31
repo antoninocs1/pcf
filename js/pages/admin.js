@@ -292,17 +292,31 @@ PCF.Pages = PCF.Pages || {};
 
   /* ==================== USUÁRIOS CRUD ==================== */
   PCF.Pages.usuarios = (container) => {
+    let _searchTerm = '';
+
     const render = () => {
-      const users = S.getUsers();
+      const todos = S.getUsers();
+      const term = _searchTerm.trim().toLowerCase();
+      const users = term
+        ? todos.filter(u =>
+            (u.nome  && u.nome.toLowerCase().includes(term)) ||
+            (u.login && u.login.toLowerCase().includes(term))
+          )
+        : todos;
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
             <h2>Gerenciar Usuários</h2>
+            <div class="contatos-search-wrap">
+              <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou login…" value="${H.esc(_searchTerm)}">
+              <button id="btn-usuarios-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
+              ${_searchTerm ? `<button id="btn-usuarios-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
+            </div>
             <button id="btn-add-user" class="btn btn-primary">+ Novo Usuário</button>
           </div>
           <div class="table-container"><table class="table">
             <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Login</th><th>Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
-            <tbody>${users.length === 0 ? '<tr><td colspan="9" class="empty-text">Nenhum usuário</td></tr>' :
+            <tbody>${users.length === 0 ? `<tr><td colspan="9" class="empty-text">${term ? 'Nenhum usuário encontrado para "' + H.esc(term) + '"' : 'Nenhum usuário'}</td></tr>` :
               users.map(u => `<tr>
                 <td>${H.esc(u.nome)}</td><td>${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td>${H.esc(u.telefone)}</td>
                 <td>${H.formatarData(u.dataNascimento)}</td><td>${H.esc(u.login)}</td><td>${H.formatarData(u.dataCadastro)}</td>
@@ -316,10 +330,18 @@ PCF.Pages = PCF.Pages || {};
           </table></div>
         </div>`;
 
+      const searchInput = document.getElementById('usuarios-search');
+      const doSearch = () => { _searchTerm = searchInput.value; render(); };
+      document.getElementById('btn-usuarios-search').onclick = doSearch;
+      searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+      const clearBtn = document.getElementById('btn-usuarios-clear');
+      if (clearBtn) clearBtn.onclick = () => { _searchTerm = ''; render(); };
+
       document.getElementById('btn-add-user').onclick = () => showUserModal();
       container.onclick = (e) => {
+        if (e.target.closest('#btn-usuarios-search') || e.target.closest('#btn-usuarios-clear') || e.target.closest('#btn-add-user')) return;
         const edit = e.target.closest('[data-edit]');
-        if (edit) { const u = users.find(u => u.id === edit.dataset.edit); if (u) showUserModal(u); }
+        if (edit) { const u = todos.find(u => u.id === edit.dataset.edit); if (u) showUserModal(u); }
         const del = e.target.closest('[data-del]');
         if (del) {
           const uid = del.dataset.del;
@@ -630,17 +652,26 @@ PCF.Pages = PCF.Pages || {};
 
   /* ==================== CONTATOS PESSOAIS ==================== */
   PCF.Pages.contatos = (container) => {
+    let _searchTerm = '';
+
     const render = () => {
-      const contatos = S.getContatos();
+      const todos = S.getContatos();
+      const term = _searchTerm.trim().toLowerCase();
+      const contatos = term ? todos.filter(c => c.nome && c.nome.toLowerCase().includes(term)) : todos;
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
             <h2>Contatos Pessoais</h2>
+            <div class="contatos-search-wrap">
+              <input type="text" id="contatos-search" class="input-search" placeholder="Buscar pelo nome…" value="${H.esc(_searchTerm)}">
+              <button id="btn-contatos-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
+              ${_searchTerm ? `<button id="btn-contatos-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
+            </div>
             <button id="btn-add-contato" class="btn btn-primary">+ Novo Contato</button>
           </div>
           <div class="table-container"><table class="table">
             <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Cadastro</th><th style="width:100px">Ações</th></tr></thead>
-            <tbody>${contatos.length === 0 ? '<tr><td colspan="7" class="empty-text">Nenhum contato cadastrado</td></tr>' :
+            <tbody>${contatos.length === 0 ? `<tr><td colspan="7" class="empty-text">${term ? 'Nenhum contato encontrado para "' + H.esc(term) + '"' : 'Nenhum contato cadastrado'}</td></tr>` :
               contatos.map(c => `<tr>
                 <td>${H.esc(c.nome)}</td><td>${H.esc(c.cpf)}</td><td>${H.esc(c.email)}</td><td>${H.esc(c.telefone)}</td>
                 <td>${H.formatarData(c.dataNascimento)}</td><td>${H.formatarData(c.dataCadastro)}</td>
@@ -653,10 +684,18 @@ PCF.Pages = PCF.Pages || {};
           </table></div>
         </div>`;
 
+      const searchInput = document.getElementById('contatos-search');
+      const doSearch = () => { _searchTerm = searchInput.value; render(); };
+      document.getElementById('btn-contatos-search').onclick = doSearch;
+      searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+      const clearBtn = document.getElementById('btn-contatos-clear');
+      if (clearBtn) clearBtn.onclick = () => { _searchTerm = ''; render(); };
+
       document.getElementById('btn-add-contato').onclick = () => showContatoModal();
       container.onclick = (e) => {
+        if (e.target.closest('#btn-contatos-search') || e.target.closest('#btn-contatos-clear') || e.target.closest('#btn-add-contato')) return;
         const edit = e.target.closest('[data-edit]');
-        if (edit) { const ct = contatos.find(c => c.id === edit.dataset.edit); if (ct) showContatoModal(ct); }
+        if (edit) { const ct = todos.find(c => c.id === edit.dataset.edit); if (ct) showContatoModal(ct); }
         const del = e.target.closest('[data-del]');
         if (del && confirm('Remover este contato?')) { S.deleteContato(del.dataset.del); render(); }
       };

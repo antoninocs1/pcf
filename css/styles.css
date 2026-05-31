@@ -130,6 +130,9 @@ a:hover { text-decoration: underline; }
 .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-right: 56px; }
 .page-header h2 { font-size: 1.5rem; font-weight: 600; }
 .page-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.contatos-search-wrap { display: flex; align-items: center; gap: 6px; }
+.contatos-search-wrap .input-search { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--text); font-size: .92rem; min-width: 200px; outline: none; transition: border-color .2s; }
+.contatos-search-wrap .input-search:focus { border-color: var(--primary); }
 .subtitle { color: var(--text-muted); margin-bottom: 16px; font-size: .92rem; }
 .text-muted { color: var(--text-muted); font-size: .85rem; }
 

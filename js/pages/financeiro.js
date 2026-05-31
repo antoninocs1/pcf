@@ -174,6 +174,7 @@ PCF.Pages = PCF.Pages || {};
     const render = () => {
       const trans = S.getTransacoes();
       const categorias = [...new Set(trans.map(t => t.categoria))].sort();
+      const anos = [...new Set(trans.map(t => t.ano).filter(Boolean))].sort((a, b) => b - a);
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
@@ -183,6 +184,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="filters">
             <select id="base-tipo"><option value="">Todos os Tipos</option><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option><option value="INVESTIMENTO">Investimento</option></select>
             <select id="base-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+            <select id="base-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
             <select id="base-cat"><option value="">Todas as Categorias</option>${categorias.map(c => `<option value="${H.esc(c)}">${H.esc(c)}</option>`).join('')}</select>
           </div>
           <div class="table-container"><table class="table">
@@ -194,10 +196,12 @@ PCF.Pages = PCF.Pages || {};
       const filterAndRender = () => {
         const tipo = document.getElementById('base-tipo').value;
         const mes = document.getElementById('base-mes').value;
+        const ano = document.getElementById('base-ano').value;
         const cat = document.getElementById('base-cat').value;
         let f = trans;
         if (tipo) f = f.filter(t => t.tipoOperacao === tipo);
         if (mes) f = f.filter(t => t.mes === mes);
+        if (ano) f = f.filter(t => String(t.ano) === ano);
         if (cat) f = f.filter(t => t.categoria === cat);
         f.sort((a, b) => a.data.localeCompare(b.data));
         document.getElementById('base-subtotal').textContent = 'Subtotal: ' + H.formatarMoeda(f.reduce((s, t) => s + t.valor, 0));
@@ -212,7 +216,7 @@ PCF.Pages = PCF.Pages || {};
             </tr>`).join('');
       };
 
-      ['base-tipo', 'base-mes', 'base-cat'].forEach(id => document.getElementById(id).onchange = filterAndRender);
+      ['base-tipo', 'base-mes', 'base-ano', 'base-cat'].forEach(id => document.getElementById(id).onchange = filterAndRender);
       container.onclick = (e) => {
         const editBtn = e.target.closest('[data-edit]');
         if (editBtn) { const t = trans.find(t => t.id === editBtn.dataset.edit); if (t) showEditTransModal(t, render); return; }
