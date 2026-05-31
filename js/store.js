@@ -88,16 +88,25 @@ PCF.Store = (() => {
   /* ---- registerSelf: auto-cadastro via Firebase Auth ---- */
   const registerSelf = async (data, password) => {
     try {
+      // Verifica se já existe algum usuário via doc público — sem exigir permissão de admin
+      // (substituiu list() que bloqueava antes do documento do usuário existir)
+      const bootstrapSnap = await _db().collection('meta').doc('bootstrap').get();
+      const isFirst = !bootstrapSnap.exists;
+
       const cred = await _auth().createUserWithEmailAndPassword(data.email, password);
-      const snap  = await _db().collection('users').limit(2).get();
       const profile = {
         nome: data.nome || '', cpf: data.cpf || '', email: data.email,
         telefone: data.telefone || '', dataNascimento: data.dataNascimento || '',
         login: data.login || data.email,
-        isAdmin: snap.size <= 1,
+        isAdmin: isFirst,
         dataCadastro: new Date().toISOString().split('T')[0],
       };
+      // O create é permitido pela regra request.auth.uid == userId (usuário recém autenticado)
       await _db().collection('users').doc(cred.user.uid).set(profile);
+      // Marca que já existe pelo menos um usuário
+      if (isFirst) {
+        await _db().collection('meta').doc('bootstrap').set({ createdAt: new Date().toISOString() }).catch(() => {});
+      }
       return { ok: true };
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') return { ok: false, msg: 'E-mail já cadastrado' };
