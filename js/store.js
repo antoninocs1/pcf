@@ -66,7 +66,13 @@ PCF.Store = (() => {
 
   /* ---- loadAll: popula cache com dados do Firestore após login ---- */
   const loadAll = async (uid) => {
-    const profileSnap = await _db().collection('users').doc(uid).get();
+    let profileSnap = await _db().collection('users').doc(uid).get();
+    // Retry único: novo usuário (Google ou e-mail) pode ter race condition entre
+    // a criação do perfil e o disparo do onAuthStateChanged
+    if (!profileSnap.exists) {
+      await new Promise(r => setTimeout(r, 1400));
+      profileSnap = await _db().collection('users').doc(uid).get();
+    }
     const profile = profileSnap.exists ? profileSnap.data() : {};
     if (profile.isAdmin) {
       const snap = await _db().collection('users').get();
@@ -83,6 +89,38 @@ PCF.Store = (() => {
       _cache[`pcf_${col}_${uid}`] = snaps[i].exists ? snaps[i].data().value : null;
     });
     _seedDefaults(uid);
+  };
+
+  /* ---- loginWithGoogle: entrar ou cadastrar via conta Google ---- */
+  const loginWithGoogle = async () => {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await _auth().signInWithPopup(provider);
+      // Cria perfil no Firestore apenas se for o primeiro acesso do usuário
+      if (result.additionalUserInfo.isNewUser) {
+        const bootstrapSnap = await _db().collection('meta').doc('bootstrap').get();
+        const isFirst = !bootstrapSnap.exists;
+        const fbUser = result.user;
+        const profile = {
+          nome: fbUser.displayName || '',
+          email: fbUser.email || '',
+          cpf: '', telefone: '', dataNascimento: '',
+          login: fbUser.email || '',
+          isAdmin: isFirst,
+          dataCadastro: new Date().toISOString().split('T')[0],
+        };
+        await _db().collection('users').doc(fbUser.uid).set(profile);
+        if (isFirst) {
+          await _db().collection('meta').doc('bootstrap')
+            .set({ createdAt: new Date().toISOString() }).catch(() => {});
+        }
+      }
+      return { ok: true };
+    } catch (err) {
+      if (['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(err.code))
+        return { ok: false, msg: '' }; // usuário fechou o popup — sem mensagem de erro
+      return { ok: false, msg: err.message };
+    }
   };
 
   /* ---- registerSelf: auto-cadastro via Firebase Auth ---- */
@@ -1724,7 +1762,7 @@ PCF.Store = (() => {
   const importCategorias = (data) => { _set(_ckU(), data); };
 
   return {
-    loadAll, registerSelf,
+    loadAll, registerSelf, loginWithGoogle,
     getUsers, saveUsers, getUserById, getUserByLogin, createUser, updateUser, deleteUser,
     getSession, setSession, clearSession, currentUserId, currentUserIsAdmin,
     getTransacoes, saveTransacoes, addTransacao, updateTransacao, deleteTransacao,

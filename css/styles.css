@@ -56,6 +56,21 @@ a:hover { text-decoration: underline; }
 }
 .auth-tab.active { background: var(--accent); color: #fff; }
 .auth-form { text-align: left; }
+.auth-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 0 10px; color: var(--text-muted); font-size: .82rem;
+}
+.auth-divider::before,
+.auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.btn-google {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: #fff; color: #3c4043; border: 1px solid #dadce0;
+  font-size: .92rem; font-weight: 500; padding: 10px 16px;
+  border-radius: 8px; cursor: pointer; transition: background .15s, box-shadow .15s;
+  width: 100%;
+}
+.btn-google:hover:not(:disabled) { background: #f8f9fa; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+.btn-google:disabled { opacity: .6; cursor: not-allowed; }
 
 /* ==================== LAYOUT ==================== */
 .app-layout { display: flex; min-height: 100vh; }
