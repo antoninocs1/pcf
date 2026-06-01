@@ -491,6 +491,10 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .landing-hero { align-items: flex-start; padding: 80px 12px 32px; }
   .landing-hero .auth-container { padding: 0; width: 100%; }
   .auth-card { padding: 24px 18px; width: 100%; max-width: 100%; box-sizing: border-box; }
+  /* Roda da Vida: empilhar roda acima do formulário */
+  .rv-layout { flex-direction: column; }
+  .rv-wheel-area { width: 100%; align-items: center; }
+  .rv-form-area { width: 100%; min-width: 0; }
 }
 
 @media (max-width: 480px) {
@@ -503,6 +507,26 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .modal { border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; }
   .modal.modal-lg { max-width: 100%; }
   .modal-actions .btn { flex: 1 1 100%; }
+  /* Agenda: formulário em coluna única */
+  .form-grid-agenda { grid-template-columns: 1fr; }
+  .form-grid-agenda .form-group:first-child { grid-column: auto; }
+  /* Botões do relógio: dividem espaço igualmente */
+  .agenda-clock-btns { width: 100%; }
+  .agenda-clock-btns .btn { flex: 1; min-width: 0; }
+  /* Hábitos: reduz indent dos extras para slider não comprimir */
+  .hab-item-extras { padding-left: 8px; }
+  .hab-int-slider-wrap { min-width: 0; flex: 1; }
+  /* Home: relógio menor */
+  .home-clock { font-size: 2rem; letter-spacing: 1px; }
+  .home-banner { padding: 16px 14px; margin-bottom: 18px; }
+  /* Page header: título menor para caber com botão voltar */
+  .page-header { padding-right: 46px; margin-bottom: 14px; }
+  .page-header h2 { font-size: 1.3rem; }
+  /* Roda da Vida: topbar sem padding excessivo */
+  .rv-topbar { padding-right: 46px; }
+  /* Filtros: selects em coluna quando não há espaço */
+  .filters { flex-direction: column; align-items: stretch; }
+  .filters select { width: 100%; min-width: 0; }
 }
 
 /* ==================== FAROL FINANCEIRO ==================== */
