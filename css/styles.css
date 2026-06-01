@@ -481,8 +481,10 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .emocoes-layout { grid-template-columns: 1fr; }
   .cards-grid { grid-template-columns: 1fr 1fr; }
   .ciclo-middle { flex-direction: column; }
-  /* Modal responsivo */
-  .modal { padding: 20px 16px; }
+  /* Modal responsivo: ocupa toda a largura, igual ao formulário de página */
+  .modal-overlay { padding: 8px; align-items: flex-start; padding-top: 60px; }
+  .modal { padding: 20px 16px; width: 100%; max-width: 100%; box-sizing: border-box; }
+  .modal.modal-lg { max-width: 100%; }
   .modal-actions { flex-wrap: wrap; }
   .modal-actions .btn { flex: 1 1 auto; min-width: 100px; }
   /* Landing hero: alinhar ao topo para evitar clipping do card no cadastro */
