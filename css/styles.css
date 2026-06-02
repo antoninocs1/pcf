@@ -495,6 +495,13 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .rv-layout { flex-direction: column; }
   .rv-wheel-area { width: 100%; align-items: center; }
   .rv-form-area { width: 100%; min-width: 0; }
+  /* Page header: recuo à esquerda para não colidir com o botão hamburger fixo */
+  .page-header { padding-left: 54px; }
+  /* Colunas de tabela ocultas no mobile */
+  .col-hide-mobile { display: none !important; }
+  /* Barra de busca ocupa linha própria no mobile */
+  .contatos-search-wrap { flex: 1 1 100%; order: 3; }
+  .contatos-search-wrap .input-search { flex: 1; min-width: 0; width: 100%; }
 }
 
 @media (max-width: 480px) {
