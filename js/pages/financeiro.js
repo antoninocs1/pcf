@@ -188,7 +188,7 @@ PCF.Pages = PCF.Pages || {};
             <select id="base-cat"><option value="">Todas as Categorias</option>${categorias.map(c => `<option value="${H.esc(c)}">${H.esc(c)}</option>`).join('')}</select>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Data</th><th>Dia</th><th>Mês</th><th>Ano</th><th>Tipo</th><th>Categoria</th><th>Subcategoria</th><th>Item</th><th>Valor</th><th>Forma Pgto</th><th>Fixo/Var.</th><th style="width:80px">Ações</th></tr></thead>
+            <thead><tr><th>Data</th><th class="col-hide-mobile">Dia</th><th class="col-hide-mobile">Mês</th><th class="col-hide-mobile">Ano</th><th>Tipo</th><th>Categoria</th><th class="col-hide-mobile">Subcategoria</th><th class="col-hide-mobile">Item</th><th>Valor</th><th class="col-hide-mobile">Forma Pgto</th><th class="col-hide-mobile">Fixo/Var.</th><th style="width:80px">Ações</th></tr></thead>
             <tbody id="base-tbody"></tbody>
           </table></div>
         </div>`;
@@ -208,10 +208,10 @@ PCF.Pages = PCF.Pages || {};
         document.getElementById('base-tbody').innerHTML = f.length === 0
           ? '<tr><td colspan="12" class="empty-text">Nenhuma transação encontrada</td></tr>'
           : f.map(t => `<tr>
-              <td>${H.formatarData(t.data)}</td><td>${t.dia}</td><td>${H.esc(t.mes)}</td><td>${t.ano}</td>
+              <td>${H.formatarData(t.data)}</td><td class="col-hide-mobile">${t.dia}</td><td class="col-hide-mobile">${H.esc(t.mes)}</td><td class="col-hide-mobile">${t.ano}</td>
               <td><span class="tipo-badge ${t.tipoOperacao.toLowerCase()}">${t.tipoOperacao}</span></td>
-              <td>${H.esc(t.categoria)}</td><td>${H.esc(t.subcategoria)}</td><td>${H.esc(t.item)}</td>
-              <td class="valor">${H.formatarMoeda(t.valor)}</td><td>${H.esc(t.formaPagamento)}</td><td>${H.esc(t.tipo)}</td>
+              <td>${H.esc(t.categoria)}</td><td class="col-hide-mobile">${H.esc(t.subcategoria)}</td><td class="col-hide-mobile">${H.esc(t.item)}</td>
+              <td class="valor">${H.formatarMoeda(t.valor)}</td><td class="col-hide-mobile">${H.esc(t.formaPagamento)}</td><td class="col-hide-mobile">${H.esc(t.tipo)}</td>
               <td><button class="btn-icon" data-edit="${t.id}" title="Editar"><i data-lucide="pencil"></i></button><button class="btn-icon btn-danger" data-del="${t.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
             </tr>`).join('');
       };

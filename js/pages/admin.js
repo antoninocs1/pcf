@@ -315,11 +315,11 @@ PCF.Pages = PCF.Pages || {};
             <button id="btn-add-user" class="btn btn-primary">+ Novo Usuário</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
+            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
             <tbody>${users.length === 0 ? `<tr><td colspan="8" class="empty-text">${term ? 'Nenhum usuário encontrado para "' + H.esc(term) + '"' : 'Nenhum usuário'}</td></tr>` :
               users.map(u => `<tr>
-                <td>${H.esc(u.nome)}</td><td>${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td>${H.esc(u.telefone)}</td>
-                <td>${H.formatarData(u.dataNascimento)}</td><td>${H.formatarData(u.dataCadastro)}</td>
+                <td>${H.esc(u.nome)}</td><td class="col-hide-mobile">${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td class="col-hide-mobile">${H.esc(u.telefone)}</td>
+                <td class="col-hide-mobile">${H.formatarData(u.dataNascimento)}</td><td class="col-hide-mobile">${H.formatarData(u.dataCadastro)}</td>
                 <td>${u.isAdmin ? '<span class="badge-admin">👑 Admin</span>' : '<span class="badge-padrao">Padrão</span>'}</td>
                 <td>
                   <button class="btn-icon" data-edit="${u.id}" title="Editar"><i data-lucide="pencil"></i></button>
@@ -668,11 +668,11 @@ PCF.Pages = PCF.Pages || {};
             <button id="btn-add-contato" class="btn btn-primary">+ Novo Contato</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th><th>Cadastro</th><th style="width:100px">Ações</th></tr></thead>
+            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th style="width:100px">Ações</th></tr></thead>
             <tbody>${contatos.length === 0 ? `<tr><td colspan="7" class="empty-text">${term ? 'Nenhum contato encontrado para "' + H.esc(term) + '"' : 'Nenhum contato cadastrado'}</td></tr>` :
               contatos.map(c => `<tr>
-                <td>${H.esc(c.nome)}</td><td>${H.esc(c.cpf)}</td><td>${H.esc(c.email)}</td><td>${H.esc(c.telefone)}</td>
-                <td>${H.formatarData(c.dataNascimento)}</td><td>${H.formatarData(c.dataCadastro)}</td>
+                <td>${H.esc(c.nome)}</td><td class="col-hide-mobile">${H.esc(c.cpf)}</td><td>${H.esc(c.email)}</td><td class="col-hide-mobile">${H.esc(c.telefone)}</td>
+                <td class="col-hide-mobile">${H.formatarData(c.dataNascimento)}</td><td class="col-hide-mobile">${H.formatarData(c.dataCadastro)}</td>
                 <td>
                   <button class="btn-icon" data-edit="${c.id}" title="Editar"><i data-lucide="pencil"></i></button>
                   <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover"><i data-lucide="trash-2"></i></button>
@@ -1009,17 +1009,17 @@ PCF.Pages = PCF.Pages || {};
           ${emocoes.length === 0 ? '<p class="empty-text">Nenhum registro encontrado</p>' : `
           <div class="table-wrapper">
             <table class="table">
-              <thead><tr><th>Data</th><th>Hora</th><th>Emoção Principal</th><th>Média / Inferior</th><th>Intensidade</th><th>Situação</th><th style="width:90px">Ações</th></tr></thead>
+              <thead><tr><th>Data</th><th class="col-hide-mobile">Hora</th><th>Emoção Principal</th><th class="col-hide-mobile">Média / Inferior</th><th class="col-hide-mobile">Intensidade</th><th class="col-hide-mobile">Situação</th><th style="width:90px">Ações</th></tr></thead>
               <tbody>
                 ${emocoes.map(em => {
                   const cor = getCorSup(em.emocaoSuperior);
                   return `<tr>
                     <td>${_fmtDate(em.data)}</td>
-                    <td>${em.hora || '—'}</td>
+                    <td class="col-hide-mobile">${em.hora || '—'}</td>
                     <td><span class="chip-small" style="background:${cor}22;border-color:${cor}">${H.esc(em.emocaoSuperior || '—')}</span></td>
-                    <td>${em.emocaoMedia ? H.esc(em.emocaoMedia) : ''}${em.emocaoInferior ? ' › ' + H.esc(em.emocaoInferior) : ''}</td>
-                    <td>${em.intensidade || '—'}/10</td>
-                    <td>${H.esc((em.situacao || '').slice(0, 40))}${(em.situacao || '').length > 40 ? '…' : ''}</td>
+                    <td class="col-hide-mobile">${em.emocaoMedia ? H.esc(em.emocaoMedia) : ''}${em.emocaoInferior ? ' › ' + H.esc(em.emocaoInferior) : ''}</td>
+                    <td class="col-hide-mobile">${em.intensidade || '—'}/10</td>
+                    <td class="col-hide-mobile">${H.esc((em.situacao || '').slice(0, 40))}${(em.situacao || '').length > 40 ? '…' : ''}</td>
                     <td>
                       <button class="btn-icon" data-gb-edit-emo="${em.id}" title="Editar"><i data-lucide="pencil"></i></button>
                       <button class="btn-icon btn-danger" data-gb-del-emo="${em.id}" title="Remover"><i data-lucide="trash-2"></i></button>
@@ -1070,7 +1070,7 @@ PCF.Pages = PCF.Pages || {};
           ${registros.length === 0 ? '<p class="empty-text">Nenhum registro diário</p>' : `
           <div class="table-wrapper">
             <table class="table">
-              <thead><tr><th>Data</th><th>Hábito</th><th>Concluído</th><th>Momento</th><th>Intensidade</th><th>Observação</th><th style="width:60px">Ações</th></tr></thead>
+              <thead><tr><th>Data</th><th>Hábito</th><th>Concluído</th><th class="col-hide-mobile">Momento</th><th class="col-hide-mobile">Intensidade</th><th class="col-hide-mobile">Observação</th><th style="width:60px">Ações</th></tr></thead>
               <tbody>
                 ${registros.map(r => {
                   const h = habitosMap[r.habitoId];
@@ -1078,9 +1078,9 @@ PCF.Pages = PCF.Pages || {};
                     <td>${_fmtDate(r.data)}</td>
                     <td>${h ? `${h.icone || '⭐'} ${H.esc(h.nome)}` : '<em class="text-muted">Removido</em>'}</td>
                     <td>${r.completo ? '<span class="tipo-badge receita">✅ Sim</span>' : '<span class="tipo-badge despesa">❌ Não</span>'}</td>
-                    <td>${r.momento ? H.esc(r.momento) : '—'}</td>
-                    <td>${r.intensidade !== undefined ? r.intensidade + '%' : '—'}</td>
-                    <td>${H.esc((r.observacao || '').slice(0, 40))}${(r.observacao || '').length > 40 ? '…' : ''}</td>
+                    <td class="col-hide-mobile">${r.momento ? H.esc(r.momento) : '—'}</td>
+                    <td class="col-hide-mobile">${r.intensidade !== undefined ? r.intensidade + '%' : '—'}</td>
+                    <td class="col-hide-mobile">${H.esc((r.observacao || '').slice(0, 40))}${(r.observacao || '').length > 40 ? '…' : ''}</td>
                     <td><button class="btn-icon btn-danger" data-gb-del-rh="${r.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
                   </tr>`;
                 }).join('')}
