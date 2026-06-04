@@ -16,7 +16,8 @@ PCF.Store = (() => {
   const DATA_COLS = [
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
-    'rodavida_reg', 'rodavida_config'
+    'rodavida_reg', 'rodavida_config',
+    'virtudes_config', 'virtudes_reg'
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
@@ -362,6 +363,41 @@ PCF.Store = (() => {
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Tocar Violão', descricao: 'Praticar violão por 20 minutos', categoria: 'Lazer', meta: 'Diário', icone: '🎸', cor: '#ec4899', ativo: true },
    ];
     _seedIfEmpty(`pcf_habitos_${userId}`, habitos);
+
+    // Virtudes padrão (Tabela das Virtudes — Peterson & Seligman + virtudes cristãs/estoicas)
+    const virtudes = [
+      { id: _uid(), nome: 'Criatividade', significado: 'Pensar em formas novas e produtivas de conceituar e fazer as coisas.', categoria: 'Sabedoria', cor: '#8b5cf6', icone: '💡', ativo: true },
+      { id: _uid(), nome: 'Curiosidade', significado: 'Interessar-se pela experiência em andamento por si só.', categoria: 'Sabedoria', cor: '#7c3aed', icone: '🔍', ativo: true },
+      { id: _uid(), nome: 'Senso Crítico', significado: 'Refletir sobre as coisas e examiná-las a partir de todos os ângulos.', categoria: 'Sabedoria', cor: '#6d28d9', icone: '🧠', ativo: true },
+      { id: _uid(), nome: 'Amor ao Aprendizado', significado: 'Dominar novas habilidades, tópicos e corpos de conhecimento.', categoria: 'Sabedoria', cor: '#5b21b6', icone: '📚', ativo: true },
+      { id: _uid(), nome: 'Perspectiva', significado: 'Ser capaz de dar conselhos sábios aos outros.', categoria: 'Sabedoria', cor: '#4c1d95', icone: '🔭', ativo: true },
+      { id: _uid(), nome: 'Bravura', significado: 'Não recuar diante de ameaças, dificuldades ou sofrimento.', categoria: 'Coragem', cor: '#dc2626', icone: '🦁', ativo: true },
+      { id: _uid(), nome: 'Perseverança', significado: 'Terminar o que se começou; persistir apesar dos obstáculos.', categoria: 'Coragem', cor: '#b91c1c', icone: '🏅', ativo: true },
+      { id: _uid(), nome: 'Integridade', significado: 'Falar a verdade e apresentar-se de forma genuína.', categoria: 'Coragem', cor: '#991b1b', icone: '⚖️', ativo: true },
+      { id: _uid(), nome: 'Vitalidade', significado: 'Encarar a vida com entusiasmo e energia; viver plenamente.', categoria: 'Coragem', cor: '#7f1d1d', icone: '⚡', ativo: true },
+      { id: _uid(), nome: 'Amor', significado: 'Valorizar relacionamentos íntimos com solidariedade e cuidado mútuo.', categoria: 'Humanidade', cor: '#ec4899', icone: '❤️', ativo: true },
+      { id: _uid(), nome: 'Generosidade', significado: 'Ajudar, cuidar, fazer boas ações e favores.', categoria: 'Humanidade', cor: '#db2777', icone: '🎁', ativo: true },
+      { id: _uid(), nome: 'Inteligência Social', significado: 'Estar ciente dos próprios sentimentos e motivações, bem como dos outros.', categoria: 'Humanidade', cor: '#be185d', icone: '🤝', ativo: true },
+      { id: _uid(), nome: 'Trabalho em Equipe', significado: 'Trabalhar bem como membro de um grupo; ser leal ao grupo.', categoria: 'Justiça', cor: '#16a34a', icone: '👥', ativo: true },
+      { id: _uid(), nome: 'Imparcialidade', significado: 'Tratar todas as pessoas segundo noções de imparcialidade e justiça.', categoria: 'Justiça', cor: '#15803d', icone: '🏛️', ativo: true },
+      { id: _uid(), nome: 'Liderança', significado: 'Estimular um grupo do qual se é membro para fazer as coisas.', categoria: 'Justiça', cor: '#166534', icone: '🌟', ativo: true },
+      { id: _uid(), nome: 'Perdão', significado: 'Perdoar os que erraram; aceitar as falhas dos outros.', categoria: 'Moderação', cor: '#0ea5e9', icone: '🕊️', ativo: true },
+      { id: _uid(), nome: 'Humildade', significado: 'Deixar que suas realizações falem por si.', categoria: 'Moderação', cor: '#0284c7', icone: '🙏', ativo: true },
+      { id: _uid(), nome: 'Prudência', significado: 'Ser cuidadoso em relação às próprias escolhas; não correr riscos indevidos.', categoria: 'Moderação', cor: '#0369a1', icone: '🛡️', ativo: true },
+      { id: _uid(), nome: 'Autocontrole', significado: 'Regular o que se sente e faz; ser disciplinado.', categoria: 'Moderação', cor: '#075985', icone: '🧘', ativo: true },
+      { id: _uid(), nome: 'Gratidão', significado: 'Estar ciente e agradecido pelas coisas boas; demonstrar emoção positiva.', categoria: 'Transcendência', cor: '#f59e0b', icone: '🌸', ativo: true },
+      { id: _uid(), nome: 'Esperança', significado: 'Esperar o melhor no futuro e trabalhar para atingi-lo.', categoria: 'Transcendência', cor: '#d97706', icone: '🌈', ativo: true },
+      { id: _uid(), nome: 'Humor', significado: 'Levar sorrisos às outras pessoas; levar a vida de forma mais leve.', categoria: 'Transcendência', cor: '#b45309', icone: '😄', ativo: true },
+      { id: _uid(), nome: 'Espiritualidade', significado: 'Ter crenças coerentes em relação ao propósito e sentido maiores do universo.', categoria: 'Transcendência', cor: '#92400e', icone: '✨', ativo: true },
+      { id: _uid(), nome: 'Apreciação da Beleza', significado: 'Observar e apreciar a beleza, a excelência e o desempenho habilidoso.', categoria: 'Transcendência', cor: '#78350f', icone: '🌺', ativo: true },
+      { id: _uid(), nome: 'Paciência', significado: 'Manter a calma e serenidade diante de adversidades e demoras.', categoria: 'Paz', cor: '#06b6d4', icone: '⏳', ativo: true },
+      { id: _uid(), nome: 'Compaixão', significado: 'Sentir e agir com empatia e altruísmo em relação ao sofrimento alheio.', categoria: 'Humanidade', cor: '#14b8a6', icone: '💞', ativo: true },
+      { id: _uid(), nome: 'Honestidade', significado: 'Ser fiel à verdade em palavras e ações.', categoria: 'Coragem', cor: '#10b981', icone: '🔑', ativo: true },
+      { id: _uid(), nome: 'Respeito', significado: 'Reconhecer e valorizar a dignidade de cada pessoa.', categoria: 'Justiça', cor: '#059669', icone: '🤲', ativo: true },
+      { id: _uid(), nome: 'Solidariedade', significado: 'Apoiar e se unir às outras pessoas nas dificuldades.', categoria: 'Humanidade', cor: '#047857', icone: '🤗', ativo: true },
+      { id: _uid(), nome: 'Fé', significado: 'Manter fidelidade e confiança nos valores e em Deus.', categoria: 'Transcendência', cor: '#065f46', icone: '🌠', ativo: true },
+    ];
+    _seedIfEmpty(`pcf_virtudes_config_${userId}`, virtudes);
 
     // Frases motivacionais padrão
     const frases = [
@@ -1620,6 +1656,7 @@ PCF.Store = (() => {
   const restoreDefaultEmocoesConfig = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_emocoes_config_${uid}`]); };
   const restoreDefaultHabitos       = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_habitos_${uid}`]); };
   const restoreDefaultFrases        = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_frases_${uid}`]); };
+  const restoreDefaultVirtudes      = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_virtudes_config_${uid}`]); };
 
   /* ---------- HÁBITOS ---------- */
   const _hkU = () => `pcf_habitos_${currentUserId()}`;
@@ -1743,6 +1780,29 @@ PCF.Store = (() => {
   const saveRodaVidaRegistros = (regs) => _set(_rvRegU(), regs);
   const deleteRodaVidaRegistro = (id) => { const all = getRodaVidaRegistros().filter(r => r.id !== id); saveRodaVidaRegistros(all); return all; };
 
+  /* ---------- VIRTUDES CONFIG ---------- */
+  const _vcU = () => `pcf_virtudes_config_${currentUserId()}`;
+  const getVirtudesConfig = () => _get(_vcU()) || [];
+  const saveVirtudesConfig = (v) => _set(_vcU(), v);
+  const addVirtude = (v) => { const all = getVirtudesConfig(); all.push({ id: _uid(), ativo: true, ...v }); saveVirtudesConfig(all); return all; };
+  const updateVirtude = (id, data) => { const all = getVirtudesConfig(); const i = all.findIndex(v => v.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveVirtudesConfig(all); } return all; };
+  const deleteVirtude = (id) => { const all = getVirtudesConfig().filter(v => v.id !== id); saveVirtudesConfig(all); return all; };
+
+  /* ---------- VIRTUDES REGISTROS ---------- */
+  const _vrU = () => `pcf_virtudes_reg_${currentUserId()}`;
+  const getVirtudesReg = () => _get(_vrU()) || [];
+  const saveVirtudesReg = (r) => _set(_vrU(), r);
+  const toggleVirtude = (virtudeId, data) => {
+    const hoje = data || new Date().toISOString().split('T')[0];
+    const all = getVirtudesReg();
+    const idx = all.findIndex(r => r.virtudeId === virtudeId && r.data === hoje);
+    if (idx >= 0) { all.splice(idx, 1); }
+    else { all.push({ id: _uid(), virtudeId, data: hoje }); }
+    saveVirtudesReg(all);
+    return all;
+  };
+  const deleteVirtudReg = (id) => { const all = getVirtudesReg().filter(r => r.id !== id); saveVirtudesReg(all); return all; };
+
   /* ---------- IMPORT / EXPORT ---------- */
   const exportData = (userId) => {
     const uid = userId || currentUserId();
@@ -1779,8 +1839,10 @@ PCF.Store = (() => {
     getDiario, saveDiario,
     getRodaVidaConfig, saveRodaVidaConfig,
     getRodaVidaRegistros, saveRodaVidaRegistros, deleteRodaVidaRegistro,
+    getVirtudesConfig, saveVirtudesConfig, addVirtude, updateVirtude, deleteVirtude,
+    getVirtudesReg, saveVirtudesReg, toggleVirtude, deleteVirtudReg,
     exportData, importTransacoes, importCategorias,
-    restoreDefaultCategorias, restoreDefaultEmocoesConfig, restoreDefaultHabitos, restoreDefaultFrases,
+    restoreDefaultCategorias, restoreDefaultEmocoesConfig, restoreDefaultHabitos, restoreDefaultFrases, restoreDefaultVirtudes,
     _uid,
   };
 })();

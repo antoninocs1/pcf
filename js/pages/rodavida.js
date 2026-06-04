@@ -84,6 +84,20 @@ PCF.Pages = PCF.Pages || {};
       }
     }
 
+    /* Virtudes / Caráter ← registros de virtudes (últimos 30 dias) */
+    const catVirt = allCats.find(c => c.integracaoFonte === 'virtudes');
+    if (catVirt && S.getVirtudesConfig) {
+      const virtudes = S.getVirtudesConfig().filter(v => v.ativo !== false);
+      if (virtudes.length > 0) {
+        const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
+        const cutStr = cutoff.toISOString().split('T')[0];
+        const regs = (S.getVirtudesReg ? S.getVirtudesReg() : []).filter(r => r.data >= cutStr);
+        // Dias únicos com pelo menos 1 virtude praticada
+        const diasUnicos = new Set(regs.map(r => r.data)).size;
+        sug[catVirt.id] = Math.max(1, Math.min(10, Math.round((diasUnicos / 30) * 9) + 1));
+      }
+    }
+
     return sug;
   };
 
@@ -361,6 +375,7 @@ PCF.Pages = PCF.Pages || {};
       { value: 'emocoes',       label: '😊  Emoções recentes' },
       { value: 'financas',      label: '💰  Saldo financeiro' },
       { value: 'habitos_mente', label: '🧠  Hábitos de Mente' },
+      { value: 'virtudes',      label: '💎  Virtudes'         },
     ];
 
     const render = () => {

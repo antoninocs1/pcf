@@ -27,6 +27,7 @@ PCF.App = (() => {
     { icon: 'brain',         title: 'Emoções',        desc: 'Registro diário de emoções com relatórios gráficos e configurações personalizadas.' },
     { icon: 'check-square',  title: 'Hábitos',        desc: 'Acompanhe hábitos diários, visualização mensal e relatórios de consistência.' },
     { icon: 'target',        title: 'Roda da Vida',   desc: 'Avalie e visualize as principais áreas da sua vida em um gráfico radial interativo.' },
+    { icon: 'gem',           title: 'Virtudes',       desc: 'Cultive virtudes diariamente, acompanhe seu crescimento de caráter e receba sugestões integradas.' },
     { icon: 'book-open',     title: 'Diário',          desc: 'Diário pessoal para registrar reflexões, pensamentos e acompanhar sua evolução.' },
     { icon: 'calendar',      title: 'Agenda',          desc: 'Gerencie compromissos e eventos de forma prática em uma agenda interativa.' },
     { icon: 'heart',         title: 'Saúde / IMC',    desc: 'Cálculo de IMC e acompanhamento de métricas de saúde e bem-estar pessoal.' },
@@ -311,6 +312,7 @@ PCF.App = (() => {
       { icon: 'book-open',    label: 'Diário',            hash: '#diario',    color: '#3b82f6' },
       { icon: 'calendar',     label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
       { icon: 'target',       label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
+      { icon: 'gem',          label: 'Virtudes',          hash: '#virtudes',  color: '#7c3aed' },
       { icon: 'heart',        label: 'IMC',               hash: '#imc',       color: '#dc2626' },
       { icon: 'users',        label: 'Contatos Pessoais', hash: '#contatos',  color: '#64748b' },
     ];
@@ -403,6 +405,15 @@ PCF.App = (() => {
       items: [
         { hash: '#roda-vida',        icon: 'target',   label: 'Roda da Vida' },
         { hash: '#roda-vida-config', icon: 'settings', label: 'Config. Roda da Vida' },
+      ]
+    },
+    {
+      id: 'virtudes', label: 'Virtudes', icon: 'gem',
+      items: [
+        { hash: '#virtudes',           icon: 'gem',        label: 'Virtudes Diárias' },
+        { hash: '#virtudes-relatorio', icon: 'bar-chart-2',label: 'Relatório Virtudes' },
+        { hash: '#virtudes-base',      icon: 'database',   label: 'Base de Virtudes' },
+        { hash: '#virtudes-config',    icon: 'settings',   label: 'Config. Virtudes' },
       ]
     },
     {
@@ -644,6 +655,10 @@ PCF.App = (() => {
       '#emocoes-config': pages.emocoesConfig,
       '#roda-vida':        pages.rodaVida,
       '#roda-vida-config': pages.rodaVidaConfig,
+      '#virtudes':           pages.virtudes,
+      '#virtudes-relatorio': pages.virtudesRelatorio,
+      '#virtudes-base':      pages.virtudesBase,
+      '#virtudes-config':    pages.virtudesConfig,
       '#diario': pages.diario,
       '#diario-config': pages.diarioConfig,
       '#usuarios': pages.usuarios,

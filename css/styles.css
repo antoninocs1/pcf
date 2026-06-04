@@ -1459,3 +1459,234 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   background: rgba(59,130,246,.07);
 }
 .btn-home-back svg { width: 16px; height: 16px; flex-shrink: 0; display: block; }
+
+/* =====================================================
+   VIRTUDES — Controle de Virtudes
+   ===================================================== */
+
+/* ── Date bar ── */
+.virtudes-date-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.form-control-inline {
+  padding: 5px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: .875rem;
+}
+
+/* ── Progress bar ── */
+.virtudes-progress-wrap { margin-bottom: 20px; }
+.virtudes-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: .85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.virtudes-progress-pct { font-weight: 600; color: var(--text); }
+.virtudes-progress-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.virtudes-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  border-radius: 99px;
+  transition: width .4s ease;
+}
+
+/* ── Grupos ── */
+.virtudes-grupos { display: flex; flex-direction: column; gap: 20px; }
+.virtudes-grupo-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: .9rem;
+  color: var(--catcolor, #64748b);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid color-mix(in srgb, var(--catcolor, #64748b) 25%, transparent);
+}
+.virtudes-grupo-header svg { width: 16px; height: 16px; }
+.virtudes-grupo-count {
+  margin-left: auto;
+  font-size: .75rem;
+  background: color-mix(in srgb, var(--catcolor, #64748b) 15%, transparent);
+  color: var(--catcolor, #64748b);
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 700;
+}
+
+/* ── Grid de botões de virtudes ── */
+.virtudes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+/* ── Botão de virtude ── */
+.virtude-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px 12px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all .18s ease;
+  text-align: center;
+  color: var(--text);
+  overflow: hidden;
+}
+.virtude-btn:hover {
+  border-color: var(--vcolor, #8b5cf6);
+  background: color-mix(in srgb, var(--vcolor, #8b5cf6) 8%, var(--bg-card));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--vcolor, #8b5cf6) 20%, transparent);
+}
+.virtude-btn.praticada {
+  border-color: var(--vcolor, #8b5cf6);
+  background: color-mix(in srgb, var(--vcolor, #8b5cf6) 14%, var(--bg-card));
+}
+.virtude-btn.praticada::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--vcolor, #8b5cf6) 6%, transparent), transparent);
+  pointer-events: none;
+}
+.virtude-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.15));
+}
+.virtude-nome {
+  font-size: .78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+}
+.virtude-btn.praticada .virtude-nome { color: var(--vcolor, #8b5cf6); }
+.virtude-streak {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: .65rem;
+  font-weight: 700;
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 99px;
+}
+.virtude-check {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: .75rem;
+  font-weight: 900;
+  color: var(--vcolor, #8b5cf6);
+}
+.virtude-hint {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: normal;
+  min-width: 200px;
+  max-width: 260px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: .75rem;
+  color: var(--text-muted);
+  box-shadow: var(--shadow);
+  z-index: 100;
+  text-align: left;
+  pointer-events: none;
+}
+.virtude-btn:hover .virtude-hint,
+.virtude-btn:focus .virtude-hint { display: block; }
+
+/* ── Relatório ── */
+.vrel-section-title {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+  margin: 20px 0 8px;
+}
+.virtudes-cat-bars { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.vcat-bar-item { display: flex; align-items: center; gap: 8px; }
+.vcat-bar-label { min-width: 130px; font-size: .82rem; font-weight: 600; }
+.vcat-bar-track {
+  flex: 1;
+  height: 10px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.vcat-bar-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
+.vcat-bar-pct { min-width: 36px; text-align: right; font-size: .78rem; color: var(--text-muted); font-weight: 600; }
+
+.mini-bar { display: inline-block; width: 60px; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; vertical-align: middle; margin-right: 4px; }
+.mini-bar-fill { height: 100%; border-radius: 99px; }
+
+.top-dias-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.top-dia-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 100px;
+}
+.top-dia-data { font-size: .8rem; color: var(--text-muted); }
+.top-dia-qtd { font-size: 1rem; font-weight: 700; color: var(--accent); }
+
+/* ── Config ── */
+.vconfig-table-wrap { overflow-x: auto; }
+.row-inactive { opacity: .5; }
+.row-inactive td:first-child::after { content: ' (inativo)'; font-size: .7rem; color: var(--text-muted); }
+
+/* ── Info box ── */
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: .83rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.info-box svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--accent); }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .virtudes-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .virtude-btn { padding: 10px 6px; }
+  .virtude-icon { font-size: 1.3rem; }
+  .virtude-nome { font-size: .72rem; }
+  .vcat-bar-label { min-width: 90px; font-size: .75rem; }
+}
+[data-theme="light"] .virtude-btn { background: #fff; }
+[data-theme="light"] .virtude-btn.praticada { background: color-mix(in srgb, var(--vcolor, #8b5cf6) 10%, #fff); }
