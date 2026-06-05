@@ -1,4 +1,4 @@
-/* ========================================================
+ï»¿/* ========================================================
    PCF - Controle Financeiro Pessoal
    styles.css â€” Tema escuro completo
    ======================================================== */
@@ -1692,13 +1692,13 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 [data-theme="light"] .virtude-btn.praticada { background: color-mix(in srgb, var(--vcolor, #8b5cf6) 10%, #fff); }
 
 /* ==================== BOOTSTRAP CONFLICT RESETS ==================== */
-/* Garante que Bootstrap não sobrescreva nossos estilos base */
+/* Garante que Bootstrap nï¿½o sobrescreva nossos estilos base */
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
-/* Cancela o reflow de fonte/cor que Bootstrap faz via variáveis css próprias */
+/* Cancela o reflow de fonte/cor que Bootstrap faz via variï¿½veis css prï¿½prias */
 body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
 /* Impede Bootstrap de estilizar links do app autenticado */
 .sidebar a, .page a:not(.landing-contact-btn):not(.landing-nav-link):not(.landing-nav-contact):not(.landing-brand):not(.btn) {
@@ -1707,11 +1707,11 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
 /* Reset do table Bootstrap para o .table do app */
 .table { border-color: var(--border); color: var(--text); background: var(--bg-card); }
 .table > :not(caption) > * > * { background-color: transparent; color: inherit; box-shadow: none; }
-/* Botões: garante nossa fonte e remove outline Bootstrap */
+/* Botï¿½es: garante nossa fonte e remove outline Bootstrap */
 .btn, button { font-family: 'Inter', system-ui, sans-serif; }
 .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: none; }
 
-/* ==================== CARROSSEL DE APRESENTAÇÃO ==================== */
+/* ==================== CARROSSEL DE APRESENTAï¿½ï¿½O ==================== */
 .landing-carousel-section {
   background: var(--bg);
   padding: 64px 0 0;
@@ -1722,7 +1722,20 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
 }
 .landing-carousel-header .landing-section-desc { margin-bottom: 0; margin-left: auto; margin-right: auto; }
 
-.pcf-slide {
+/* ==================== CARROSSEL VANILLA JS ==================== */
+.pcf-carousel {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.pcf-carousel-track {
+  display: flex;
+  transition: transform .5s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.pcf-carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
   min-height: 440px;
   display: flex;
   align-items: center;
@@ -1733,6 +1746,58 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
 .pcf-slide-2 { background: linear-gradient(135deg, #042f2e 0%, #0c4a6e 60%, #0a0f1e 100%); }
 .pcf-slide-3 { background: linear-gradient(135deg, #052e16 0%, #064e3b 50%, #0c4a6e 100%); }
 .pcf-slide-4 { background: linear-gradient(135deg, #2e1065 0%, #4c1d95 50%, #1e3a5f 100%); }
+
+/* BotÃµes prev/next */
+.pcf-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background .2s, transform .15s;
+  font-family: inherit;
+  padding: 0;
+}
+.pcf-carousel-btn:hover { background: rgba(0,0,0,.6); transform: translateY(-50%) scale(1.1); }
+.pcf-carousel-prev { left: 14px; }
+.pcf-carousel-next { right: 14px; }
+
+/* Dots indicadores */
+.pcf-carousel-dots {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.pcf-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,.4);
+  cursor: pointer;
+  padding: 0;
+  transition: background .3s, width .3s, border-radius .3s;
+}
+.pcf-dot.active {
+  background: #fff;
+  width: 28px;
+  border-radius: 5px;
+}
 
 .pcf-slide-body {
   text-align: center;
@@ -1783,7 +1848,7 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
   box-shadow: 0 8px 24px rgba(59,130,246,.5);
 }
 
-/* Slide 2 – módulos */
+/* Slide 2 ï¿½ mï¿½dulos */
 .pcf-modules-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1802,7 +1867,7 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
   backdrop-filter: blur(4px);
 }
 
-/* Slide 3 – relatórios */
+/* Slide 3 ï¿½ relatï¿½rios */
 .pcf-reports-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1825,7 +1890,7 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
 }
 .pcf-report-card span:first-child { font-size: 1.4rem; flex-shrink: 0; }
 
-/* Slide 4 – integração */
+/* Slide 4 ï¿½ integraï¿½ï¿½o */
 .pcf-int-diagram {
   display: flex;
   flex-direction: column;
@@ -1876,41 +1941,18 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
   margin-bottom: 0;
 }
 
-/* Indicadores e controles do carrossel */
-#pcfCarousel .carousel-indicators [data-bs-target] {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: none;
-  background-color: rgba(255,255,255,.45);
-  margin: 0 4px;
-  transition: background-color .3s, width .3s;
-  opacity: 1;
-}
-#pcfCarousel .carousel-indicators .active {
-  background-color: #fff;
-  width: 28px;
-  border-radius: 5px;
-}
-#pcfCarousel .carousel-control-prev,
-#pcfCarousel .carousel-control-next {
-  width: 52px;
-  opacity: .65;
-}
-#pcfCarousel .carousel-control-prev:hover,
-#pcfCarousel .carousel-control-next:hover { opacity: 1; }
 
-/* ==================== BOTÃO TEMA NA LANDING HEADER ==================== */
-/* Ícone sol/lua: visibilidade controlada pelo data-theme */
+/* ==================== BOTï¿½O TEMA NA LANDING HEADER ==================== */
+/* ï¿½cone sol/lua: visibilidade controlada pelo data-theme */
 [data-theme="dark"] #ltg-sun { display: none; }
 [data-theme="dark"] #ltg-moon { display: block; }
 [data-theme="light"] #ltg-sun { display: block; }
 [data-theme="light"] #ltg-moon { display: none; }
-/* padrão sem data-theme (tema escuro inicial) */
+/* padrï¿½o sem data-theme (tema escuro inicial) */
 #ltg-sun { display: none; }
 #ltg-moon { display: block; }
 
-/* ==================== LANDING — TEMA CLARO ==================== */
+/* ==================== LANDING ï¿½ TEMA CLARO ==================== */
 [data-theme="light"] .landing-header {
   background: rgba(248,250,252,.97);
   border-bottom-color: #e2e8f0;
@@ -1926,9 +1968,9 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
 [data-theme="light"] .landing-carousel-section { background: #f1f5f9; }
 [data-theme="light"] .landing-footer { background: #fff; border-top-color: #e2e8f0; }
 
-/* ==================== CARROSSEL — RESPONSIVO ==================== */
+/* ==================== CARROSSEL ï¿½ RESPONSIVO ==================== */
 @media (max-width: 768px) {
-  .pcf-slide { min-height: 360px; padding: 40px 20px; }
+  .pcf-carousel-slide { min-height: 360px; padding: 40px 20px; }
   .pcf-slide-title { font-size: 1.45rem; }
   .pcf-slide-sub { font-size: .88rem; margin-bottom: 22px; }
   .pcf-slide-emoji { font-size: 3rem; margin-bottom: 14px; }
@@ -1936,10 +1978,14 @@ body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
   .pcf-int-line { display: none; }
   .pcf-int-row { gap: 6px; }
   .landing-carousel-section { padding: 48px 0 0; }
+  .pcf-carousel-btn { width: 36px; height: 36px; font-size: 1.5rem; }
+  .pcf-carousel-prev { left: 6px; }
+  .pcf-carousel-next { right: 6px; }
 }
 @media (max-width: 480px) {
-  .pcf-slide { min-height: 300px; padding: 32px 14px; }
+  .pcf-carousel-slide { min-height: 300px; padding: 32px 14px; }
   .pcf-slide-title { font-size: 1.2rem; }
   .pcf-reports-grid { grid-template-columns: 1fr; }
   .pcf-module-chip { font-size: .82rem; padding: 7px 13px; }
 }
+
