@@ -477,6 +477,7 @@ PCF.Pages = PCF.Pages || {};
               <button id="clear-frases" class="btn btn-danger">Limpar Base de Mensagens</button>
               <button id="clear-habitos-def" class="btn btn-danger">Limpar Hábitos (Definições)</button>
               <button id="clear-reg-hab" class="btn btn-danger">Limpar Registros de Hábitos</button>
+              <button id="clear-virtudes" class="btn btn-danger">Limpar Registros de Virtudes</button>
               <button id="clear-rodavida" class="btn btn-danger">Limpar Roda da Vida</button>
               <button id="clear-diario" class="btn btn-danger">Limpar Diário</button>
             </div>
@@ -640,6 +641,9 @@ PCF.Pages = PCF.Pages || {};
     const btnClearRegHab = document.getElementById('clear-reg-hab');
     if (btnClearRegHab) btnClearRegHab.onclick = () =>
       clearBase('Registros de Hábitos', () => S.getRegistrosHabitos().length, () => S.saveRegistrosHabitos([]));
+    const btnClearVirtudes = document.getElementById('clear-virtudes');
+    if (btnClearVirtudes) btnClearVirtudes.onclick = () =>
+      clearBase('Registros de Virtudes', () => (S.getVirtudesReg ? S.getVirtudesReg().length : 0), () => S.saveVirtudesReg && S.saveVirtudesReg([]));
     const btnClearRV = document.getElementById('clear-rodavida');
     if (btnClearRV) btnClearRV.onclick = () =>
       clearBase('Roda da Vida', () => S.getRodaVidaRegistros().length, () => S.saveRodaVidaRegistros([]));
@@ -985,6 +989,7 @@ PCF.Pages = PCF.Pages || {};
     const TABS = [
       { id: 'emocoes',  icon: '🧠', label: 'Emoções'      },
       { id: 'habitos',  icon: '🌱', label: 'Hábitos'      },
+      { id: 'virtudes', icon: '💎', label: 'Virtudes'     },
       { id: 'rodavida', icon: '🎯', label: 'Roda da Vida' },
       { id: 'agenda',   icon: '📅', label: 'Agenda'       },
       { id: 'diario',   icon: '📖', label: 'Diário'       },
@@ -1194,7 +1199,59 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
     };
 
-    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, rodavida: renderRodaVida, agenda: renderAgenda, diario: renderDiario };
+    /* ---- Seção: Virtudes ---- */
+    const renderVirtudes = () => {
+      const virtudes = S.getVirtudesConfig ? S.getVirtudesConfig() : [];
+      const regs = S.getVirtudesReg ? [...S.getVirtudesReg()].sort((a, b) => b.data.localeCompare(a.data)) : [];
+      const virtMap = Object.fromEntries(virtudes.map(v => [v.id, v]));
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>💎 Configurações de Virtudes <span class="badge badge-neutral">${virtudes.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#virtudes-config" class="btn btn-secondary btn-sm">⚙️ Gerenciar</a>
+            </div>
+          </div>
+          ${virtudes.length === 0 ? '<p class="empty-text">Nenhuma virtude configurada</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Ícone</th><th>Nome</th><th>Categoria</th><th>Ativo</th></tr></thead>
+              <tbody>
+                ${virtudes.map(v => `<tr>
+                  <td style="text-align:center;font-size:1.2rem">${H.esc(v.icone || '✦')}</td>
+                  <td><strong>${H.esc(v.nome)}</strong></td>
+                  <td><span class="chip-small">${H.esc(v.categoria || '—')}</span></td>
+                  <td><span class="tipo-badge ${v.ativo !== false ? 'receita' : 'despesa'}">${v.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`}
+          <hr style="margin:20px 0">
+          <div class="gb-section-header">
+            <h3>📋 Registros de Virtudes <span class="badge badge-neutral">${regs.length}</span></h3>
+            <button id="gb-clear-virtudes" class="btn btn-danger btn-sm"${regs.length === 0 ? ' disabled' : ''}>🗑 Limpar Registros</button>
+          </div>
+          ${regs.length === 0 ? '<p class="empty-text">Nenhum registro de virtude</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Data</th><th>Virtude</th><th>Categoria</th><th style="width:60px">Ações</th></tr></thead>
+              <tbody>
+                ${regs.map(r => {
+                  const v = virtMap[r.virtudeId] || { nome: 'Removida', icone: '?', cor: '#64748b', categoria: '' };
+                  return `<tr>
+                    <td>${_fmtDate(r.data)}</td>
+                    <td>${H.esc(v.icone || '✦')} ${H.esc(v.nome)}</td>
+                    <td><span class="chip-small">${H.esc(v.categoria || '—')}</span></td>
+                    <td><button class="btn-icon btn-danger" data-gb-del-vr="${r.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, agenda: renderAgenda, diario: renderDiario };
 
     /* ---- Render principal ---- */
     const render = () => {
@@ -1235,6 +1292,9 @@ PCF.Pages = PCF.Pages || {};
       if (q('gb-clear-reg-hab')) q('gb-clear-reg-hab').onclick = () =>
         confirmClear('Registros Diários de Hábitos', () => S.getRegistrosHabitos().length, () => S.saveRegistrosHabitos([]));
 
+      if (q('gb-clear-virtudes')) q('gb-clear-virtudes').onclick = () =>
+        confirmClear('Registros de Virtudes', () => (S.getVirtudesReg ? S.getVirtudesReg().length : 0), () => S.saveVirtudesReg && S.saveVirtudesReg([]));
+
       if (q('gb-clear-rv')) q('gb-clear-rv').onclick = () =>
         confirmClear('Avaliações da Roda da Vida', () => S.getRodaVidaRegistros().length, () => S.saveRodaVidaRegistros([]));
 
@@ -1267,6 +1327,10 @@ PCF.Pages = PCF.Pages || {};
         }
         const delRh = e.target.closest('[data-gb-del-rh]');
         if (delRh && confirm('Remover este registro diário?')) { S.deleteRegistroHabito(delRh.dataset.gbDelRh); render(); return; }
+
+        /* Virtudes */
+        const delVr = e.target.closest('[data-gb-del-vr]');
+        if (delVr && confirm('Remover este registro de virtude?')) { S.deleteVirtudReg && S.deleteVirtudReg(delVr.dataset.gbDelVr); render(); return; }
 
         /* Roda da Vida */
         const delRv = e.target.closest('[data-gb-del-rv]');

@@ -401,19 +401,19 @@ PCF.App = (() => {
       ]
     },
     {
-      id: 'rodavida', label: 'Roda da Vida', icon: 'target',
-      items: [
-        { hash: '#roda-vida',        icon: 'target',   label: 'Roda da Vida' },
-        { hash: '#roda-vida-config', icon: 'settings', label: 'Config. Roda da Vida' },
-      ]
-    },
-    {
       id: 'virtudes', label: 'Virtudes', icon: 'gem',
       items: [
         { hash: '#virtudes',           icon: 'gem',        label: 'Virtudes Diárias' },
         { hash: '#virtudes-relatorio', icon: 'bar-chart-2',label: 'Relatório Virtudes' },
         { hash: '#virtudes-base',      icon: 'database',   label: 'Base de Virtudes' },
         { hash: '#virtudes-config',    icon: 'settings',   label: 'Config. Virtudes' },
+      ]
+    },
+    {
+      id: 'rodavida', label: 'Roda da Vida', icon: 'target',
+      items: [
+        { hash: '#roda-vida',        icon: 'target',   label: 'Roda da Vida' },
+        { hash: '#roda-vida-config', icon: 'settings', label: 'Config. Roda da Vida' },
       ]
     },
     {
