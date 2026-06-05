@@ -1690,3 +1690,256 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 [data-theme="light"] .virtude-btn { background: #fff; }
 [data-theme="light"] .virtude-btn.praticada { background: color-mix(in srgb, var(--vcolor, #8b5cf6) 10%, #fff); }
+
+/* ==================== BOOTSTRAP CONFLICT RESETS ==================== */
+/* Garante que Bootstrap não sobrescreva nossos estilos base */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+/* Cancela o reflow de fonte/cor que Bootstrap faz via variáveis css próprias */
+body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
+/* Impede Bootstrap de estilizar links do app autenticado */
+.sidebar a, .page a:not(.landing-contact-btn):not(.landing-nav-link):not(.landing-nav-contact):not(.landing-brand):not(.btn) {
+  text-decoration: none; color: inherit;
+}
+/* Reset do table Bootstrap para o .table do app */
+.table { border-color: var(--border); color: var(--text); background: var(--bg-card); }
+.table > :not(caption) > * > * { background-color: transparent; color: inherit; box-shadow: none; }
+/* Botões: garante nossa fonte e remove outline Bootstrap */
+.btn, button { font-family: 'Inter', system-ui, sans-serif; }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: none; }
+
+/* ==================== CARROSSEL DE APRESENTAÇÃO ==================== */
+.landing-carousel-section {
+  background: var(--bg);
+  padding: 64px 0 0;
+}
+.landing-carousel-header {
+  text-align: center;
+  padding: 0 24px 32px;
+}
+.landing-carousel-header .landing-section-desc { margin-bottom: 0; margin-left: auto; margin-right: auto; }
+
+.pcf-slide {
+  min-height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 48px;
+}
+.pcf-slide-1 { background: linear-gradient(135deg, #0a0f1e 0%, #1a237e 55%, #1a0533 100%); }
+.pcf-slide-2 { background: linear-gradient(135deg, #042f2e 0%, #0c4a6e 60%, #0a0f1e 100%); }
+.pcf-slide-3 { background: linear-gradient(135deg, #052e16 0%, #064e3b 50%, #0c4a6e 100%); }
+.pcf-slide-4 { background: linear-gradient(135deg, #2e1065 0%, #4c1d95 50%, #1e3a5f 100%); }
+
+.pcf-slide-body {
+  text-align: center;
+  max-width: 820px;
+  width: 100%;
+}
+.pcf-slide-emoji {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 20px;
+  display: block;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,.4));
+}
+.pcf-slide-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 14px;
+  text-shadow: 0 2px 12px rgba(0,0,0,.5);
+  line-height: 1.25;
+}
+.pcf-slide-sub {
+  font-size: 1rem;
+  color: rgba(226,232,240,.8);
+  margin-bottom: 28px;
+  line-height: 1.65;
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.pcf-cta-btn {
+  display: inline-block;
+  padding: 13px 32px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  font-family: 'Inter', system-ui, sans-serif;
+  box-shadow: 0 4px 16px rgba(59,130,246,.4);
+}
+.pcf-cta-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59,130,246,.5);
+}
+
+/* Slide 2 – módulos */
+.pcf-modules-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.pcf-module-chip {
+  padding: 9px 18px;
+  background: rgba(255,255,255,.13);
+  color: #f1f5f9;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+  font-size: .9rem;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+
+/* Slide 3 – relatórios */
+.pcf-reports-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+.pcf-report-card {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #f1f5f9;
+  font-size: .9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(4px);
+  text-align: left;
+}
+.pcf-report-card span:first-child { font-size: 1.4rem; flex-shrink: 0; }
+
+/* Slide 4 – integração */
+.pcf-int-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 18px auto;
+  max-width: 680px;
+}
+.pcf-int-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pcf-int-node {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: .9rem;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+.pcf-int-center-node {
+  background: rgba(59,130,246,.35);
+  border: 1px solid rgba(99,179,237,.5);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.pcf-int-line {
+  color: rgba(255,255,255,.35);
+  font-size: .85rem;
+  letter-spacing: -1px;
+}
+.pcf-int-arrows {
+  color: rgba(255,255,255,.45);
+  font-size: 1.3rem;
+}
+.pcf-int-note {
+  font-size: .85rem;
+  color: rgba(226,232,240,.6);
+  margin-top: 10px;
+  font-style: italic;
+  margin-bottom: 0;
+}
+
+/* Indicadores e controles do carrossel */
+#pcfCarousel .carousel-indicators [data-bs-target] {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(255,255,255,.45);
+  margin: 0 4px;
+  transition: background-color .3s, width .3s;
+  opacity: 1;
+}
+#pcfCarousel .carousel-indicators .active {
+  background-color: #fff;
+  width: 28px;
+  border-radius: 5px;
+}
+#pcfCarousel .carousel-control-prev,
+#pcfCarousel .carousel-control-next {
+  width: 52px;
+  opacity: .65;
+}
+#pcfCarousel .carousel-control-prev:hover,
+#pcfCarousel .carousel-control-next:hover { opacity: 1; }
+
+/* ==================== BOTÃO TEMA NA LANDING HEADER ==================== */
+/* Ícone sol/lua: visibilidade controlada pelo data-theme */
+[data-theme="dark"] #ltg-sun { display: none; }
+[data-theme="dark"] #ltg-moon { display: block; }
+[data-theme="light"] #ltg-sun { display: block; }
+[data-theme="light"] #ltg-moon { display: none; }
+/* padrão sem data-theme (tema escuro inicial) */
+#ltg-sun { display: none; }
+#ltg-moon { display: block; }
+
+/* ==================== LANDING — TEMA CLARO ==================== */
+[data-theme="light"] .landing-header {
+  background: rgba(248,250,252,.97);
+  border-bottom-color: #e2e8f0;
+}
+[data-theme="light"] .landing-header .landing-brand-name,
+[data-theme="light"] .landing-header .landing-brand-sub { color: #1e293b; }
+[data-theme="light"] .landing-header .landing-nav-link { color: #475569; }
+[data-theme="light"] .landing-header .landing-nav-link:hover { background: rgba(0,0,0,.05); color: #1e293b; }
+[data-theme="light"] .landing-header .landing-nav-link.active { color: #2563eb; background: rgba(37,99,235,.08); }
+[data-theme="light"] .landing-header .landing-nav-contact { color: #475569; }
+[data-theme="light"] .landing-header .landing-nav-contact:hover { color: #2563eb; background: rgba(37,99,235,.08); }
+[data-theme="light"] .landing-header .landing-nav-toggle { border-color: #e2e8f0; color: #1e293b; }
+[data-theme="light"] .landing-carousel-section { background: #f1f5f9; }
+[data-theme="light"] .landing-footer { background: #fff; border-top-color: #e2e8f0; }
+
+/* ==================== CARROSSEL — RESPONSIVO ==================== */
+@media (max-width: 768px) {
+  .pcf-slide { min-height: 360px; padding: 40px 20px; }
+  .pcf-slide-title { font-size: 1.45rem; }
+  .pcf-slide-sub { font-size: .88rem; margin-bottom: 22px; }
+  .pcf-slide-emoji { font-size: 3rem; margin-bottom: 14px; }
+  .pcf-reports-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pcf-int-line { display: none; }
+  .pcf-int-row { gap: 6px; }
+  .landing-carousel-section { padding: 48px 0 0; }
+}
+@media (max-width: 480px) {
+  .pcf-slide { min-height: 300px; padding: 32px 14px; }
+  .pcf-slide-title { font-size: 1.2rem; }
+  .pcf-reports-grid { grid-template-columns: 1fr; }
+  .pcf-module-chip { font-size: .82rem; padding: 7px 13px; }
+}

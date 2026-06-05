@@ -42,6 +42,104 @@ PCF.App = (() => {
         <p>${f.desc}</p>
       </div>`).join('');
 
+    const carouselHtml = `
+      <section id="apresentacao-section" class="landing-section landing-carousel-section">
+        <div class="landing-container landing-carousel-header">
+          <span class="landing-badge">Apresentação</span>
+          <h2 class="landing-section-title">Conheça o PCF</h2>
+          <p class="landing-section-desc" style="margin-bottom:0">Uma visão completa do que o sistema oferece para transformar sua vida pessoal e financeira</p>
+        </div>
+        <div id="pcfCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#pcfCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
+            <button type="button" data-bs-target="#pcfCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#pcfCarousel" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#pcfCarousel" data-bs-slide-to="3"></button>
+          </div>
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <div class="pcf-slide pcf-slide-1">
+                <div class="pcf-slide-body">
+                  <div class="pcf-slide-emoji">💰</div>
+                  <h2 class="pcf-slide-title">Planejamento para o Sucesso Pessoal</h2>
+                  <p class="pcf-slide-sub">Organize suas finanças, emoções, hábitos e projetos de vida em uma plataforma completa e integrada.</p>
+                  <button class="pcf-cta-btn" id="pcf-cta-login">Começar agora →</button>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <div class="pcf-slide pcf-slide-2">
+                <div class="pcf-slide-body">
+                  <h2 class="pcf-slide-title">Funções Existentes</h2>
+                  <p class="pcf-slide-sub">9 módulos integrados para cobrir todos os aspectos da sua vida</p>
+                  <div class="pcf-modules-grid">
+                    <span class="pcf-module-chip">💰 Financeiro</span>
+                    <span class="pcf-module-chip">🧠 Emoções</span>
+                    <span class="pcf-module-chip">🌱 Hábitos</span>
+                    <span class="pcf-module-chip">💎 Virtudes</span>
+                    <span class="pcf-module-chip">🎯 Roda da Vida</span>
+                    <span class="pcf-module-chip">📖 Diário</span>
+                    <span class="pcf-module-chip">📅 Agenda</span>
+                    <span class="pcf-module-chip">❤️ Saúde / IMC</span>
+                    <span class="pcf-module-chip">👤 Contatos</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <div class="pcf-slide pcf-slide-3">
+                <div class="pcf-slide-body">
+                  <h2 class="pcf-slide-title">Relatórios e Análises</h2>
+                  <p class="pcf-slide-sub">Visualize sua evolução com gráficos e relatórios detalhados</p>
+                  <div class="pcf-reports-grid">
+                    <div class="pcf-report-card"><span>📊</span><span>Dashboard Financeiro</span></div>
+                    <div class="pcf-report-card"><span>📈</span><span>Evolução de Hábitos</span></div>
+                    <div class="pcf-report-card"><span>🧠</span><span>Análise de Emoções</span></div>
+                    <div class="pcf-report-card"><span>💎</span><span>Streak de Virtudes</span></div>
+                    <div class="pcf-report-card"><span>🎯</span><span>Histórico Roda da Vida</span></div>
+                    <div class="pcf-report-card"><span>💸</span><span>4 Forças do Dinheiro</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <div class="pcf-slide pcf-slide-4">
+                <div class="pcf-slide-body">
+                  <h2 class="pcf-slide-title">Integração entre Módulos</h2>
+                  <p class="pcf-slide-sub">Os módulos se comunicam para enriquecer sua autoavaliação</p>
+                  <div class="pcf-int-diagram">
+                    <div class="pcf-int-row">
+                      <div class="pcf-int-node">🌱 Hábitos</div>
+                      <div class="pcf-int-line">───</div>
+                      <div class="pcf-int-center-node">🎯 Roda da Vida</div>
+                      <div class="pcf-int-line">───</div>
+                      <div class="pcf-int-node">💎 Virtudes</div>
+                    </div>
+                    <div class="pcf-int-arrows">↕</div>
+                    <div class="pcf-int-row">
+                      <div class="pcf-int-node">🧠 Emoções</div>
+                      <div class="pcf-int-line">───</div>
+                      <div class="pcf-int-center-node">📊 Análises</div>
+                      <div class="pcf-int-line">───</div>
+                      <div class="pcf-int-node">💰 Finanças</div>
+                    </div>
+                  </div>
+                  <p class="pcf-int-note">Sugestões automáticas preenchem a Roda da Vida com base nas suas atividades diárias</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#pcfCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#pcfCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Próximo</span>
+          </button>
+        </div>
+      </section>`;
+
     document.getElementById('app').innerHTML = `
       <div class="landing-page">
 
@@ -55,9 +153,10 @@ PCF.App = (() => {
               </span>
             </a>
             <nav class="landing-nav" id="landing-nav">
-              <a href="#inicio-section"        class="landing-nav-link active" data-section="inicio-section">Início</a>
+              <a href="#inicio-section"          class="landing-nav-link active" data-section="inicio-section">Início</a>
+              <a href="#apresentacao-section"    class="landing-nav-link" data-section="apresentacao-section">Apresentação</a>
               <a href="#funcionalidades-section" class="landing-nav-link" data-section="funcionalidades-section">Funcionalidades</a>
-              <a href="#sobre-section"          class="landing-nav-link" data-section="sobre-section">Sobre</a>
+              <a href="#sobre-section"           class="landing-nav-link" data-section="sobre-section">Sobre</a>
               <span class="landing-nav-divider"></span>
               <a href="mailto:antoninocs@yahoo.com.br" class="landing-nav-contact" title="Enviar e-mail para antoninocs@yahoo.com.br">
                 <i data-lucide="mail"></i>
@@ -65,6 +164,11 @@ PCF.App = (() => {
               <a href="https://github.com/antoninocs1" target="_blank" rel="noopener noreferrer" class="landing-nav-contact" title="Perfil no GitHub">
                 ${_githubSvg}
               </a>
+              <span class="landing-nav-divider"></span>
+              <button id="landing-theme-toggle" class="landing-nav-contact" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+                <i data-lucide="sun" id="ltg-sun"></i>
+                <i data-lucide="moon" id="ltg-moon"></i>
+              </button>
             </nav>
             <button class="landing-nav-toggle" id="landing-nav-toggle" aria-label="Abrir menu">
               <i data-lucide="menu"></i>
@@ -85,6 +189,8 @@ PCF.App = (() => {
             </div>
           </div>
         </section>
+
+        ${carouselHtml}
 
         <section id="funcionalidades-section" class="landing-section landing-features-section">
           <div class="landing-container">
@@ -168,6 +274,27 @@ PCF.App = (() => {
     /* Lucide icons */
     if (window.lucide) lucide.createIcons();
 
+    /* Bootstrap carousel init */
+    if (window.bootstrap) {
+      const carouselEl = document.getElementById('pcfCarousel');
+      if (carouselEl) new bootstrap.Carousel(carouselEl, { interval: 5000, ride: 'carousel' });
+    }
+
+    /* CTA do carousel → scroll ao login */
+    const ctaBtn = document.getElementById('pcf-cta-login');
+    if (ctaBtn) ctaBtn.onclick = () => document.getElementById('inicio-section').scrollIntoView({ behavior: 'smooth' });
+
+    /* Toggle tema (landing) */
+    const landingThemeBtn = document.getElementById('landing-theme-toggle');
+    if (landingThemeBtn) {
+      landingThemeBtn.onclick = () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('pcf_theme', next);
+      };
+    }
+
     /* Mobile nav toggle */
     document.getElementById('landing-nav-toggle').onclick = () => {
       document.getElementById('landing-nav').classList.toggle('open');
@@ -188,7 +315,7 @@ PCF.App = (() => {
     };
 
     /* Active nav on scroll */
-    const _sections = ['inicio-section', 'funcionalidades-section', 'sobre-section'];
+    const _sections = ['inicio-section', 'apresentacao-section', 'funcionalidades-section', 'sobre-section'];
     const _obs = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
