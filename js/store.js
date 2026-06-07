@@ -270,11 +270,43 @@ PCF.Store = (() => {
 
   /* ---------- AGENDA / COMPROMISSOS ---------- */
   const _agU = () => `pcf_agenda_${currentUserId()}`;
+  const _emitAgendaChange = (type, detail = {}) => {
+    if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
+    window.dispatchEvent(new CustomEvent('pcf:agenda-changed', {
+      detail: { type, ...detail }
+    }));
+  };
   const getCompromissos = () => _get(_agU()) || [];
-  const saveCompromissos = (c) => _set(_agU(), c);
-  const addCompromisso = (c) => { const all = getCompromissos(); all.push({ id: _uid(), ...c }); saveCompromissos(all); return all; };
-  const updateCompromisso = (id, data) => { const all = getCompromissos(); const i = all.findIndex(c => c.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveCompromissos(all); } return all; };
-  const deleteCompromisso = (id) => { const all = getCompromissos().filter(c => c.id !== id); saveCompromissos(all); return all; };
+  const saveCompromissos = (c) => {
+    _set(_agU(), c);
+    _emitAgendaChange('save', { compromissos: c });
+  };
+  const addCompromisso = (c) => {
+    const novo = { id: _uid(), ultimoAvisoChave: null, ...c };
+    const all = getCompromissos();
+    all.push(novo);
+    saveCompromissos(all);
+    return all;
+  };
+  const updateCompromisso = (id, data) => {
+    const all = getCompromissos();
+    const i = all.findIndex(c => c.id === id);
+    if (i >= 0) {
+      const anterior = all[i];
+      all[i] = { ...all[i], ...data };
+      const mudouAgendamento = anterior.data !== all[i].data || anterior.hora !== all[i].hora;
+      const virouPendente = anterior.status !== 'Pendente' && all[i].status === 'Pendente';
+      if (mudouAgendamento || virouPendente) all[i].ultimoAvisoChave = null;
+      if (all[i].status !== 'Pendente') all[i].ultimoAvisoChave = null;
+      saveCompromissos(all);
+    }
+    return all;
+  };
+  const deleteCompromisso = (id) => {
+    const all = getCompromissos().filter(c => c.id !== id);
+    saveCompromissos(all);
+    return all;
+  };
 
   /* ---------- SEED DEFAULTS ---------- */
   // forceKeys: quando fornecido, sobrescreve APENAS as chaves listadas; caso contrário, só escreve se vazio

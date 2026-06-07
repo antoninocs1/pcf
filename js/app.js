@@ -827,13 +827,156 @@ PCF.App = (() => {
     }
   };
 
-  /* ==================== INIT ==================== */
+  /* ==================== GLOBAL ALERTAS ==================== */
+  
+  let _globalAlertInterval = null;
+  let _agendaChangeListenerBound = false;
+
+  const getCompromissoAvisoChave = (compromisso) =>
+    `${compromisso.id}|${compromisso.data || ''}|${compromisso.hora || ''}`;
+
+  const getCompromissoDateTime = (compromisso) => {
+    if (!compromisso.data) return null;
+    if (!compromisso.hora) return new Date(`${compromisso.data}T00:00:00`);
+    const hora = compromisso.hora.length === 5 ? `${compromisso.hora}:00` : compromisso.hora;
+    return new Date(`${compromisso.data}T${hora}`);
+  };
+
+  const getCompromissoSortValue = (compromisso) => {
+    const dateTime = getCompromissoDateTime(compromisso);
+    if (!dateTime || Number.isNaN(dateTime.getTime())) return Number.MAX_SAFE_INTEGER;
+    return dateTime.getTime();
+  };
+
+  const getCompromissoUrgente = (compromisso, agora = new Date()) => {
+    if (compromisso.status !== 'Pendente') return null;
+
+    const hj = agora.toISOString().split('T')[0];
+    if (compromisso.hora) {
+      const compDateTime = getCompromissoDateTime(compromisso);
+      if (!compDateTime || Number.isNaN(compDateTime.getTime())) return null;
+      if (compDateTime <= agora) return 'agora';
+      return null;
+    }
+
+    if (compromisso.data < hj) return 'atrasado';
+    return null;
+  };
+
+  const markCompromissoAlertShown = (compromisso) => {
+    const chave = getCompromissoAvisoChave(compromisso);
+    const atual = S.getCompromissos().find(c => c.id === compromisso.id);
+    if (!atual || atual.ultimoAvisoChave === chave) return;
+    S.updateCompromisso(compromisso.id, { ultimoAvisoChave: chave });
+  };
+
+  const startGlobalAlertSystem = () => {
+    if (_globalAlertInterval) clearInterval(_globalAlertInterval);
+    
+    // Verifica alertas a cada 30 segundos
+    _globalAlertInterval = setInterval(() => {
+      checkGlobalAlerts();
+    }, 30000);
+    
+    // Verifica alertas imediatamente
+    checkGlobalAlerts();
+  };
+
+  const stopGlobalAlertSystem = () => {
+    if (_globalAlertInterval) {
+      clearInterval(_globalAlertInterval);
+      _globalAlertInterval = null;
+    }
+  };
+
+  const checkGlobalAlerts = () => {
+    if (!S.getSession()) return;
+    
+    try {
+      const compromissos = S.getCompromissos();
+      if (!compromissos || compromissos.length === 0) return;
+
+      const agora = new Date();
+      const alerta = compromissos
+        .sort((a, b) => getCompromissoSortValue(a) - getCompromissoSortValue(b))
+        .map(comp => ({ comp, tipo: getCompromissoUrgente(comp, agora) }))
+        .find(({ comp, tipo }) =>
+          (tipo === 'agora' || tipo === 'atrasado') &&
+          comp.ultimoAvisoChave !== getCompromissoAvisoChave(comp)
+        );
+
+      if (!alerta) return;
+
+      markCompromissoAlertShown(alerta.comp);
+      showCompromissoModalGlobal(alerta.comp, alerta.tipo);
+    } catch (err) {
+      console.error('[PCF] Erro ao verificar alertas globais:', err);
+    }
+  };
+
+  const showCompromissoModalGlobal = (compromisso, tipo) => {
+    // Remove modais existentes
+    const existingModals = document.querySelectorAll('.compromisso-modal');
+    existingModals.forEach(modal => modal.remove());
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay compromisso-modal';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h3>${tipo === 'atrasado' ? 'Aviso de compromisso em atraso!' : 'Aviso de compromisso!'}</h3>
+        <div class="modal-body">
+          <p><strong>Descrição do compromisso:</strong></p>
+          <p>${H.esc(compromisso.compromisso)}</p>
+          <p><strong>Data - Hora:</strong></p>
+          <p>${H.formatarData(compromisso.data)} ${compromisso.hora || ''}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="compromisso-cancelar">Cancelar</button>
+          <button class="btn btn-primary" id="compromisso-ok">OK</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    // Botão OK
+    document.getElementById('compromisso-ok').onclick = () => {
+      S.updateCompromisso(compromisso.id, { status: 'Concluído' });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+
+    // Botão Cancelar
+    document.getElementById('compromisso-cancelar').onclick = () => {
+      S.updateCompromisso(compromisso.id, { status: 'Cancelado' });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+
+    // Fechar ao clicar fora
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+      }
+    };
+  };
+
+  const bindAgendaAlertListeners = () => {
+    if (_agendaChangeListenerBound) return;
+    _agendaChangeListenerBound = true;
+    window.addEventListener('pcf:agenda-changed', () => {
+      if (!S.getSession()) return;
+      setTimeout(checkGlobalAlerts, 100);
+    });
+  };
+
   const initApp = () => {
     if (!S.getSession()) { renderLogin(); return; }
     renderShell();
     if (window.lucide) lucide.createIcons();
     initThemeToggle();
     initNavGroups();
+    bindAgendaAlertListeners();
+    // Inicia sistema de alertas globais
+    startGlobalAlertSystem();
     // Ativa redimensionamento automático de colunas sempre que uma nova página for renderizada
     const mc = document.getElementById('main-content');
     if (mc) {
@@ -856,15 +999,12 @@ PCF.App = (() => {
           await PCF.Store.loadAll(firebaseUser.uid);
           initApp();
           // Verifica alertas pendentes quando o usuário fizer login
-          setTimeout(() => {
-            if (PCF.Pages.checkAgendaAlerts) {
-              PCF.Pages.checkAgendaAlerts();
-            }
-          }, 1000); // Pequeno atraso para garantir que os dados estejam carregados
+          setTimeout(checkGlobalAlerts, 1000); // Pequeno atraso para garantir que os dados estejam carregados
         } catch (err) {
           document.getElementById('app').innerHTML = `<div style="padding:2rem"><div class="alert alert-error"><strong>Erro ao carregar dados.</strong><br>${err.message}</div></div>`;
         }
       } else {
+        stopGlobalAlertSystem();
         renderLogin();
       }
     });

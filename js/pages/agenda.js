@@ -4,6 +4,8 @@
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
 
+const checkAndShowAlerts = () => {};
+
 (() => {
   const S = PCF.Store;
   const H = PCF.Helpers;
@@ -14,9 +16,6 @@ PCF.Pages = PCF.Pages || {};
   let _clockInterval = null;
 
   PCF.Pages.agenda = (container) => {
-
-    let _alertInterval = null;
-
     const checkAlertas = () => {
       const compromissos = S.getCompromissos();
       const agora = new Date();
@@ -98,33 +97,14 @@ PCF.Pages = PCF.Pages || {};
       };
     };
 
-    const checkAndShowAlerts = () => {
-      const alertas = checkAlertas();
-      alertas.forEach(alerta => {
-        if (alerta.tipo === 'agora' || alerta.tipo === 'atrasado') {
-          showCompromissoModal(alerta.comp, alerta.tipo);
-        }
-      });
-    };
+    const checkAndShowAlerts = () => {};
 
     const startAlertChecking = () => {
-      // Para intervalos existentes
-      if (_alertInterval) clearInterval(_alertInterval);
-      
-      // Verifica alertas a cada minuto
-      _alertInterval = setInterval(() => {
-        checkAndShowAlerts();
-      }, 60000);
-      
-      // Verifica alertas imediatamente ao iniciar
       checkAndShowAlerts();
     };
 
     const stopAlertChecking = () => {
-      if (_alertInterval) {
-        clearInterval(_alertInterval);
-        _alertInterval = null;
-      }
+      return null;
     };
 
     const render = () => {
