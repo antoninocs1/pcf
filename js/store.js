@@ -270,12 +270,15 @@ PCF.Store = (() => {
 
   /* ---------- AGENDA / COMPROMISSOS ---------- */
   const _agU = () => `pcf_agenda_${currentUserId()}`;
+  const _agCfgU = () => `pcf_agenda_config_${currentUserId()}`;
   const _emitAgendaChange = (type, detail = {}) => {
     if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return;
     window.dispatchEvent(new CustomEvent('pcf:agenda-changed', {
       detail: { type, ...detail }
     }));
   };
+  const getAgendaConfig = () => ({ avisoSonoroAtivo: true, ...(_get(_agCfgU()) || {}) });
+  const saveAgendaConfig = (config) => _set(_agCfgU(), { ...getAgendaConfig(), ...config });
   const getCompromissos = () => _get(_agU()) || [];
   const saveCompromissos = (c) => {
     _set(_agU(), c);
@@ -387,12 +390,13 @@ PCF.Store = (() => {
     const habitos = [
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Beber 2L de água', descricao: 'Hidratação diária', categoria: 'Saúde', meta: 'Diário', icone: '💧', cor: '#3b82f6', ativo: true },
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Exercício físico', descricao: 'Pelo menos 30 minutos', categoria: 'Exercício', meta: '5x/semana', icone: '🏃', cor: '#16a34a', ativo: true },
+      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Estudo', descricao: '1 hora de estudo', categoria: 'Mente', meta: 'Diário', icone: '📖', cor: '#c13ef5', ativo: true },
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Leitura', descricao: '20 minutos de leitura', categoria: 'Mente', meta: 'Diário', icone: '📚', cor: '#8b5cf6', ativo: true },
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Meditação / Oração', descricao: 'Momento de reflexão e gratidão', categoria: 'Mente', meta: 'Diário', icone: '🧘', cor: '#f59e0b', ativo: true },
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Alimentação saudável', descricao: 'Evitar ultraprocessados', categoria: 'Alimentação', meta: 'Diário', icone: '🍎', cor: '#dc2626', ativo: true },
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Dormir 7–8 horas', descricao: 'Qualidade do sono', categoria: 'Sono', meta: 'Diário', icone: '😴', cor: '#0ea5e9', ativo: true },
       { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Gratidão', descricao: 'Anotar 3 coisas pelas quais sou grato', categoria: 'Mente', meta: 'Diário', icone: '🙏', cor: '#ec4899', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Tocar Violão', descricao: 'Praticar violão por 20 minutos', categoria: 'Lazer', meta: 'Diário', icone: '🎸', cor: '#ec4899', ativo: true },
+      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Tocar Violão', descricao: 'Praticar violão por 20 minutos', categoria: 'Lazer', meta: 'Diário', icone: '🎸', cor: '#fcff40f1', ativo: true },
    ];
     _seedIfEmpty(`pcf_habitos_${userId}`, habitos);
 
@@ -1862,6 +1866,7 @@ PCF.Store = (() => {
     getEmocoes, saveEmocoes, addEmocao, updateEmocao, deleteEmocao,
     getEmocoesConfig, saveEmocoesConfig,
     getIMC, saveIMC,
+    getAgendaConfig, saveAgendaConfig,
     getCompromissos, saveCompromissos, addCompromisso, updateCompromisso, deleteCompromisso,
     getHabitos, saveHabitos, addHabito, updateHabito, deleteHabito,
     getRegistrosHabitos, saveRegistrosHabitos, upsertRegistroHabito, deleteRegistroHabito,

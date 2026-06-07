@@ -116,12 +116,17 @@ const checkAndShowAlerts = () => {};
         if (cmpData !== 0) return cmpData;
         return (a.hora || '').localeCompare(b.hora || '');
       });
+      const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
       const alertas = checkAlertas();
 
       container.innerHTML = `
         <div class="page">
-          <div class="page-header">
+          <div class="page-header page-header-agenda">
             <h2>📅 Agenda de Compromissos</h2>
+            <label class="agenda-sound-toggle">
+              <input type="checkbox" id="ag-sound-toggle" ${agendaConfig.avisoSonoroAtivo ? 'checked' : ''}>
+              <span>Ativar aviso sonoro</span>
+            </label>
           </div>
 
           <div class="agenda-clock-banner">
@@ -216,6 +221,9 @@ const checkAndShowAlerts = () => {};
       document.getElementById('ag-btn-crono').onclick = () => showCronoModal();
 
       // Iniciar verificação de alertas
+      document.getElementById('ag-sound-toggle').onchange = (e) => {
+        S.saveAgendaConfig({ avisoSonoroAtivo: e.target.checked });
+      };
       startAlertChecking();
 
       // Adicionar compromisso

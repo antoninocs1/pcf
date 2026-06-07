@@ -565,6 +565,34 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   gap: .5rem;
   margin-bottom: 1rem;
 }
+.page-header-agenda {
+  align-items: center;
+  gap: 14px;
+}
+.agenda-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .55rem .85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: .92rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.agenda-sound-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+  flex: 0 0 auto;
+}
+.agenda-sound-toggle span {
+  white-space: nowrap;
+}
 .alerta-item {
   padding: .6rem 1rem;
   border-radius: var(--radius-sm);
@@ -591,6 +619,19 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 @media (max-width: 768px) {
   .form-grid-agenda { grid-template-columns: 1fr 1fr; }
   .form-grid-agenda .form-group:first-child { grid-column: 1 / -1; }
+  .page-header-agenda {
+    flex-direction: column;
+    align-items: stretch;
+    padding-right: 54px;
+  }
+  .agenda-sound-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+  .agenda-sound-toggle span {
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 /* ---- Agenda: Banner Relógio ---- */
@@ -706,6 +747,11 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .agenda-clock-banner { flex-direction: column; align-items: center; text-align: center; }
   .agenda-clock-time { font-size: 2.2rem; }
   .agenda-clock-btns { flex-direction: row; }
+  .agenda-clock-btns .btn { min-width: 0; }
+  .agenda-sound-toggle {
+    border-radius: var(--radius);
+    padding: .7rem .85rem;
+  }
 }
 
 /* ==================== HÁBITOS ==================== */

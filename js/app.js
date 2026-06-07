@@ -870,6 +870,36 @@ PCF.App = (() => {
     S.updateCompromisso(compromisso.id, { ultimoAvisoChave: chave });
   };
 
+  const playCompromissoAlertSound = () => {
+    try {
+      const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
+      if (!agendaConfig.avisoSonoroAtivo) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      const audioCtx = new AudioCtx();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+      oscillator.frequency.setValueAtTime(660, audioCtx.currentTime + 0.16);
+
+      gainNode.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.36);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.38);
+      oscillator.onended = () => audioCtx.close().catch(() => {});
+    } catch (err) {
+      console.warn('[PCF] Não foi possível reproduzir o aviso sonoro da agenda:', err);
+    }
+  };
+
   const startGlobalAlertSystem = () => {
     if (_globalAlertInterval) clearInterval(_globalAlertInterval);
     
@@ -936,6 +966,7 @@ PCF.App = (() => {
         </div>
       </div>`;
     document.body.appendChild(overlay);
+    playCompromissoAlertSound();
 
     // Botão OK
     document.getElementById('compromisso-ok').onclick = () => {
