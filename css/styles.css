@@ -1691,26 +1691,6 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 [data-theme="light"] .virtude-btn { background: #fff; }
 [data-theme="light"] .virtude-btn.praticada { background: color-mix(in srgb, var(--vcolor, #8b5cf6) 10%, #fff); }
 
-/* ==================== BOOTSTRAP CONFLICT RESETS ==================== */
-/* Garante que Bootstrap n�o sobrescreva nossos estilos base */
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-/* Cancela o reflow de fonte/cor que Bootstrap faz via vari�veis css pr�prias */
-body, h1, h2, h3, h4, h5, h6 { font-weight: inherit; }
-/* Impede Bootstrap de estilizar links do app autenticado */
-.sidebar a, .page a:not(.landing-contact-btn):not(.landing-nav-link):not(.landing-nav-contact):not(.landing-brand):not(.btn) {
-  text-decoration: none; color: inherit;
-}
-/* Reset do table Bootstrap para o .table do app */
-.table { border-color: var(--border); color: var(--text); background: var(--bg-card); }
-.table > :not(caption) > * > * { background-color: transparent; color: inherit; box-shadow: none; }
-/* Bot�es: garante nossa fonte e remove outline Bootstrap */
-.btn, button { font-family: 'Inter', system-ui, sans-serif; }
-.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: none; }
-
 /* ==================== CARROSSEL DE APRESENTA��O ==================== */
 .landing-carousel-section {
   background: var(--bg);

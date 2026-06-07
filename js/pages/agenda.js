@@ -15,6 +15,8 @@ PCF.Pages = PCF.Pages || {};
 
   PCF.Pages.agenda = (container) => {
 
+    let _alertInterval = null;
+
     const checkAlertas = () => {
       const compromissos = S.getCompromissos();
       const agora = new Date();
@@ -23,6 +25,21 @@ PCF.Pages = PCF.Pages || {};
 
       compromissos.forEach(c => {
         if (c.status !== 'Pendente') return;
+        
+        // Verifica se tem hora específica
+        if (c.hora) {
+          const compDateTime = new Date(c.data + 'T' + c.hora);
+          const nowDateTime = new Date();
+          const diffMs = compDateTime - nowDateTime;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          
+          // Se for o mesmo dia e a hora passou ou está próxima (dentro de 1 hora)
+          if (c.data === hj && diffHours <= 1 && diffHours > -1) {
+            alertas.push({ tipo: 'agora', comp: c });
+            return;
+          }
+        }
+        
         if (c.data < hj) {
           alertas.push({ tipo: 'atrasado', comp: c });
         } else if (c.data === hj) {
@@ -35,7 +52,85 @@ PCF.Pages = PCF.Pages || {};
       return alertas;
     };
 
+    const showCompromissoModal = (compromisso, tipo) => {
+      // Remove modais existentes
+      const existingModals = document.querySelectorAll('.compromisso-modal');
+      existingModals.forEach(modal => modal.remove());
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay compromisso-modal';
+      overlay.innerHTML = `
+        <div class="modal">
+          <h3>${tipo === 'atrasado' ? 'Aviso de compromisso em atraso!' : 'Aviso de compromisso!'}</h3>
+          <div class="modal-body">
+            <p><strong>Descrição do compromisso:</strong></p>
+            <p>${H.esc(compromisso.compromisso)}</p>
+            <p><strong>Data - Hora:</strong></p>
+            <p>${H.formatarData(compromisso.data)} ${compromisso.hora || ''}</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" id="compromisso-cancelar">Cancelar</button>
+            <button class="btn btn-primary" id="compromisso-ok">OK</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      // Botão OK
+      document.getElementById('compromisso-ok').onclick = () => {
+        S.updateCompromisso(compromisso.id, { status: 'Concluído' });
+        overlay.remove();
+        render();
+      };
+
+      // Botão Cancelar
+      document.getElementById('compromisso-cancelar').onclick = () => {
+        S.updateCompromisso(compromisso.id, { status: 'Cancelado' });
+        overlay.remove();
+        render();
+      };
+
+      // Fechar ao clicar fora
+      overlay.onclick = (e) => {
+        if (e.target === overlay) {
+          // Se fechar sem clicar em botões, mantém como Pendente
+          overlay.remove();
+        }
+      };
+    };
+
+    const checkAndShowAlerts = () => {
+      const alertas = checkAlertas();
+      alertas.forEach(alerta => {
+        if (alerta.tipo === 'agora' || alerta.tipo === 'atrasado') {
+          showCompromissoModal(alerta.comp, alerta.tipo);
+        }
+      });
+    };
+
+    const startAlertChecking = () => {
+      // Para intervalos existentes
+      if (_alertInterval) clearInterval(_alertInterval);
+      
+      // Verifica alertas a cada minuto
+      _alertInterval = setInterval(() => {
+        checkAndShowAlerts();
+      }, 60000);
+      
+      // Verifica alertas imediatamente ao iniciar
+      checkAndShowAlerts();
+    };
+
+    const stopAlertChecking = () => {
+      if (_alertInterval) {
+        clearInterval(_alertInterval);
+        _alertInterval = null;
+      }
+    };
+
     const render = () => {
+      // Para a verificação de alertes anterior
+      stopAlertChecking();
+      
       const compromissos = S.getCompromissos().sort((a, b) => {
         const cmpData = a.data.localeCompare(b.data);
         if (cmpData !== 0) return cmpData;
@@ -139,6 +234,9 @@ PCF.Pages = PCF.Pages || {};
       startClock();
       document.getElementById('ag-btn-timer').onclick = () => showTimerModal();
       document.getElementById('ag-btn-crono').onclick = () => showCronoModal();
+
+      // Iniciar verificação de alertas
+      startAlertChecking();
 
       // Adicionar compromisso
       document.getElementById('agenda-form').onsubmit = (e) => {
@@ -446,5 +544,17 @@ PCF.Pages = PCF.Pages || {};
     };
 
     render();
+    
+    // Função de limpeza para quando a página for destruída
+    return () => {
+      stopAlertChecking();
+      if (_clockInterval) {
+        clearInterval(_clockInterval);
+        _clockInterval = null;
+      }
+    };
   };
-})();
+  })();
+  
+   // Exporta função para verificação de alertas
+   PCF.Pages.checkAgendaAlerts = checkAndShowAlerts;

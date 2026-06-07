@@ -855,6 +855,12 @@ PCF.App = (() => {
         try {
           await PCF.Store.loadAll(firebaseUser.uid);
           initApp();
+          // Verifica alertas pendentes quando o usuário fizer login
+          setTimeout(() => {
+            if (PCF.Pages.checkAgendaAlerts) {
+              PCF.Pages.checkAgendaAlerts();
+            }
+          }, 1000); // Pequeno atraso para garantir que os dados estejam carregados
         } catch (err) {
           document.getElementById('app').innerHTML = `<div style="padding:2rem"><div class="alert alert-error"><strong>Erro ao carregar dados.</strong><br>${err.message}</div></div>`;
         }
