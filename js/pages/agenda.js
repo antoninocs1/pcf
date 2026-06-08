@@ -14,6 +14,18 @@ const checkAndShowAlerts = () => {};
   const STATUS_COLORS = { 'Pendente': '#f59e0b', 'Concluído': '#16a34a', 'Cancelado': '#dc2626' };
 
   let _clockInterval = null;
+  const isCompromissoAtrasado = (data, hora) => {
+    if (!data) return false;
+    const agora = new Date();
+    if (!hora) {
+      const hoje = agora.toISOString().split('T')[0];
+      return data < hoje;
+    }
+    const horaCompleta = hora.length === 5 ? `${hora}:00` : hora;
+    const dateTime = new Date(`${data}T${horaCompleta}`);
+    if (Number.isNaN(dateTime.getTime())) return false;
+    return dateTime < agora;
+  };
 
   PCF.Pages.agenda = (container) => {
     const checkAlertas = () => {
@@ -229,12 +241,17 @@ const checkAndShowAlerts = () => {};
       // Adicionar compromisso
       document.getElementById('agenda-form').onsubmit = (e) => {
         e.preventDefault();
-        S.addCompromisso({
+        const novoCompromisso = {
           compromisso: document.getElementById('ag-desc').value.trim(),
           data: document.getElementById('ag-data').value,
           hora: document.getElementById('ag-hora').value,
           status: document.getElementById('ag-status').value,
-        });
+        };
+        if (isCompromissoAtrasado(novoCompromisso.data, novoCompromisso.hora)) {
+          alert('Data/horário atrasado!');
+          return;
+        }
+        S.addCompromisso(novoCompromisso);
         render();
       };
 
@@ -291,12 +308,17 @@ const checkAndShowAlerts = () => {};
 
       document.getElementById('ag-edit-form').onsubmit = (e) => {
         e.preventDefault();
-        S.updateCompromisso(comp.id, {
+        const compromissoAtualizado = {
           compromisso: document.getElementById('ag-e-desc').value.trim(),
           data: document.getElementById('ag-e-data').value,
           hora: document.getElementById('ag-e-hora').value,
           status: document.getElementById('ag-e-status').value,
-        });
+        };
+        if (isCompromissoAtrasado(compromissoAtualizado.data, compromissoAtualizado.hora)) {
+          alert('Data/horário atrasado!');
+          return;
+        }
+        S.updateCompromisso(comp.id, compromissoAtualizado);
         overlay.remove();
         render();
       };

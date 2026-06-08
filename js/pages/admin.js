@@ -1168,6 +1168,19 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
     };
 
+    const isCompromissoAtrasado = (data, hora) => {
+      if (!data) return false;
+      const agora = new Date();
+      if (!hora) {
+        const hoje = agora.toISOString().split('T')[0];
+        return data < hoje;
+      }
+      const horaCompleta = hora.length === 5 ? `${hora}:00` : hora;
+      const dateTime = new Date(`${data}T${horaCompleta}`);
+      if (Number.isNaN(dateTime.getTime())) return false;
+      return dateTime < agora;
+    };
+
     /* ---- Seção: Diário ---- */
     const renderDiario = () => {
       const entries = [...S.getDiario()].sort((a, b) => b.data.localeCompare(a.data));
@@ -1477,6 +1490,10 @@ PCF.Pages = PCF.Pages || {};
           hora: document.getElementById('gb-ag-hora').value,
           status: document.getElementById('gb-ag-status').value,
         };
+        if (isCompromissoAtrasado(data.data, data.hora)) {
+          alert('Data/horário atrasado!');
+          return;
+        }
         if (isEdit) S.updateCompromisso(comp.id, data);
         else S.addCompromisso(data);
         overlay.remove();
