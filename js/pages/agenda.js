@@ -12,6 +12,8 @@ const checkAndShowAlerts = () => {};
 
   const STATUS_OPTS = ['Pendente', 'Concluído', 'Cancelado'];
   const STATUS_COLORS = { 'Pendente': '#f59e0b', 'Concluído': '#16a34a', 'Cancelado': '#dc2626' };
+  const CALENDAR_WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+  const MONTH_LABEL = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
 
   let _clockInterval = null;
   const isCompromissoAtrasado = (data, hora) => {
@@ -28,8 +30,62 @@ const checkAndShowAlerts = () => {};
   };
 
   PCF.Pages.agenda = (container) => {
+    const today = new Date();
+    let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    let selectedDate = H.hoje();
+
+    const normalizeDateKey = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    const getMonthCounts = (compromissos) => compromissos.reduce((acc, comp) => {
+      if (!comp.data) return acc;
+      acc[comp.data] = (acc[comp.data] || 0) + 1;
+      return acc;
+    }, {});
+
+    const getPlanoAcoesVinculadas = () => (S.getPlanoAcoes ? S.getPlanoAcoes() : [])
+      .filter(acao => acao.agendaAtivo && acao.whenDate)
+      .sort((a, b) => a.whenDate.localeCompare(b.whenDate) || (a.whenTime || '').localeCompare(b.whenTime || ''));
+
+    const getCombinedMonthCounts = (compromissos, acoesVinculadas) => {
+      const counts = getMonthCounts(compromissos);
+      acoesVinculadas.forEach(acao => {
+        counts[acao.whenDate] = (counts[acao.whenDate] || 0) + 1;
+      });
+      return counts;
+    };
+
+    const buildCalendarGrid = (monthDate, countsByDate) => {
+      const year = monthDate.getFullYear();
+      const month = monthDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const startOffset = firstDay.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const cells = [];
+
+      for (let i = 0; i < startOffset; i += 1) cells.push(null);
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const cellDate = new Date(year, month, day);
+        const dateKey = normalizeDateKey(cellDate);
+        cells.push({
+          day,
+          dateKey,
+          count: countsByDate[dateKey] || 0,
+          isToday: dateKey === H.hoje(),
+          isSelected: dateKey === selectedDate,
+        });
+      }
+      while (cells.length % 7 !== 0) cells.push(null);
+      return cells;
+    };
+
     const checkAlertas = () => {
       const compromissos = S.getCompromissos();
+      const acoesVinculadas = getPlanoAcoesVinculadas();
       const agora = new Date();
       const hj = agora.toISOString().split('T')[0];
       const alertas = [];
@@ -58,6 +114,33 @@ const checkAndShowAlerts = () => {};
         } else {
           const diff = (new Date(c.data + 'T00:00:00') - new Date(hj + 'T00:00:00')) / (1000 * 60 * 60 * 24);
           if (diff <= 3) alertas.push({ tipo: 'proximo', comp: c });
+        }
+      });
+
+      acoesVinculadas.forEach(acao => {
+        if (acao.status !== 'Pendente') return;
+        if (acao.whenTime) {
+          const acaoDateTime = new Date(`${acao.whenDate}T${acao.whenTime}`);
+          const diffMs = acaoDateTime - agora;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          if (acao.whenDate === hj && diffHours <= 1 && diffHours > -1) {
+            alertas.push({
+              tipo: 'agora',
+              comp: { compromisso: `[Plano] ${acao.what}`, data: acao.whenDate, hora: acao.whenTime }
+            });
+            return;
+          }
+        }
+        if (acao.whenDate < hj) {
+          alertas.push({
+            tipo: 'atrasado',
+            comp: { compromisso: `[Plano] ${acao.what}`, data: acao.whenDate, hora: acao.whenTime }
+          });
+        } else if (acao.whenDate === hj) {
+          alertas.push({
+            tipo: 'hoje',
+            comp: { compromisso: `[Plano] ${acao.what}`, data: acao.whenDate, hora: acao.whenTime }
+          });
         }
       });
       return alertas;
@@ -128,6 +211,9 @@ const checkAndShowAlerts = () => {};
         if (cmpData !== 0) return cmpData;
         return (a.hora || '').localeCompare(b.hora || '');
       });
+      const acoesVinculadas = getPlanoAcoesVinculadas();
+      const countsByDate = getCombinedMonthCounts(compromissos, acoesVinculadas);
+      const calendarCells = buildCalendarGrid(currentMonth, countsByDate);
       const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
       const alertas = checkAlertas();
 
@@ -141,15 +227,59 @@ const checkAndShowAlerts = () => {};
             </label>
           </div>
 
-          <div class="agenda-clock-banner">
-            <div class="agenda-clock-main">
-              <div class="agenda-clock-time" id="ag-clock-time">--:--:--</div>
-              <div class="agenda-clock-date" id="ag-clock-date">--/--/----</div>
-              <div class="agenda-clock-tz" id="ag-clock-tz"></div>
+          <div class="agenda-top-grid">
+            <div class="agenda-top-left">
+              <div class="agenda-clock-banner">
+                <div class="agenda-clock-main">
+                  <div class="agenda-clock-time" id="ag-clock-time">--:--:--</div>
+                  <div class="agenda-clock-date" id="ag-clock-date">--/--/----</div>
+                  <div class="agenda-clock-tz" id="ag-clock-tz"></div>
+                </div>
+              </div>
+              <div class="agenda-calendar-heading agenda-calendar-heading-side">
+                <h3>Calendario Mensal</h3>
+                <p class="agenda-calendar-subtitle">Navegue pelos meses e veja quantos compromissos existem em cada dia.</p>
+              </div>
             </div>
-            <div class="agenda-clock-btns">
-              <button class="btn btn-secondary" id="ag-btn-timer">⏱ Timer</button>
-              <button class="btn btn-secondary" id="ag-btn-crono">⏱ Cronômetro</button>
+
+            <div class="agenda-calendar-panel">
+              <div class="agenda-calendar-header">
+                <div class="agenda-calendar-toolbar">
+                  <button type="button" class="btn btn-secondary" id="ag-cal-today">Hoje</button>
+                  <div class="agenda-calendar-nav">
+                    <button type="button" class="btn btn-secondary" id="ag-cal-prev" aria-label="Mes anterior">&lsaquo;</button>
+                    <div class="agenda-calendar-title">${MONTH_LABEL.format(currentMonth)}</div>
+                    <button type="button" class="btn btn-secondary" id="ag-cal-next" aria-label="Proximo mes">&rsaquo;</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="agenda-calendar-board">
+                <div class="agenda-calendar-weekdays">
+                  ${CALENDAR_WEEKDAYS.map(day => `<span>${day}</span>`).join('')}
+                </div>
+                <div class="agenda-calendar-grid">
+                  ${calendarCells.map(cell => {
+                    if (!cell) return '<div class="agenda-calendar-cell agenda-calendar-cell-empty" aria-hidden="true"></div>';
+                    return `
+                      <button
+                        type="button"
+                        class="agenda-calendar-cell ${cell.isToday ? 'is-today' : ''} ${cell.isSelected ? 'is-selected' : ''} ${cell.count > 0 ? 'has-events' : ''}"
+                        data-ag-date="${cell.dateKey}"
+                        aria-label="${cell.day} com ${cell.count} compromisso${cell.count === 1 ? '' : 's'}">
+                        <span class="agenda-calendar-day">${cell.day}</span>
+                        ${cell.count > 0 ? `<span class="agenda-calendar-count">${cell.count > 99 ? '99+' : cell.count}</span>` : '<span class="agenda-calendar-count agenda-calendar-count-empty"></span>'}
+                      </button>`;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="agenda-top-actions">
+              <div class="agenda-clock-btns">
+                <button class="btn btn-secondary" id="ag-btn-timer">⏱ Timer</button>
+                <button class="btn btn-secondary" id="ag-btn-crono">⏱ Cronômetro</button>
+              </div>
             </div>
           </div>
 
@@ -173,7 +303,7 @@ const checkAndShowAlerts = () => {};
               </div>
               <div class="form-group">
                 <label>Data</label>
-                <input type="date" id="ag-data" required value="${H.hoje()}">
+                <input type="date" id="ag-data" required value="${selectedDate}">
               </div>
               <div class="form-group">
                 <label>Hora</label>
@@ -226,11 +356,60 @@ const checkAndShowAlerts = () => {};
               </table>
             </div>`}
           </div>
+
+          <div class="card" style="margin-top:1rem">
+            <h3>Ações do Plano vinculadas na Agenda (${acoesVinculadas.length})</h3>
+            ${acoesVinculadas.length === 0 ? '<p class="empty-text">Nenhuma ação do 5W2H vinculada à Agenda</p>' : `
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ação</th>
+                    <th>Quando</th>
+                    <th>Contato</th>
+                    <th>Status</th>
+                    <th>Origem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${acoesVinculadas.map(acao => {
+                    const contato = (S.getContatos ? S.getContatos() : []).find(c => c.id === acao.howContactId);
+                    const statusCor = STATUS_COLORS[acao.status] || '#6b7280';
+                    return `<tr>
+                      <td>${H.esc(acao.what)}</td>
+                      <td>${H.formatarData(acao.whenDate)} ${acao.whenTime || ''}</td>
+                      <td>${H.esc(contato?.nome || '—')}</td>
+                      <td><span class="status-badge" style="background:${statusCor}">${acao.status}</span></td>
+                      <td><a href="#plano-acao" class="btn-link">Plano de Ação</a></td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>`}
+          </div>
         </div>`;
 
       startClock();
       document.getElementById('ag-btn-timer').onclick = () => showTimerModal();
       document.getElementById('ag-btn-crono').onclick = () => showCronoModal();
+      document.getElementById('ag-cal-prev').onclick = () => {
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+        render();
+      };
+      document.getElementById('ag-cal-next').onclick = () => {
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+        render();
+      };
+      document.getElementById('ag-cal-today').onclick = () => {
+        currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        selectedDate = H.hoje();
+        render();
+        const inputData = document.getElementById('ag-data');
+        if (inputData) {
+          inputData.value = selectedDate;
+          inputData.focus();
+        }
+      };
 
       // Iniciar verificação de alertas
       document.getElementById('ag-sound-toggle').onchange = (e) => {
@@ -251,6 +430,9 @@ const checkAndShowAlerts = () => {};
           alert('Data/horário atrasado!');
           return;
         }
+        selectedDate = novoCompromisso.data;
+        currentMonth = new Date(`${novoCompromisso.data}T00:00:00`);
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
         S.addCompromisso(novoCompromisso);
         render();
       };
@@ -266,6 +448,17 @@ const checkAndShowAlerts = () => {};
         const delBtn = e.target.closest('[data-del-ag]');
         if (delBtn && confirm('Remover este compromisso?')) {
           S.deleteCompromisso(delBtn.dataset.delAg);
+          render();
+          return;
+        }
+        const dayBtn = e.target.closest('[data-ag-date]');
+        if (dayBtn) {
+          const inputData = document.getElementById('ag-data');
+          selectedDate = dayBtn.dataset.agDate;
+          if (inputData) {
+            inputData.value = dayBtn.dataset.agDate;
+            inputData.focus();
+          }
           render();
         }
       };

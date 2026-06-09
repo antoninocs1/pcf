@@ -16,7 +16,7 @@ PCF.Store = (() => {
   const DATA_COLS = [
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
-    'rodavida_reg', 'rodavida_config',
+    'rodavida_reg', 'rodavida_config', 'plano_acao',
     'virtudes_config', 'virtudes_reg'
   ];
 
@@ -308,6 +308,48 @@ PCF.Store = (() => {
   const deleteCompromisso = (id) => {
     const all = getCompromissos().filter(c => c.id !== id);
     saveCompromissos(all);
+    return all;
+  };
+
+  /* ---------- PLANO DE ACAO / 5W2H ---------- */
+  const _paU = () => `pcf_plano_acao_${currentUserId()}`;
+  const getPlanoAcoes = () => _get(_paU()) || [];
+  const savePlanoAcoes = (acoes) => {
+    _set(_paU(), acoes);
+    _emitAgendaChange('plano-save', { acoes });
+  };
+  const addPlanoAcao = (acao) => {
+    const nova = {
+      id: _uid(),
+      dataCadastro: new Date().toISOString().split('T')[0],
+      ultimoAvisoChave: null,
+      ...acao,
+    };
+    const all = getPlanoAcoes();
+    all.push(nova);
+    savePlanoAcoes(all);
+    return all;
+  };
+  const updatePlanoAcao = (id, data) => {
+    const all = getPlanoAcoes();
+    const i = all.findIndex(a => a.id === id);
+    if (i >= 0) {
+      const anterior = all[i];
+      all[i] = { ...all[i], ...data };
+      const mudouAgenda =
+        anterior.agendaAtivo !== all[i].agendaAtivo ||
+        anterior.whenDate !== all[i].whenDate ||
+        anterior.whenTime !== all[i].whenTime;
+      const virouPendente = anterior.status !== 'Pendente' && all[i].status === 'Pendente';
+      if (mudouAgenda || virouPendente) all[i].ultimoAvisoChave = null;
+      if (all[i].status !== 'Pendente' || !all[i].agendaAtivo) all[i].ultimoAvisoChave = null;
+      savePlanoAcoes(all);
+    }
+    return all;
+  };
+  const deletePlanoAcao = (id) => {
+    const all = getPlanoAcoes().filter(a => a.id !== id);
+    savePlanoAcoes(all);
     return all;
   };
 
@@ -1851,6 +1893,11 @@ PCF.Store = (() => {
       habitos: _get(`pcf_habitos_${uid}`) || [],
       reg_habitos: _get(`pcf_reg_habitos_${uid}`) || [],
       frases: _get(`pcf_frases_${uid}`) || [],
+      agenda: _get(`pcf_agenda_${uid}`) || [],
+      contatos: _get(`pcf_contatos_${uid}`) || [],
+      diario: _get(`pcf_diario_${uid}`) || [],
+      diario_tabs: _get(`pcf_diario_tabs_${uid}`) || [],
+      plano_acao: _get(`pcf_plano_acao_${uid}`) || [],
     };
   };
 
@@ -1868,6 +1915,7 @@ PCF.Store = (() => {
     getIMC, saveIMC,
     getAgendaConfig, saveAgendaConfig,
     getCompromissos, saveCompromissos, addCompromisso, updateCompromisso, deleteCompromisso,
+    getPlanoAcoes, savePlanoAcoes, addPlanoAcao, updatePlanoAcao, deletePlanoAcao,
     getHabitos, saveHabitos, addHabito, updateHabito, deleteHabito,
     getRegistrosHabitos, saveRegistrosHabitos, upsertRegistroHabito, deleteRegistroHabito,
     getFrases, saveFrases, addFrase, updateFrase, deleteFrase,

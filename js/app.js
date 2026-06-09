@@ -26,6 +26,7 @@ PCF.App = (() => {
     { icon: 'wallet',        title: 'Financeiro',    desc: 'Dashboard, controle de transações, relatórios, categorias e análise das 4 Forças do Dinheiro.' },
     { icon: 'brain',         title: 'Emoções',        desc: 'Registro diário de emoções com relatórios gráficos e configurações personalizadas.' },
     { icon: 'check-square',  title: 'Hábitos',        desc: 'Acompanhe hábitos diários, visualização mensal e relatórios de consistência.' },
+    { icon: 'list-todo',     title: 'Plano de Ação',  desc: 'Organize ações em 5W2H, acompanhe status, vincule contatos e gere lembretes na agenda.' },
     { icon: 'target',        title: 'Roda da Vida',   desc: 'Avalie e visualize as principais áreas da sua vida em um gráfico radial interativo.' },
     { icon: 'gem',           title: 'Virtudes',       desc: 'Cultive virtudes diariamente, acompanhe seu crescimento de caráter e receba sugestões integradas.' },
     { icon: 'book-open',     title: 'Diário',          desc: 'Diário pessoal para registrar reflexões, pensamentos e acompanhar sua evolução.' },
@@ -62,11 +63,12 @@ PCF.App = (() => {
             <div class="pcf-carousel-slide pcf-slide-2">
               <div class="pcf-slide-body">
                 <h2 class="pcf-slide-title">Funções Existentes</h2>
-                <p class="pcf-slide-sub">9 módulos integrados para cobrir todos os aspectos da sua vida</p>
+                <p class="pcf-slide-sub">10 módulos integrados para cobrir planejamento, rotina e desenvolvimento pessoal</p>
                 <div class="pcf-modules-grid">
                   <span class="pcf-module-chip">💰 Financeiro</span>
                   <span class="pcf-module-chip">🧠 Emoções</span>
                   <span class="pcf-module-chip">🌱 Hábitos</span>
+                  <span class="pcf-module-chip">🗂 Plano de Ação</span>
                   <span class="pcf-module-chip">💎 Virtudes</span>
                   <span class="pcf-module-chip">🎯 Roda da Vida</span>
                   <span class="pcf-module-chip">📖 Diário</span>
@@ -210,7 +212,7 @@ PCF.App = (() => {
             </div>
             <div class="landing-about-stats">
               <div class="landing-stat">
-                <span class="landing-stat-number">8+</span>
+                <span class="landing-stat-number">10+</span>
                 <span class="landing-stat-label">Módulos</span>
               </div>
               <div class="landing-stat">
@@ -452,6 +454,7 @@ PCF.App = (() => {
       { icon: 'wallet',       label: 'Financeiro',       hash: '#dashboard', color: '#16a34a' },
       { icon: 'brain',        label: 'Emoções',           hash: '#emocoes',   color: '#8b5cf6' },
       { icon: 'check-square', label: 'Hábitos',           hash: '#habitos',   color: '#f59e0b' },
+      { icon: 'list-todo',   label: 'Plano de Ação',   hash: '#plano-acao', color: '#0f766e' },
       { icon: 'book-open',    label: 'Diário',            hash: '#diario',    color: '#3b82f6' },
       { icon: 'calendar',     label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
       { icon: 'target',       label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
@@ -541,6 +544,12 @@ PCF.App = (() => {
         { hash: '#habitos-relatorio', icon: 'bar-chart-2',   label: 'Relatório Hábitos' },
         { hash: '#frases',            icon: 'message-square',label: 'Base de Mensagens' },
         { hash: '#habitos-config',    icon: 'settings',      label: 'Config. Hábitos' },
+      ]
+    },
+    {
+      id: 'planoacao', label: 'Plano de Ação', icon: 'list-todo',
+      items: [
+        { hash: '#plano-acao', icon: 'list-todo', label: 'Plano de Ação 5W2H' },
       ]
     },
     {
@@ -789,6 +798,7 @@ PCF.App = (() => {
       '#emocoes': pages.emocoes,
       '#emocoes-relatorios': pages.emocoesRelatorios,
       '#agenda': pages.agenda,
+      '#plano-acao': pages.planoAcao,
       '#habitos': pages.habitos,
       '#habitos-mensal': pages.habitosMensal,
       '#habitos-relatorio': pages.habitosRelatorio,
@@ -870,6 +880,42 @@ PCF.App = (() => {
     S.updateCompromisso(compromisso.id, { ultimoAvisoChave: chave });
   };
 
+  const getPlanoAcaoAvisoChave = (acao) =>
+    `${acao.id}|${acao.whenDate || ''}|${acao.whenTime || ''}|${acao.agendaAtivo ? '1' : '0'}`;
+
+  const getPlanoAcaoDateTime = (acao) => {
+    if (!acao.whenDate) return null;
+    if (!acao.whenTime) return new Date(`${acao.whenDate}T00:00:00`);
+    const hora = acao.whenTime.length === 5 ? `${acao.whenTime}:00` : acao.whenTime;
+    return new Date(`${acao.whenDate}T${hora}`);
+  };
+
+  const getPlanoAcaoSortValue = (acao) => {
+    const dateTime = getPlanoAcaoDateTime(acao);
+    if (!dateTime || Number.isNaN(dateTime.getTime())) return Number.MAX_SAFE_INTEGER;
+    return dateTime.getTime();
+  };
+
+  const getPlanoAcaoUrgente = (acao, agora = new Date()) => {
+    if (acao.status !== 'Pendente' || !acao.agendaAtivo || !acao.whenDate) return null;
+    const hj = agora.toISOString().split('T')[0];
+    if (acao.whenTime) {
+      const acaoDateTime = getPlanoAcaoDateTime(acao);
+      if (!acaoDateTime || Number.isNaN(acaoDateTime.getTime())) return null;
+      if (acaoDateTime <= agora) return 'agora';
+      return null;
+    }
+    if (acao.whenDate < hj) return 'atrasado';
+    return null;
+  };
+
+  const markPlanoAcaoAlertShown = (acao) => {
+    const chave = getPlanoAcaoAvisoChave(acao);
+    const atual = S.getPlanoAcoes().find(a => a.id === acao.id);
+    if (!atual || atual.ultimoAvisoChave === chave) return;
+    S.updatePlanoAcao(acao.id, { ultimoAvisoChave: chave });
+  };
+
   const playCompromissoAlertSound = () => {
     try {
       const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
@@ -924,10 +970,11 @@ PCF.App = (() => {
     
     try {
       const compromissos = S.getCompromissos();
-      if (!compromissos || compromissos.length === 0) return;
+      const planoAcoes = S.getPlanoAcoes ? S.getPlanoAcoes() : [];
+      if ((!compromissos || compromissos.length === 0) && (!planoAcoes || planoAcoes.length === 0)) return;
 
       const agora = new Date();
-      const alerta = compromissos
+      const alertaCompromisso = compromissos
         .sort((a, b) => getCompromissoSortValue(a) - getCompromissoSortValue(b))
         .map(comp => ({ comp, tipo: getCompromissoUrgente(comp, agora) }))
         .find(({ comp, tipo }) =>
@@ -935,10 +982,27 @@ PCF.App = (() => {
           comp.ultimoAvisoChave !== getCompromissoAvisoChave(comp)
         );
 
-      if (!alerta) return;
+      const alertaPlanoAcao = planoAcoes
+        .sort((a, b) => getPlanoAcaoSortValue(a) - getPlanoAcaoSortValue(b))
+        .map(acao => ({ acao, tipo: getPlanoAcaoUrgente(acao, agora) }))
+        .find(({ acao, tipo }) =>
+          (tipo === 'agora' || tipo === 'atrasado') &&
+          acao.ultimoAvisoChave !== getPlanoAcaoAvisoChave(acao)
+        );
 
-      markCompromissoAlertShown(alerta.comp);
-      showCompromissoModalGlobal(alerta.comp, alerta.tipo);
+      const compromissoSort = alertaCompromisso ? getCompromissoSortValue(alertaCompromisso.comp) : Number.MAX_SAFE_INTEGER;
+      const planoSort = alertaPlanoAcao ? getPlanoAcaoSortValue(alertaPlanoAcao.acao) : Number.MAX_SAFE_INTEGER;
+
+      if (!alertaCompromisso && !alertaPlanoAcao) return;
+
+      if (compromissoSort <= planoSort) {
+        markCompromissoAlertShown(alertaCompromisso.comp);
+        showCompromissoModalGlobal(alertaCompromisso.comp, alertaCompromisso.tipo);
+        return;
+      }
+
+      markPlanoAcaoAlertShown(alertaPlanoAcao.acao);
+      showPlanoAcaoModalGlobal(alertaPlanoAcao.acao, alertaPlanoAcao.tipo);
     } catch (err) {
       console.error('[PCF] Erro ao verificar alertas globais:', err);
     }
@@ -987,6 +1051,47 @@ PCF.App = (() => {
       if (e.target === overlay) {
         overlay.remove();
       }
+    };
+  };
+
+  const showPlanoAcaoModalGlobal = (acao, tipo) => {
+    const existingModals = document.querySelectorAll('.compromisso-modal');
+    existingModals.forEach(modal => modal.remove());
+
+    const contato = (S.getContatos ? S.getContatos() : []).find(c => c.id === acao.whoContactId);
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay compromisso-modal';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h3>${tipo === 'atrasado' ? 'Aviso de ação em atraso!' : 'Aviso do Plano de Ação!'}</h3>
+        <div class="modal-body">
+          <p><strong>O quê?</strong></p>
+          <p>${H.esc(acao.what || '')}</p>
+          ${acao.why ? `<p><strong>Por quê?</strong></p><p>${H.esc(acao.why)}</p>` : ''}
+          ${acao.how ? `<p><strong>Como?</strong></p><p>${H.esc(acao.how)}${contato ? ` — Contato: ${H.esc(contato.nome)}` : ''}</p>` : contato ? `<p><strong>Contato:</strong> ${H.esc(contato.nome)}</p>` : ''}
+          <p><strong>Quando?</strong></p>
+          <p>${H.formatarData(acao.whenDate)} ${acao.whenTime || ''}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="planoacao-cancelar">Cancelar</button>
+          <button class="btn btn-primary" id="planoacao-ok">Concluir</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    playCompromissoAlertSound();
+
+    document.getElementById('planoacao-ok').onclick = () => {
+      S.updatePlanoAcao(acao.id, { status: 'Concluído' });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+    document.getElementById('planoacao-cancelar').onclick = () => {
+      S.updatePlanoAcao(acao.id, { status: 'Cancelado' });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+    overlay.onclick = (e) => {
+      if (e.target === overlay) overlay.remove();
     };
   };
 
