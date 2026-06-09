@@ -454,8 +454,8 @@ PCF.App = (() => {
       { icon: 'wallet',       label: 'Financeiro',       hash: '#dashboard', color: '#16a34a' },
       { icon: 'brain',        label: 'Emoções',           hash: '#emocoes',   color: '#8b5cf6' },
       { icon: 'check-square', label: 'Hábitos',           hash: '#habitos',   color: '#f59e0b' },
-      { icon: 'list-todo',   label: 'Plano de Ação',   hash: '#plano-acao', color: '#0f766e' },
       { icon: 'book-open',    label: 'Diário',            hash: '#diario',    color: '#3b82f6' },
+      { icon: 'list-todo',    label: 'Plano de Ação',     hash: '#plano-acao', color: '#0f766e' },
       { icon: 'calendar',     label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
       { icon: 'target',       label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
       { icon: 'gem',          label: 'Virtudes',          hash: '#virtudes',  color: '#7c3aed' },
@@ -547,12 +547,6 @@ PCF.App = (() => {
       ]
     },
     {
-      id: 'planoacao', label: 'Plano de Ação', icon: 'list-todo',
-      items: [
-        { hash: '#plano-acao', icon: 'list-todo', label: 'Plano de Ação 5W2H' },
-      ]
-    },
-    {
       id: 'virtudes', label: 'Virtudes', icon: 'gem',
       items: [
         { hash: '#virtudes',           icon: 'gem',        label: 'Virtudes Diárias' },
@@ -573,6 +567,12 @@ PCF.App = (() => {
       items: [
         { hash: '#diario',        icon: 'book-open', label: 'Diário' },
         { hash: '#diario-config', icon: 'settings',  label: 'Config. Diário' },
+      ]
+    },
+    {
+      id: 'planoacao', label: 'Plano de Ação', icon: 'list-todo',
+      items: [
+        { hash: '#plano-acao', icon: 'list-todo', label: 'Plano de Ação 5W2H' },
       ]
     },
     { standalone: true, hash: '#agenda',       icon: 'calendar',  label: 'Agenda' },
@@ -1068,7 +1068,8 @@ PCF.App = (() => {
           <p><strong>O quê?</strong></p>
           <p>${H.esc(acao.what || '')}</p>
           ${acao.why ? `<p><strong>Por quê?</strong></p><p>${H.esc(acao.why)}</p>` : ''}
-          ${acao.how ? `<p><strong>Como?</strong></p><p>${H.esc(acao.how)}${contato ? ` — Contato: ${H.esc(contato.nome)}` : ''}</p>` : contato ? `<p><strong>Contato:</strong> ${H.esc(contato.nome)}</p>` : ''}
+          ${contato ? `<p><strong>Quem?</strong></p><p>${H.esc(contato.nome)}</p>` : ''}
+          ${acao.how ? `<p><strong>Como?</strong></p><p>${H.esc(acao.how)}</p>` : ''}
           <p><strong>Quando?</strong></p>
           <p>${H.formatarData(acao.whenDate)} ${acao.whenTime || ''}</p>
         </div>

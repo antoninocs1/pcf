@@ -373,7 +373,7 @@ const checkAndShowAlerts = () => {};
                 </thead>
                 <tbody>
                   ${acoesVinculadas.map(acao => {
-                    const contato = (S.getContatos ? S.getContatos() : []).find(c => c.id === acao.howContactId);
+                    const contato = (S.getContatos ? S.getContatos() : []).find(c => c.id === acao.whoContactId);
                     const statusCor = STATUS_COLORS[acao.status] || '#6b7280';
                     return `<tr>
                       <td>${H.esc(acao.what)}</td>

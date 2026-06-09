@@ -1,5 +1,5 @@
 /* ========================================================
-   PCF - pages/plano-acao.js — Plano de Ação 5W2H
+   PCF - pages/plano-acao.js - Plano de Acao 5W2H
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
@@ -17,14 +17,20 @@ PCF.Pages = PCF.Pages || {};
     return contato?.nome || '';
   };
 
-  const getHowLabel = (acao) => {
-    const contatoNome = getContatoNome(acao.howContactId);
-    if (acao.how && contatoNome) return `${acao.how} | Contato: ${contatoNome}`;
-    return acao.how || contatoNome || '—';
-  };
+  const getWhoLabel = (acao) => getContatoNome(acao.whoContactId) || acao.who || '—';
 
   PCF.Pages.planoAcao = (container) => {
     let editingId = null;
+
+    const toggleWhenFields = () => {
+      const ativo = document.getElementById('pa-agenda-ativo').checked;
+      const dateEl = document.getElementById('pa-when-date');
+      const timeEl = document.getElementById('pa-when-time');
+      dateEl.disabled = !ativo;
+      timeEl.disabled = !ativo;
+      dateEl.required = ativo;
+      timeEl.required = ativo;
+    };
 
     const resetForm = () => {
       editingId = null;
@@ -36,16 +42,6 @@ PCF.Pages = PCF.Pages || {};
       toggleWhenFields();
       document.getElementById('pa-submit-label').textContent = 'Adicionar ação';
       document.getElementById('pa-cancel-edit').style.display = 'none';
-    };
-
-    const toggleWhenFields = () => {
-      const ativo = document.getElementById('pa-agenda-ativo').checked;
-      const dateEl = document.getElementById('pa-when-date');
-      const timeEl = document.getElementById('pa-when-time');
-      dateEl.disabled = !ativo;
-      timeEl.disabled = !ativo;
-      dateEl.required = ativo;
-      timeEl.required = ativo;
     };
 
     const render = () => {
@@ -79,18 +75,14 @@ PCF.Pages = PCF.Pages || {};
               </div>
               <div class="form-group">
                 <label>Quem? (Who)</label>
-                <input type="text" id="pa-who" placeholder="Responsável ou envolvidos">
+                <select id="pa-who-contact">
+                  <option value="">Selecione um contato</option>
+                  ${contatos.map(c => `<option value="${c.id}">${H.esc(c.nome)}</option>`).join('')}
+                </select>
               </div>
               <div class="form-group plano-acao-form-span-2">
                 <label>Como? (How)</label>
                 <textarea id="pa-how" rows="2" placeholder="Como a ação será executada"></textarea>
-              </div>
-              <div class="form-group">
-                <label>Contato de apoio</label>
-                <select id="pa-how-contact">
-                  <option value="">Selecione um contato</option>
-                  ${contatos.map(c => `<option value="${c.id}">${H.esc(c.nome)}</option>`).join('')}
-                </select>
               </div>
               <div class="form-group">
                 <label>Quanto custa? (How much)</label>
@@ -148,8 +140,8 @@ PCF.Pages = PCF.Pages || {};
                         <td>${H.esc(acao.what || '—')}</td>
                         <td>${H.esc(acao.why || '—')}</td>
                         <td>${H.esc(acao.where || '—')}</td>
-                        <td>${H.esc(acao.who || '—')}</td>
-                        <td>${H.esc(getHowLabel(acao))}</td>
+                        <td>${H.esc(getWhoLabel(acao))}</td>
+                        <td>${H.esc(acao.how || '—')}</td>
                         <td>${H.esc(acao.howMuch || '—')}</td>
                         <td>${acao.agendaAtivo && acao.whenDate ? `${H.formatarData(acao.whenDate)} ${acao.whenTime || ''}` : '—'}</td>
                         <td><span class="status-badge" style="background:${STATUS_COLORS[acao.status] || '#6b7280'}">${acao.status}</span></td>
@@ -173,13 +165,14 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('pa-form').onsubmit = (e) => {
         e.preventDefault();
         const agendaAtivo = document.getElementById('pa-agenda-ativo').checked;
+        const whoContactId = document.getElementById('pa-who-contact').value;
         const data = {
           what: document.getElementById('pa-what').value.trim(),
           why: document.getElementById('pa-why').value.trim(),
           where: document.getElementById('pa-where').value.trim(),
-          who: document.getElementById('pa-who').value.trim(),
+          whoContactId,
+          who: getContatoNome(whoContactId),
           how: document.getElementById('pa-how').value.trim(),
-          howContactId: document.getElementById('pa-how-contact').value,
           howMuch: document.getElementById('pa-how-much').value.trim(),
           whenDate: agendaAtivo ? document.getElementById('pa-when-date').value : '',
           whenTime: agendaAtivo ? document.getElementById('pa-when-time').value : '',
@@ -210,9 +203,8 @@ PCF.Pages = PCF.Pages || {};
           document.getElementById('pa-what').value = acao.what || '';
           document.getElementById('pa-why').value = acao.why || '';
           document.getElementById('pa-where').value = acao.where || '';
-          document.getElementById('pa-who').value = acao.who || '';
+          document.getElementById('pa-who-contact').value = acao.whoContactId || '';
           document.getElementById('pa-how').value = acao.how || '';
-          document.getElementById('pa-how-contact').value = acao.howContactId || '';
           document.getElementById('pa-how-much').value = acao.howMuch || '';
           document.getElementById('pa-when-date').value = acao.whenDate || H.hoje();
           document.getElementById('pa-when-time').value = acao.whenTime || H.horaAtual();

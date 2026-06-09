@@ -567,7 +567,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .agenda-top-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 320px) minmax(390px, 500px) minmax(150px, 210px);
+  grid-template-columns: minmax(220px, 320px) minmax(360px, 460px) minmax(150px, 210px);
   justify-content: space-between;
   gap: 1.25rem;
   align-items: start;
@@ -579,7 +579,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   min-width: 0;
 }
 .agenda-calendar-panel {
-  max-width: 500px;
+  max-width: 460px;
 }
 .agenda-top-left {
   display: flex;
@@ -669,9 +669,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   padding-inline: 0;
 }
 .agenda-calendar-title {
-  min-width: 148px;
+  min-width: 140px;
   text-align: center;
-  font-size: .9rem;
+  font-size: .86rem;
   font-weight: 700;
   text-transform: capitalize;
 }
@@ -687,14 +687,14 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .agenda-calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: .42rem;
+  gap: .34rem;
 }
 .agenda-calendar-weekdays {
   margin-bottom: .1rem;
 }
 .agenda-calendar-weekdays span {
   text-align: center;
-  font-size: .7rem;
+  font-size: .66rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -702,8 +702,8 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .agenda-calendar-cell {
   position: relative;
-  min-height: 52px;
-  padding: .42rem .38rem;
+  min-height: 46px;
+  padding: .34rem .3rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
@@ -739,21 +739,21 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   cursor: default;
 }
 .agenda-calendar-day {
-  font-size: .8rem;
+  font-size: .74rem;
   font-weight: 700;
   line-height: 1;
 }
 .agenda-calendar-count {
-  min-width: 20px;
-  height: 17px;
-  border-radius: 6px;
-  padding: 0 4px;
+  min-width: 18px;
+  height: 15px;
+  border-radius: 5px;
+  padding: 0 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: var(--accent);
   color: #fff;
-  font-size: .62rem;
+  font-size: .56rem;
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 6px 14px rgba(59,130,246,.2);
@@ -817,17 +817,17 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   }
   .agenda-calendar-weekdays,
   .agenda-calendar-grid {
-    gap: .35rem;
+    gap: .28rem;
   }
   .agenda-calendar-cell {
-    min-height: 46px;
-    padding: .35rem .3rem;
+    min-height: 42px;
+    padding: .28rem .24rem;
   }
   .agenda-calendar-count {
-    min-width: 18px;
-    height: 16px;
+    min-width: 16px;
+    height: 14px;
     padding: 0 3px;
-    font-size: .58rem;
+    font-size: .54rem;
   }
   .plano-acao-form {
     grid-template-columns: 1fr;
