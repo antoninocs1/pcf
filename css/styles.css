@@ -493,7 +493,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .auth-card { padding: 24px 18px; width: 100%; max-width: 100%; box-sizing: border-box; }
   /* Roda da Vida: empilhar roda acima do formulário */
   .rv-layout { flex-direction: column; }
-  .rv-wheel-area { width: 100%; align-items: center; }
+  .rv-wheel-area { width: 100%; max-width: 520px; margin-inline: auto; align-items: center; padding-inline: 6px; }
   .rv-form-area { width: 100%; min-width: 0; }
   /* Page header: recuo à esquerda para não colidir com o botão hamburger fixo */
   .page-header { padding-left: 54px; }
@@ -531,6 +531,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .page-header h2 { font-size: 1.3rem; }
   /* Roda da Vida: topbar sem padding excessivo */
   .rv-topbar { padding-right: 46px; }
+  .rv-wheel-area { padding-inline: 2px; }
   /* Filtros: selects em coluna quando não há espaço */
   .filters { flex-direction: column; align-items: stretch; }
   .filters select { width: 100%; min-width: 0; }
@@ -700,6 +701,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   text-transform: uppercase;
   letter-spacing: .06em;
 }
+.agenda-calendar-weekdays span.is-weekend {
+  color: #e9b4b4;
+}
 .agenda-calendar-cell {
   position: relative;
   min-height: 46px;
@@ -742,6 +746,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   font-size: .74rem;
   font-weight: 700;
   line-height: 1;
+}
+.agenda-calendar-cell.is-weekend .agenda-calendar-day {
+  color: #e9b4b4;
 }
 .agenda-calendar-count {
   min-width: 18px;
@@ -1295,9 +1302,10 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .rv-wheel-area {
   flex: 0 0 auto; width: clamp(280px, 42%, 500px);
+  max-width: 100%; padding-inline: 10px; box-sizing: border-box;
   display: flex; flex-direction: column; align-items: center; gap: 12px;
 }
-.rv-canvas { width: 100%; height: auto; display: block; }
+.rv-canvas { width: 100%; max-width: 100%; height: auto; display: block; }
 .rv-form-area {
   flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px; min-width: 280px;
 }

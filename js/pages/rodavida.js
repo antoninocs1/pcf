@@ -109,11 +109,16 @@ PCF.Pages = PCF.Pages || {};
     if (!canvas) return;
 
     const sz = canvas.offsetWidth || 480;
-    canvas.width  = sz;
-    canvas.height = sz;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = Math.round(sz * dpr);
+    canvas.height = Math.round(sz * dpr);
+    canvas.style.width = `${sz}px`;
+    canvas.style.height = `${sz}px`;
     const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const cx = sz / 2, cy = sz / 2;
-    const maxR  = sz * 0.36;
+    const outerMargin = Math.max(56, sz * 0.19);
+    const maxR  = Math.max(84, (sz / 2) - outerMargin);
     const allCats = config.flatMap(q => q.categorias);
     const n     = allCats.length;   // normalmente 12
     const step  = (2 * Math.PI) / n;
@@ -194,25 +199,35 @@ PCF.Pages = PCF.Pages || {};
     });
 
     /* ── rótulos curtos fora da roda ── */
-    const lblR = maxR + sz * 0.065;
+    const sidePad = Math.max(18, sz * 0.06);
+    const lblR = maxR + sz * 0.04;
     ctx.font = `${Math.max(9, sz * 0.022)}px 'Inter', sans-serif`;
     allCats.forEach((cat, i) => {
       const angle = start + (i + 0.5) * step;
       const x = cx + lblR * Math.cos(angle);
       const y = cy + lblR * Math.sin(angle);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       ctx.fillStyle = cat.cor;
       const lbl = (cat.labelCurto || cat.label.split('–')[0].trim()).split(' ').slice(0, 2).join(' ');
       ctx.fillText(lbl, x, y);
     });
 
     /* ── rótulos de quadrante nos cantos ── */
-    const qLblR = maxR + sz * 0.175;
     ctx.font = `bold ${Math.max(10, sz * 0.025)}px 'Inter', sans-serif`;
+    const quadrantInsetX = Math.max(28, sz * 0.13);
+    const quadrantAnchors = [
+      { x: sz - quadrantInsetX, y: sidePad, align: 'right', baseline: 'top' },
+      { x: sz - quadrantInsetX, y: sz - sidePad, align: 'right', baseline: 'bottom' },
+      { x: quadrantInsetX, y: sz - sidePad, align: 'left', baseline: 'bottom' },
+      { x: quadrantInsetX, y: sidePad, align: 'left', baseline: 'top' },
+    ];
     config.forEach((q, qi) => {
-      const midCat = qi * 3 + 1;
-      const angle  = start + (midCat + 0.5) * step;
+      const anchor = quadrantAnchors[qi] || quadrantAnchors[0];
+      ctx.textAlign = anchor.align;
+      ctx.textBaseline = anchor.baseline;
       ctx.fillStyle = q.cor;
-      ctx.fillText(q.label.toUpperCase(), cx + qLblR * Math.cos(angle), cy + qLblR * Math.sin(angle));
+      ctx.fillText(q.label.toUpperCase(), anchor.x, anchor.y);
     });
   };
 
@@ -311,14 +326,19 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       /* desenha a roda */
-      setTimeout(() => _desenharRoda('rv-canvas', config, _scoresFromSliders()), 20);
+      const redrawWheel = () => _desenharRoda('rv-canvas', config, _scoresFromSliders());
+      setTimeout(redrawWheel, 20);
+
+      if (container._rvResizeHandler) window.removeEventListener('resize', container._rvResizeHandler);
+      container._rvResizeHandler = () => redrawWheel();
+      window.addEventListener('resize', container._rvResizeHandler);
 
       /* atualização ao vivo */
       document.querySelectorAll('.rv-range').forEach(s => {
         s.oninput = () => {
           const el = document.getElementById(`rv-val-${s.dataset.catid}`);
           if (el) el.textContent = s.value;
-          _desenharRoda('rv-canvas', config, _scoresFromSliders());
+          redrawWheel();
         };
       });
 

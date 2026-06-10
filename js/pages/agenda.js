@@ -13,6 +13,7 @@ const checkAndShowAlerts = () => {};
   const STATUS_OPTS = ['Pendente', 'Concluído', 'Cancelado'];
   const STATUS_COLORS = { 'Pendente': '#f59e0b', 'Concluído': '#16a34a', 'Cancelado': '#dc2626' };
   const CALENDAR_WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+  const WEEKEND_INDEXES = new Set([0, 6]);
   const MONTH_LABEL = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
 
   let _clockInterval = null;
@@ -75,6 +76,7 @@ const checkAndShowAlerts = () => {};
           day,
           dateKey,
           count: countsByDate[dateKey] || 0,
+          isWeekend: WEEKEND_INDEXES.has(cellDate.getDay()),
           isToday: dateKey === H.hoje(),
           isSelected: dateKey === selectedDate,
         });
@@ -256,7 +258,7 @@ const checkAndShowAlerts = () => {};
 
               <div class="agenda-calendar-board">
                 <div class="agenda-calendar-weekdays">
-                  ${CALENDAR_WEEKDAYS.map(day => `<span>${day}</span>`).join('')}
+                  ${CALENDAR_WEEKDAYS.map((day, index) => `<span class="${WEEKEND_INDEXES.has(index) ? 'is-weekend' : ''}">${day}</span>`).join('')}
                 </div>
                 <div class="agenda-calendar-grid">
                   ${calendarCells.map(cell => {
@@ -264,7 +266,7 @@ const checkAndShowAlerts = () => {};
                     return `
                       <button
                         type="button"
-                        class="agenda-calendar-cell ${cell.isToday ? 'is-today' : ''} ${cell.isSelected ? 'is-selected' : ''} ${cell.count > 0 ? 'has-events' : ''}"
+                        class="agenda-calendar-cell ${cell.isWeekend ? 'is-weekend' : ''} ${cell.isToday ? 'is-today' : ''} ${cell.isSelected ? 'is-selected' : ''} ${cell.count > 0 ? 'has-events' : ''}"
                         data-ag-date="${cell.dateKey}"
                         aria-label="${cell.day} com ${cell.count} compromisso${cell.count === 1 ? '' : 's'}">
                         <span class="agenda-calendar-day">${cell.day}</span>
