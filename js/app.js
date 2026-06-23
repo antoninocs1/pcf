@@ -21,6 +21,7 @@ PCF.App = (() => {
 
   const _githubSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>`;
   const _githubSvgSm = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>`;
+  const _instagramSvgSm = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5zm8.93 1.35a1.07 1.07 0 1 1 0 2.14 1.07 1.07 0 0 1 0-2.14zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.8A3.2 3.2 0 1 0 12 15.2 3.2 3.2 0 0 0 12 8.8z"/></svg>`;
 
   const _featuresData = [
     { icon: 'wallet',        title: 'Financeiro',    desc: 'Dashboard, controle de transações, relatórios, categorias e análise das 4 Forças do Dinheiro.' },
@@ -212,7 +213,7 @@ PCF.App = (() => {
                   <i data-lucide="globe"></i> Blog
                 </a>
                 <a href="https://instagram.com/promoverobem" target="_blank" rel="noopener noreferrer" class="landing-contact-btn">
-                  <i data-lucide="instagram"></i> @promoverobem
+                  ${_instagramSvgSm} @promoverobem
                 </a>
               </div>
             </div>
@@ -234,13 +235,8 @@ PCF.App = (() => {
         </section>
 
         <footer class="landing-footer">
-          <div class="landing-footer-brand">
-            <img src="Img/promover-o-bem.svg" alt="Promover o Bem" class="landing-footer-logo">
-            <div class="landing-footer-copy">
-              <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
-              <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
-            </div>
-          </div>
+          <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
+          <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
         </footer>
 
       </div>`;

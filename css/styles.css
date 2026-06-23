@@ -1481,18 +1481,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 
 /* ---- Footer ---- */
 .landing-footer {
-  padding: 22px 24px; border-top: 1px solid var(--border);
+  padding: 22px 24px; text-align: center; border-top: 1px solid var(--border);
   color: var(--text-dim); font-size: .82rem; background: var(--bg-card);
-}
-.landing-footer-brand {
-  width: min(1100px, 100%); margin: 0 auto;
-  display: flex; align-items: center; justify-content: flex-start; gap: 18px;
-}
-.landing-footer-logo {
-  width: 92px; height: auto; display: block; flex-shrink: 0;
-}
-.landing-footer-copy {
-  display: flex; flex-direction: column; gap: 6px; text-align: left;
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
 }
 .landing-visit-counter {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1516,8 +1507,6 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .landing-about-stats { flex-direction: row; gap: 12px; }
   .landing-stat { flex: 1; padding: 14px 10px; }
   .landing-stat-number { font-size: 1.5rem; }
-  .landing-footer-brand { flex-direction: column; align-items: flex-start; gap: 14px; }
-  .landing-footer-logo { width: 78px; }
   .landing-section-title { font-size: 1.5rem; }
   .landing-section { padding: 56px 20px; }
 }
