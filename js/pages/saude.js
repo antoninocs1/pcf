@@ -1,5 +1,5 @@
-/* ========================================================
-   PCF - pages/saude.js — IMC e Emoções (registro)
+﻿/* ========================================================
+   PCF - pages/saude.js â€” IMC e EmoÃ§Ãµes (registro)
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
@@ -13,9 +13,9 @@ PCF.Pages = PCF.Pages || {};
     const saved = S.getIMC();
     container.innerHTML = `
       <div class="page">
-        <h2>Cálculo do IMC</h2>
-        <p class="subtitle">IMC é a sigla para Índice de Massa Corpórea, parâmetro utilizado para avaliar se o peso está dentro do valor ideal para a altura.</p>
-        <p class="subtitle">O índice é calculado da seguinte maneira: IMC = Peso ÷ (Altura × Altura)</p>
+        <h2>CÃ¡lculo do IMC</h2>
+        <p class="subtitle">IMC Ã© a sigla para Ãndice de Massa CorpÃ³rea, parÃ¢metro utilizado para avaliar se o peso estÃ¡ dentro do valor ideal para a altura.</p>
+        <p class="subtitle">O Ã­ndice Ã© calculado da seguinte maneira: IMC = Peso Ã· (Altura Ã— Altura)</p>
         <div class="imc-layout">
           <div class="imc-form">
             <div class="form-group"><label>Peso (Kg)</label><input type="number" id="imc-peso" step="0.1" min="0" placeholder="Ex: 65" value="${saved.peso || ''}"></div>
@@ -24,8 +24,8 @@ PCF.Pages = PCF.Pages || {};
             <div id="imc-result"></div>
           </div>
           <div class="imc-table-container">
-            <h3>Tabela de Referência</h3>
-            <table class="table"><thead><tr><th>IMC</th><th>Classificação</th><th>Grau</th></tr></thead>
+            <h3>Tabela de ReferÃªncia</h3>
+            <table class="table"><thead><tr><th>IMC</th><th>ClassificaÃ§Ã£o</th><th>Grau</th></tr></thead>
             <tbody>${H.IMC_CLASS.map((c, i) => `<tr id="imc-row-${i}"><td>${c.max === Infinity ? 'Maior que ' + c.min : i === 0 ? 'Menor que ' + c.max : 'Entre ' + c.min + ' e ' + c.max}</td><td>${c.nome}</td><td>${c.grau}</td></tr>`).join('')}</tbody></table>
           </div>
         </div>
@@ -40,11 +40,11 @@ PCF.Pages = PCF.Pages || {};
       const idx = H.IMC_CLASS.indexOf(cl);
       const cor = imc < 18.5 ? '#f59e0b' : imc < 25 ? '#16a34a' : imc < 30 ? '#f59e0b' : '#dc2626';
       let msg = '';
-      if (imc < 18.5) msg = 'Você está abaixo do peso ideal. Consulte um nutricionista.';
-      else if (imc < 25) msg = 'Parabéns! Você está no seu peso ideal! 🎉';
-      else if (imc < 30) msg = 'Você está acima do peso. Considere ajustar sua alimentação.';
-      else if (imc < 40) msg = 'Atenção! Procure orientação médica.';
-      else msg = 'Obesidade grave! Procure ajuda médica urgente.';
+      if (imc < 18.5) msg = 'VocÃª estÃ¡ abaixo do peso ideal. Consulte um nutricionista.';
+      else if (imc < 25) msg = 'ParabÃ©ns! VocÃª estÃ¡ no seu peso ideal! ðŸŽ‰';
+      else if (imc < 30) msg = 'VocÃª estÃ¡ acima do peso. Considere ajustar sua alimentaÃ§Ã£o.';
+      else if (imc < 40) msg = 'AtenÃ§Ã£o! Procure orientaÃ§Ã£o mÃ©dica.';
+      else msg = 'Obesidade grave! Procure ajuda mÃ©dica urgente.';
 
       document.getElementById('imc-result').innerHTML = `
         <div class="imc-result-card" style="border-color:${cor}">
@@ -76,6 +76,8 @@ PCF.Pages = PCF.Pages || {};
     return (cfg && cfg.icon) ? cfg.icon : (EMOCAO_ICONS[nome] || '🔵');
   };
 
+  const getSituacaoDescricao = (em) => (em?.situacaoDescricao || '').trim();
+
   PCF.Pages.emocoes = (container) => {
     let editingId = null;
 
@@ -93,16 +95,15 @@ PCF.Pages = PCF.Pages || {};
                 <div class="form-group"><label>Data</label><input type="date" id="emo-data" value="${H.hoje()}" required></div>
                 <div class="form-group"><label>Hora</label><input type="time" id="emo-hora" value="${H.horaAtual()}"></div>
               </div>
-              <div class="form-group"><label>Situação</label><input type="text" id="emo-situacao" placeholder="O que está acontecendo?"></div>
               <div class="form-group"><label>Emoção Principal</label>
                 <div class="emocao-chips" id="emo-sup-chips">
-                  ${config.map(e => `<button type="button" class="chip chip-emocao" data-id="${e.id}" style="border-color:${e.cor}"><span class="chip-icon">${getEmoIcon(e.nome)}</span>${H.esc(e.nome)}</button>`).join('')}
+                  ${config.map(e => `<button type="button" class="chip chip-emocao" data-id="${e.id}" style="border-color:${e.cor}"><span class="chip-icon">${getEmoIcon(e.nome)}</span>${H.esc(e.nome)}</button>`).join('' )}
                 </div>
               </div>
               <div class="form-group" id="emo-med-group" style="display:none"><label>Emoção Nível Médio</label><select id="emo-med"><option value="">Selecione...</option></select></div>
               <div class="form-group" id="emo-inf-group" style="display:none"><label>Emoção Nível Inferior</label><select id="emo-inf"><option value="">Selecione...</option></select></div>
               <div class="form-group"><label>Intensidade: <span id="emo-int-val">5</span>/10</label><input type="range" id="emo-intensidade" min="1" max="10" value="5"></div>
-              <div class="form-group"><label>Descrição</label><textarea id="emo-desc" rows="3" placeholder="Descreva o que você está sentindo..."></textarea></div>
+              <div class="form-group"><label>Situação/Descrição</label><textarea id="emo-situacao-descricao" rows="4" placeholder="Descreva a situação e o que você está sentindo..."></textarea></div>
               <div class="form-row">
                 <button type="submit" class="btn btn-primary" id="emo-submit-btn">Registrar Emoção</button>
                 <button type="button" class="btn btn-secondary" id="emo-cancel-edit" style="display:none">Cancelar Edição</button>
@@ -128,16 +129,14 @@ PCF.Pages = PCF.Pages || {};
                       ${em.emocaoInferior ? `<span class="chip">${H.esc(em.emocaoInferior)}</span>` : ''}
                       <span class="chip">Intensidade: ${em.intensidade}/10</span>
                     </div>
-                    ${em.situacao ? `<p class="emocao-situacao"><strong>Situação:</strong> ${H.esc(em.situacao)}</p>` : ''}
-                    ${em.descricao ? `<p class="emocao-descricao">${H.esc(em.descricao)}</p>` : ''}
+                    ${getSituacaoDescricao(em) ? `<p class="emocao-descricao"><strong>Situação/Descrição:</strong> ${H.esc(getSituacaoDescricao(em))}</p>` : ''}
                   </div>`;
-                }).join('')}
+                }).join('' )}
               </div>
             </div>
           </div>
         </div>`;
 
-      /* --- FORM LOGIC --- */
       let selSup = null;
       document.getElementById('emo-intensidade').oninput = function() { document.getElementById('emo-int-val').textContent = this.value; };
 
@@ -174,14 +173,13 @@ PCF.Pages = PCF.Pages || {};
         document.getElementById('emo-cancel-edit').style.display = 'none';
         document.getElementById('emo-data').value = H.hoje();
         document.getElementById('emo-hora').value = H.horaAtual();
-        document.getElementById('emo-situacao').value = '';
         document.querySelectorAll('#emo-sup-chips .chip').forEach(b => { b.classList.remove('selected'); b.style.background = ''; b.style.color = ''; });
         selSup = null;
         document.getElementById('emo-med-group').style.display = 'none';
         document.getElementById('emo-inf-group').style.display = 'none';
         document.getElementById('emo-intensidade').value = 5;
         document.getElementById('emo-int-val').textContent = '5';
-        document.getElementById('emo-desc').value = '';
+        document.getElementById('emo-situacao-descricao').value = '';
       };
 
       document.getElementById('form-emocao').onsubmit = (e) => {
@@ -190,19 +188,17 @@ PCF.Pages = PCF.Pages || {};
         const data = {
           data: document.getElementById('emo-data').value,
           hora: document.getElementById('emo-hora').value,
-          situacao: document.getElementById('emo-situacao').value.trim(),
           emocaoSuperior: selSup.nome,
           emocaoMedia: document.getElementById('emo-med').value,
           emocaoInferior: document.getElementById('emo-inf').value,
           intensidade: parseInt(document.getElementById('emo-intensidade').value),
-          descricao: document.getElementById('emo-desc').value.trim(),
+          situacaoDescricao: document.getElementById('emo-situacao-descricao').value.trim(),
         };
         if (editingId) { S.updateEmocao(editingId, data); editingId = null; }
         else { S.addEmocao(data); }
         render();
       };
 
-      /* --- EDIT / DELETE CLICK --- */
       container.querySelector('.emocoes-lista')?.addEventListener('click', (e) => {
         const editBtn = e.target.closest('[data-edit-emo]');
         if (editBtn) {
@@ -214,12 +210,9 @@ PCF.Pages = PCF.Pages || {};
           document.getElementById('emo-cancel-edit').style.display = '';
           document.getElementById('emo-data').value = em.data;
           document.getElementById('emo-hora').value = em.hora || '';
-          document.getElementById('emo-situacao').value = em.situacao || '';
-          // selecionar emoção superior
           const sup = config.find(c => c.nome === em.emocaoSuperior);
           if (sup) {
             selectSup(sup.id);
-            // setar média
             if (em.emocaoMedia) {
               document.getElementById('emo-med').value = em.emocaoMedia;
               document.getElementById('emo-med').dispatchEvent(new Event('change'));
@@ -228,7 +221,7 @@ PCF.Pages = PCF.Pages || {};
           }
           document.getElementById('emo-intensidade').value = em.intensidade || 5;
           document.getElementById('emo-int-val').textContent = em.intensidade || 5;
-          document.getElementById('emo-desc').value = em.descricao || '';
+          document.getElementById('emo-situacao-descricao').value = getSituacaoDescricao(em);
           document.getElementById('form-emocao').scrollIntoView({ behavior: 'smooth' });
           return;
         }
@@ -327,3 +320,4 @@ PCF.Pages = PCF.Pages || {};
     }));
   };
 })();
+

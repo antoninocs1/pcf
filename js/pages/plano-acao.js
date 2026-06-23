@@ -1,4 +1,4 @@
-/* ========================================================
+﻿/* ========================================================
    PCF - pages/plano-acao.js - Plano de Acao 5W2H
    ======================================================== */
 window.PCF = window.PCF || {};
@@ -63,7 +63,7 @@ PCF.Pages = PCF.Pages || {};
             <form id="pa-form" class="plano-acao-form">
               <div class="form-group">
                 <label>O quê? (What)</label>
-                <input type="text" id="pa-what" required placeholder="Descreva a ação">
+                <textarea id="pa-what" rows="2" required placeholder="Descreva a ação"></textarea>
               </div>
               <div class="form-group">
                 <label>Por quê? (Why)</label>

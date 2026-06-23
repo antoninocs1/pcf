@@ -252,10 +252,27 @@ PCF.Store = (() => {
 
   /* ---------- EMOÇÕES REGISTRO ---------- */
   const _ekU = () => `pcf_emocoes_${currentUserId()}`;
-  const getEmocoes = () => _get(_ekU()) || [];
-  const saveEmocoes = (e) => _set(_ekU(), e);
-  const addEmocao = (e) => { const all = getEmocoes(); all.push({ id: _uid(), ...e }); saveEmocoes(all); return all; };
-  const updateEmocao = (id, data) => { const all = getEmocoes(); const i = all.findIndex(e => e.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveEmocoes(all); } return all; };
+  const _mergeEmocaoTexto = (situacao, descricao, situacaoDescricao) => {
+    if (situacaoDescricao && situacaoDescricao.trim()) return situacaoDescricao.trim();
+    const partes = [situacao, descricao].map(v => (v || '').trim()).filter(Boolean);
+    return partes.filter((v, i) => partes.indexOf(v) === i).join('\n\n');
+  };
+  const _normalizeEmocao = (e) => {
+    const situacaoDescricao = _mergeEmocaoTexto(e?.situacao, e?.descricao, e?.situacaoDescricao);
+    const normalizada = { ...e, situacaoDescricao };
+    delete normalizada.situacao;
+    delete normalizada.descricao;
+    return normalizada;
+  };
+  const getEmocoes = () => {
+    const raw = _get(_ekU()) || [];
+    const normalizadas = raw.map(_normalizeEmocao);
+    if (JSON.stringify(raw) !== JSON.stringify(normalizadas)) _set(_ekU(), normalizadas);
+    return normalizadas;
+  };
+  const saveEmocoes = (e) => _set(_ekU(), (e || []).map(_normalizeEmocao));
+  const addEmocao = (e) => { const all = getEmocoes(); all.push({ id: _uid(), ..._normalizeEmocao(e) }); saveEmocoes(all); return all; };
+  const updateEmocao = (id, data) => { const all = getEmocoes(); const i = all.findIndex(e => e.id === id); if (i >= 0) { all[i] = { ...all[i], ..._normalizeEmocao(data) }; saveEmocoes(all); } return all; };
   const deleteEmocao = (id) => { const all = getEmocoes().filter(e => e.id !== id); saveEmocoes(all); return all; };
 
   /* ---------- EMOÇÕES CONFIG ---------- */
@@ -1399,6 +1416,11 @@ PCF.Store = (() => {
     { id: _uid(), texto: 'Cuide do seu corpo. É o único lugar que você tem para viver. (Jim Rohn).', autor: 'Jim Rohn', categoria: 'Saúde', ativo: true },
     { id: _uid(), texto: 'Quem tem saúde tem esperança, e quem tem esperança tem tudo. (Árabe Antigo).', autor: '', categoria: 'Saúde', ativo: true },
     { id: _uid(), texto: '“Os bons merecem o nosso amor, os maus precisam dele.” (Madre Teresa de Calcutá).', autor: 'Madre Teresa de Calcutá', categoria: 'Reflexão', ativo: true },
+    { id: _uid(), texto: 'É bem melhor acender uma pequenina chama do que amaldiçoar a escuridão.', autor: '', categoria: 'Reflexão', ativo: true },
+    { id: _uid(), texto: 'A palavra convence, mas o exemplo arrasta.', autor: '', categoria: 'Reflexão', ativo: true },
+    { id: _uid(), texto: 'Não adianta cuidar da casca e deixar(abandonar) a semente.', autor: '', categoria: 'Reflexão', ativo: true },
+    { id: _uid(), texto: '“Pregue o Evangelho em todo tempo. Se necessário, use palavras.” (São Francisco de Assis).', autor: 'São Francisco de Assis', categoria: 'Reflexão', ativo: true },
+    { id: _uid(), texto: '“Quem não vive para servir, não serve para viver.” (Mahatma Gandhi). Essa citação ressalta a importância da dedicação e do serviço ao próximo como um propósito fundamental para uma vida com significado.', autor: 'Mahatma Gandhi', categoria: 'Reflexão', ativo: true },
     { id: _uid(), texto: 'Mensagem: 1 -  Não Critique! Procure antes colaborar com todos, sem fazer críticas. A crítica fere, e ninguém gosta de ser ferido. E a criatura que gosta de criticar, aos poucos, se vê isolada de todos. Se vir alguma coisa errada, fale com amor e carinho, procurando ajudar. Mas, sobretudo, procure corrigir os outros, através de seu próprio exemplo!', autor: 'C. Torres Pastorino', categoria: 'Minutos de Sabedoria', ativo: true },
     { id: _uid(), texto: 'Mensagem: 2 -  Deus está em toda a parte ao mesmo tempo, em redor de você, dentro de você! Jamais você está desamparado. Nunca está só. Não permita que a mágoa o perturbe: procure manter-se calmo, para ouvir a voz silenciosa de Deus dentro de você. Assim poderá superar todas as dificuldades que aparecerem em seu caminho, e há de descobrir a Verdade que existe em todas as coisas e pessoas.', autor: 'C. Torres Pastorino', categoria: 'Minutos de Sabedoria', ativo: true },
     { id: _uid(), texto: 'Mensagem: 3 -  Lembre-se de que colheremos, infalivelmente, aquilo que houvermos semeado. Se estamos sofrendo, é porque estamos colhendo os frutos amargos das sementeiras errôneas do passado. Fique alerta quanto ao momento presente! Plante apenas sementes de otimismo e de Amor, para colher amanhã os frutos doces da alegria e da felicidade. Cada um colhe, exatamente, aquilo que plantou.', autor: 'C. Torres Pastorino', categoria: 'Minutos de Sabedoria', ativo: true },
@@ -1887,7 +1909,7 @@ PCF.Store = (() => {
     return {
       transacoes: _get(`pcf_transacoes_${uid}`) || [],
       categorias: _get(`pcf_categorias_${uid}`) || [],
-      emocoes: _get(`pcf_emocoes_${uid}`) || [],
+      emocoes: ((_get(`pcf_emocoes_${uid}`) || []).map(_normalizeEmocao)),
       emocoes_config: _get(`pcf_emocoes_config_${uid}`) || [],
       imc: _get(`pcf_imc_${uid}`) || { peso: 0, altura: 0 },
       habitos: _get(`pcf_habitos_${uid}`) || [],

@@ -1,6 +1,6 @@
-/* ========================================================
-   PCF - pages/admin.js — Categorias CRUD, Emoções Config CRUD,
-   Usuários CRUD, Importar/Exportar CSV
+﻿/* ========================================================
+   PCF - pages/admin.js â€” Categorias CRUD, EmoÃ§Ãµes Config CRUD,
+   UsuÃ¡rios CRUD, Importar/Exportar CSV
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
@@ -20,7 +20,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>Config. Categorias</h2>
             <div style="display:flex;gap:8px;align-items:center">
-              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
+              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar PadrÃµes</button>
               <button id="btn-add-cat" class="btn btn-primary">+ Nova Categoria</button>
             </div>
           </div>
@@ -33,7 +33,7 @@ PCF.Pages = PCF.Pages || {};
             </select>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Tipo Operação</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
+            <thead><tr><th>Tipo OperaÃ§Ã£o</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">AÃ§Ãµes</th></tr></thead>
             <tbody>${filtered.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma categoria</td></tr>' :
               filtered.map(c => `<tr>
                 <td><span class="tipo-badge ${c.tipoOperacao.toLowerCase()}">${c.tipoOperacao}</span></td>
@@ -51,7 +51,7 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('cat-filtro-tipo').onchange = function() { filtroTipo = this.value; render(); };
       document.getElementById('btn-add-cat').onclick = () => showCatModal();
       document.getElementById('btn-restaurar-cats').onclick = () => {
-        if (confirm('Restaurar categorias padrão? As categorias atuais serão substituídas pelas categorias padrão.')) {
+        if (confirm('Restaurar categorias padrÃ£o? As categorias atuais serÃ£o substituÃ­das pelas categorias padrÃ£o.')) {
           S.restoreDefaultCategorias();
           filtroTipo = '';
           render();
@@ -73,7 +73,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="modal">
           <h3>${isEdit ? 'Editar' : 'Nova'} Categoria</h3>
           <form id="cat-modal-form">
-            <div class="form-group"><label>Tipo de Operação</label>
+            <div class="form-group"><label>Tipo de OperaÃ§Ã£o</label>
               <select id="cat-m-tipo" required ${isEdit ? 'disabled' : ''}>
                 <option value="DESPESA" ${cat?.tipoOperacao === 'DESPESA' ? 'selected' : ''}>DESPESA</option>
                 <option value="RECEITA" ${cat?.tipoOperacao === 'RECEITA' ? 'selected' : ''}>RECEITA</option>
@@ -97,7 +97,7 @@ PCF.Pages = PCF.Pages || {};
       const addSubcatRow = (nome = '', tipo = '') => {
         const row = document.createElement('div');
         row.className = 'subcat-row';
-        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="Variável" ${tipo === 'Variável' ? 'selected' : ''}>Variável</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover"><i data-lucide="trash-2"></i></button>`;
+        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="VariÃ¡vel" ${tipo === 'VariÃ¡vel' ? 'selected' : ''}>VariÃ¡vel</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover"><i data-lucide="trash-2"></i></button>`;
         row.querySelector('.subcat-del').onclick = () => row.remove();
         document.getElementById('subcat-list').appendChild(row);
       };
@@ -290,7 +290,7 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
-  /* ==================== USUÁRIOS CRUD ==================== */
+  /* ==================== USUÃRIOS CRUD ==================== */
   PCF.Pages.usuarios = (container) => {
     let _searchTerm = '';
 
@@ -306,21 +306,21 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>Gerenciar Usuários</h2>
+            <h2>Gerenciar UsuÃ¡rios</h2>
             <div class="contatos-search-wrap">
-              <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou e-mail…" value="${H.esc(_searchTerm)}">
+              <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou e-mailâ€¦" value="${H.esc(_searchTerm)}">
               <button id="btn-usuarios-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-usuarios-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
-            <button id="btn-add-user" class="btn btn-primary">+ Novo Usuário</button>
+            <button id="btn-add-user" class="btn btn-primary">+ Novo UsuÃ¡rio</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
-            <tbody>${users.length === 0 ? `<tr><td colspan="8" class="empty-text">${term ? 'Nenhum usuário encontrado para "' + H.esc(term) + '"' : 'Nenhum usuário'}</td></tr>` :
+            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th>Perfil</th><th style="width:100px">AÃ§Ãµes</th></tr></thead>
+            <tbody>${users.length === 0 ? `<tr><td colspan="8" class="empty-text">${term ? 'Nenhum usuÃ¡rio encontrado para "' + H.esc(term) + '"' : 'Nenhum usuÃ¡rio'}</td></tr>` :
               users.map(u => `<tr>
                 <td>${H.esc(u.nome)}</td><td class="col-hide-mobile">${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td class="col-hide-mobile">${H.esc(u.telefone)}</td>
                 <td class="col-hide-mobile">${H.formatarData(u.dataNascimento)}</td><td class="col-hide-mobile">${H.formatarData(u.dataCadastro)}</td>
-                <td>${u.isAdmin ? '<span class="badge-admin">👑 Admin</span>' : '<span class="badge-padrao">Padrão</span>'}</td>
+                <td>${u.isAdmin ? '<span class="badge-admin">ðŸ‘‘ Admin</span>' : '<span class="badge-padrao">PadrÃ£o</span>'}</td>
                 <td>
                   <button class="btn-icon" data-edit="${u.id}" title="Editar"><i data-lucide="pencil"></i></button>
                   <button class="btn-icon btn-danger" data-del="${u.id}" title="Remover"><i data-lucide="trash-2"></i></button>
@@ -345,8 +345,8 @@ PCF.Pages = PCF.Pages || {};
         const del = e.target.closest('[data-del]');
         if (del) {
           const uid = del.dataset.del;
-          if (uid === S.currentUserId()) { alert('Não é possível remover o usuário logado.'); return; }
-          if (confirm('Remover este usuário e todos os seus dados?')) { S.deleteUser(uid).then(() => render()); }
+          if (uid === S.currentUserId()) { alert('NÃ£o Ã© possÃ­vel remover o usuÃ¡rio logado.'); return; }
+          if (confirm('Remover este usuÃ¡rio e todos os seus dados?')) { S.deleteUser(uid).then(() => render()); }
         }
       };
     };
@@ -357,7 +357,7 @@ PCF.Pages = PCF.Pages || {};
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal modal-lg">
-          <h3>${isEdit ? 'Editar' : 'Novo'} Usuário</h3>
+          <h3>${isEdit ? 'Editar' : 'Novo'} UsuÃ¡rio</h3>
           <form id="user-modal-form">
             <div class="form-row">
               <div class="form-group"><label>Nome Completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
@@ -377,7 +377,7 @@ PCF.Pages = PCF.Pages || {};
             ${S.currentUserIsAdmin() ? `
             <div class="form-row">
               <div class="form-group">
-                <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> 👑 Administrador</label>
+                <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> ðŸ‘‘ Administrador</label>
                 <small class="text-muted">Somente administradores podem criar outros administradores.</small>
               </div>
             </div>` : ''}
@@ -399,7 +399,7 @@ PCF.Pages = PCF.Pages || {};
         const errEl = document.getElementById('um-error');
         const p1 = document.getElementById('um-pass').value;
         const p2 = document.getElementById('um-pass2').value;
-        if (p1 && p1 !== p2) { errEl.textContent = 'As senhas não coincidem'; errEl.style.display = 'block'; return; }
+        if (p1 && p1 !== p2) { errEl.textContent = 'As senhas nÃ£o coincidem'; errEl.style.display = 'block'; return; }
 
         const data = {
           nome: document.getElementById('um-nome').value.trim(),
@@ -418,7 +418,7 @@ PCF.Pages = PCF.Pages || {};
           const res = await S.updateUser(user.id, data);
           if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
         } else {
-          if (!p1) { errEl.textContent = 'Senha é obrigatória'; errEl.style.display = 'block'; return; }
+          if (!p1) { errEl.textContent = 'Senha Ã© obrigatÃ³ria'; errEl.style.display = 'block'; return; }
           const res = await S.createUser(data, p1);
           if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
         }
@@ -485,14 +485,14 @@ PCF.Pages = PCF.Pages || {};
         </div>
       </div>`;
 
-    // EXPORTAR TRANSAÇÕES
+    // EXPORTAR TRANSAÃ‡Ã•ES
     document.getElementById('exp-trans').onclick = () => {
       const trans = S.getTransacoes();
       const headers = ['data','dia','mes','ano','tipoOperacao','categoria','subcategoria','item','valor','formaPagamento','tipo'];
       H.downloadCSV(H.toCSV(trans, headers), 'transacoes.csv');
     };
 
-    // EXPORTAR USUÁRIOS
+    // EXPORTAR USUÃRIOS
     document.getElementById('exp-users').onclick = () => {
       const users = S.getUsers().map(u => ({ ...u, senhaHash: undefined }));
       const headers = ['id','nome','cpf','email','telefone','dataNascimento','login','dataCadastro'];
@@ -506,10 +506,10 @@ PCF.Pages = PCF.Pages || {};
       H.downloadCSV(H.toCSV(rows, ['tipoOperacao', 'categoria', 'subcategorias']), 'categorias.csv');
     };
 
-    // EXPORTAR EMOÇÕES
+    // EXPORTAR EMOÃ‡Ã•ES
     document.getElementById('exp-emocoes').onclick = () => {
       const emos = S.getEmocoes();
-      const headers = ['data','hora','situacao','emocaoSuperior','emocaoMedia','emocaoInferior','intensidade','descricao'];
+      const headers = ['data','hora','situacaoDescricao','emocaoSuperior','emocaoMedia','emocaoInferior','intensidade'];
       H.downloadCSV(H.toCSV(emos, headers), 'emocoes.csv');
     };
 
@@ -531,7 +531,7 @@ PCF.Pages = PCF.Pages || {};
       setTimeout(() => { if (el) el.innerHTML = ''; }, 4000);
     };
 
-    // IMPORTAR TRANSAÇÕES
+    // IMPORTAR TRANSAÃ‡Ã•ES
     document.getElementById('imp-trans').onchange = function() {
       const file = this.files[0];
       if (!file) return;
@@ -560,7 +560,7 @@ PCF.Pages = PCF.Pages || {};
       inputEl.value = '';
     };
 
-    // IMPORTAR USUÁRIOS
+    // IMPORTAR USUÃRIOS
     document.getElementById('imp-users').onchange = function() {
       const file = this.files[0];
       if (!file) return;
@@ -665,14 +665,14 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>Contatos Pessoais</h2>
             <div class="contatos-search-wrap">
-              <input type="text" id="contatos-search" class="input-search" placeholder="Buscar pelo nome…" value="${H.esc(_searchTerm)}">
+              <input type="text" id="contatos-search" class="input-search" placeholder="Buscar pelo nomeâ€¦" value="${H.esc(_searchTerm)}">
               <button id="btn-contatos-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-contatos-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
             <button id="btn-add-contato" class="btn btn-primary">+ Novo Contato</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th style="width:100px">Ações</th></tr></thead>
+            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th style="width:100px">AÃ§Ãµes</th></tr></thead>
             <tbody>${contatos.length === 0 ? `<tr><td colspan="7" class="empty-text">${term ? 'Nenhum contato encontrado para "' + H.esc(term) + '"' : 'Nenhum contato cadastrado'}</td></tr>` :
               contatos.map(c => `<tr>
                 <td>${H.esc(c.nome)}</td><td class="col-hide-mobile">${H.esc(c.cpf)}</td><td>${H.esc(c.email)}</td><td class="col-hide-mobile">${H.esc(c.telefone)}</td>
@@ -752,7 +752,7 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
-  /* ==================== DIÁRIO ==================== */
+  /* ==================== DIÃRIO ==================== */
   PCF.Pages.diario = (container) => {
     const userId = S.currentUserId();
     const KEY = `pcf_diario_${userId}`;
@@ -784,8 +784,8 @@ PCF.Pages = PCF.Pages || {};
 
           <div class="diario-sugestoes">
             <div class="diario-sugestoes-header">
-              <span>💡 <strong>Sugestões de reflexão</strong></span>
-              <small class="text-muted">Clique em uma pergunta para inserir no diário</small>
+              <span>ðŸ’¡ <strong>SugestÃµes de reflexÃ£o</strong></span>
+              <small class="text-muted">Clique em uma pergunta para inserir no diÃ¡rio</small>
             </div>
             <div class="diario-tabs-bar">
               ${TABS_SUGESTOES.map(t => `<button class="diario-tab${t.id === sugestoesTab ? ' active' : ''}" data-tab="${t.id}">${t.icon} ${t.label}</button>`).join('')}
@@ -803,17 +803,17 @@ PCF.Pages = PCF.Pages || {};
             <div class="diario-today-actions">
               <button id="diario-salvar" class="btn btn-primary"><i data-lucide="save"></i> Salvar</button>
               ${entry ? `<button id="diario-apagar" class="btn btn-danger"><i data-lucide="trash-2"></i> Apagar</button>` : ''}
-              <span id="diario-ok" class="diario-saved-msg" style="display:none">✓ Salvo!</span>
+              <span id="diario-ok" class="diario-saved-msg" style="display:none">âœ“ Salvo!</span>
             </div>
           </div>
 
           ${sorted.length > 0 ? `
-          <h3 style="margin:24px 0 10px">📚 Dias com Registro <span class="badge badge-neutral">${sorted.length}</span></h3>
+          <h3 style="margin:24px 0 10px">ðŸ“š Dias com Registro <span class="badge badge-neutral">${sorted.length}</span></h3>
           <div class="diario-index">
             ${sorted.map(e => `
               <div class="diario-index-item ${e.data === selectedDate ? 'active' : ''}" data-goto="${e.data}">
                 <span class="diario-index-date">${fmtDate(e.data)}${e.data === today ? ' <small>(hoje)</small>' : ''}</span>
-                <span class="diario-index-preview">${H.esc((e.texto || '').slice(0, 90))}${(e.texto || '').length > 90 ? '…' : ''}</span>
+                <span class="diario-index-preview">${H.esc((e.texto || '').slice(0, 90))}${(e.texto || '').length > 90 ? 'â€¦' : ''}</span>
               </div>`).join('')}
           </div>` : ''}
         </div>`;
@@ -868,19 +868,19 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
-  /* ==================== CONFIG DIÁRIO ==================== */
+  /* ==================== CONFIG DIÃRIO ==================== */
   PCF.Pages.diarioConfig = (container) => {
     const render = () => {
       const tabs = S.getDiarioTabs();
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2><i data-lucide="settings"></i> Config. Diário</h2>
+            <h2><i data-lucide="settings"></i> Config. DiÃ¡rio</h2>
             <button id="btn-add-dtab" class="btn btn-primary">+ Nova Aba</button>
           </div>
-          <p class="subtitle">Configure as abas e perguntas de reflexão exibidas no banner do Diário.</p>
+          <p class="subtitle">Configure as abas e perguntas de reflexÃ£o exibidas no banner do DiÃ¡rio.</p>
           <div class="table-container"><table class="table">
-            <thead><tr><th style="width:60px">Ícone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
+            <thead><tr><th style="width:60px">Ãcone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">AÃ§Ãµes</th></tr></thead>
             <tbody>${tabs.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma aba configurada</td></tr>' :
               tabs.map((t, idx) => `<tr>
                 <td style="font-size:1.4rem;text-align:center">${H.esc(t.icon || '')}</td>
@@ -929,10 +929,10 @@ PCF.Pages = PCF.Pages || {};
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal">
-          <h3>${isEdit ? 'Editar' : 'Nova'} Aba de Reflexão</h3>
+          <h3>${isEdit ? 'Editar' : 'Nova'} Aba de ReflexÃ£o</h3>
           <form id="dtab-form">
             <div class="form-row">
-              <div class="form-group" style="flex:0 0 100px"><label>Ícone</label><input type="text" id="dtab-icon" value="${H.esc(tab?.icon || '')}" placeholder="💡" maxlength="4"></div>
+              <div class="form-group" style="flex:0 0 100px"><label>Ãcone</label><input type="text" id="dtab-icon" value="${H.esc(tab?.icon || '')}" placeholder="ðŸ’¡" maxlength="4"></div>
               <div class="form-group"><label>Nome da Aba</label><input type="text" id="dtab-label" value="${H.esc(tab?.label || '')}" required placeholder="Ex: Relacionamentos"></div>
             </div>
             <div class="form-group">
@@ -1002,6 +1002,7 @@ PCF.Pages = PCF.Pages || {};
       const config = S.getEmocoesConfig();
       const emocoes = [...S.getEmocoes()].reverse();
       const getCorSup = (nome) => { const s = config.find(c => c.nome === nome); return s ? s.cor : '#6b7280'; };
+      const getSituacaoDescricao = (em) => em?.situacaoDescricao || '';
       return `
         <div class="gb-section">
           <div class="gb-section-header">
@@ -1014,17 +1015,18 @@ PCF.Pages = PCF.Pages || {};
           ${emocoes.length === 0 ? '<p class="empty-text">Nenhum registro encontrado</p>' : `
           <div class="table-wrapper">
             <table class="table">
-              <thead><tr><th>Data</th><th class="col-hide-mobile">Hora</th><th>Emoção Principal</th><th class="col-hide-mobile">Média / Inferior</th><th class="col-hide-mobile">Intensidade</th><th class="col-hide-mobile">Situação</th><th style="width:90px">Ações</th></tr></thead>
+              <thead><tr><th>Data</th><th class="col-hide-mobile">Hora</th><th>Emoção Principal</th><th class="col-hide-mobile">Média / Inferior</th><th class="col-hide-mobile">Intensidade</th><th class="col-hide-mobile">Situação/Descrição</th><th style="width:90px">Ações</th></tr></thead>
               <tbody>
                 ${emocoes.map(em => {
                   const cor = getCorSup(em.emocaoSuperior);
+                  const texto = getSituacaoDescricao(em);
                   return `<tr>
                     <td>${_fmtDate(em.data)}</td>
                     <td class="col-hide-mobile">${em.hora || '—'}</td>
                     <td><span class="chip-small" style="background:${cor}22;border-color:${cor}">${H.esc(em.emocaoSuperior || '—')}</span></td>
                     <td class="col-hide-mobile">${em.emocaoMedia ? H.esc(em.emocaoMedia) : ''}${em.emocaoInferior ? ' › ' + H.esc(em.emocaoInferior) : ''}</td>
                     <td class="col-hide-mobile">${em.intensidade || '—'}/10</td>
-                    <td class="col-hide-mobile">${H.esc((em.situacao || '').slice(0, 40))}${(em.situacao || '').length > 40 ? '…' : ''}</td>
+                    <td class="col-hide-mobile">${H.esc(texto.slice(0, 40))}${texto.length > 40 ? '…' : ''}</td>
                     <td>
                       <button class="btn-icon" data-gb-edit-emo="${em.id}" title="Editar"><i data-lucide="pencil"></i></button>
                       <button class="btn-icon btn-danger" data-gb-del-emo="${em.id}" title="Remover"><i data-lucide="trash-2"></i></button>
@@ -1057,7 +1059,7 @@ PCF.Pages = PCF.Pages || {};
               <thead><tr><th style="width:50px">Ícone</th><th>Nome</th><th>Categoria</th><th>Meta</th><th>Status</th><th style="width:60px">Ações</th></tr></thead>
               <tbody>
                 ${habitos.map(h => `<tr>
-                  <td style="text-align:center;font-size:1.3rem">${h.icone || '⭐'}</td>
+                  <td style="text-align:center;font-size:1.3rem">${h.icone || 'â­'}</td>
                   <td><strong>${H.esc(h.nome)}</strong>${h.descricao ? `<br><small class="text-muted">${H.esc(h.descricao)}</small>` : ''}</td>
                   <td><span class="chip-small">${H.esc(h.categoria || '—')}</span></td>
                   <td>${H.esc(h.meta || '—')}</td>
@@ -1081,7 +1083,7 @@ PCF.Pages = PCF.Pages || {};
                   const h = habitosMap[r.habitoId];
                   return `<tr>
                     <td>${_fmtDate(r.data)}</td>
-                    <td>${h ? `${h.icone || '⭐'} ${H.esc(h.nome)}` : '<em class="text-muted">Removido</em>'}</td>
+                    <td>${h ? `${h.icone || 'â­'} ${H.esc(h.nome)}` : '<em class="text-muted">Removido</em>'}</td>
                     <td>${r.completo ? '<span class="tipo-badge receita">✅ Sim</span>' : '<span class="tipo-badge despesa">❌ Não</span>'}</td>
                     <td class="col-hide-mobile">${r.momento ? H.esc(r.momento) : '—'}</td>
                     <td class="col-hide-mobile">${r.intensidade !== undefined ? r.intensidade + '%' : '—'}</td>
@@ -1231,7 +1233,7 @@ PCF.Pages = PCF.Pages || {};
               <thead><tr><th>Ícone</th><th>Nome</th><th>Categoria</th><th>Ativo</th></tr></thead>
               <tbody>
                 ${virtudes.map(v => `<tr>
-                  <td style="text-align:center;font-size:1.2rem">${H.esc(v.icone || '✦')}</td>
+                  <td style="text-align:center;font-size:1.2rem">${H.esc(v.icone || 'âœ¦')}</td>
                   <td><strong>${H.esc(v.nome)}</strong></td>
                   <td><span class="chip-small">${H.esc(v.categoria || '—')}</span></td>
                   <td><span class="tipo-badge ${v.ativo !== false ? 'receita' : 'despesa'}">${v.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
@@ -1253,7 +1255,7 @@ PCF.Pages = PCF.Pages || {};
                   const v = virtMap[r.virtudeId] || { nome: 'Removida', icone: '?', cor: '#64748b', categoria: '' };
                   return `<tr>
                     <td>${_fmtDate(r.data)}</td>
-                    <td>${H.esc(v.icone || '✦')} ${H.esc(v.nome)}</td>
+                    <td>${H.esc(v.icone || 'âœ¦')} ${H.esc(v.nome)}</td>
                     <td><span class="chip-small">${H.esc(v.categoria || '—')}</span></td>
                     <td><button class="btn-icon btn-danger" data-gb-del-vr="${r.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
                   </tr>`;
@@ -1377,7 +1379,6 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group"><label>Data</label><input type="date" id="gb-emo-data" value="${em?.data || H.hoje()}" required></div>
               <div class="form-group"><label>Hora</label><input type="time" id="gb-emo-hora" value="${em?.hora || H.horaAtual()}"></div>
             </div>
-            <div class="form-group"><label>Situação</label><input type="text" id="gb-emo-situacao" value="${H.esc(em?.situacao || '')}" placeholder="O que estava acontecendo?"></div>
             <div class="form-row">
               <div class="form-group"><label>Emoção Principal</label>
                 <select id="gb-emo-sup" required>
@@ -1399,7 +1400,7 @@ PCF.Pages = PCF.Pages || {};
             <div class="form-group"><label>Intensidade: <span id="gb-emo-int-val">${em?.intensidade || 5}</span>/10</label>
               <input type="range" id="gb-emo-int" min="1" max="10" value="${em?.intensidade || 5}">
             </div>
-            <div class="form-group"><label>Descrição</label><textarea id="gb-emo-desc" rows="3">${H.esc(em?.descricao || '')}</textarea></div>
+            <div class="form-group"><label>Situação/Descrição</label><textarea id="gb-emo-situacao-descricao" rows="4">${H.esc(em?.situacaoDescricao || '')}</textarea></div>
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="gb-emo-cancel">Cancelar</button>
               <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
@@ -1441,12 +1442,11 @@ PCF.Pages = PCF.Pages || {};
         const data = {
           data: document.getElementById('gb-emo-data').value,
           hora: document.getElementById('gb-emo-hora').value,
-          situacao: document.getElementById('gb-emo-situacao').value.trim(),
           emocaoSuperior: supSel.value,
           emocaoMedia: medSel.value,
           emocaoInferior: infSel.value,
           intensidade: parseInt(document.getElementById('gb-emo-int').value),
-          descricao: document.getElementById('gb-emo-desc').value.trim(),
+          situacaoDescricao: document.getElementById('gb-emo-situacao-descricao').value.trim(),
         };
         if (isEdit) S.updateEmocao(em.id, data);
         else S.addEmocao(data);
@@ -1458,14 +1458,14 @@ PCF.Pages = PCF.Pages || {};
     /* ---- Modal: Agenda ---- */
     const showAgendaModal = (comp) => {
       const isEdit = !!comp;
-      const STATUS_OPTS = ['Pendente', 'Concluído', 'Cancelado'];
+      const STATUS_OPTS = ['Pendente', 'ConcluÃ­do', 'Cancelado'];
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal">
           <h3>${isEdit ? 'Editar' : 'Novo'} Compromisso</h3>
           <form id="gb-ag-form">
-            <div class="form-group"><label>Compromisso</label><input type="text" id="gb-ag-desc" value="${H.esc(comp?.compromisso || '')}" required placeholder="Descrição do compromisso"></div>
+            <div class="form-group"><label>Compromisso</label><input type="text" id="gb-ag-desc" value="${H.esc(comp?.compromisso || '')}" required placeholder="DescriÃ§Ã£o do compromisso"></div>
             <div class="form-row">
               <div class="form-group"><label>Data</label><input type="date" id="gb-ag-data" value="${comp?.data || H.hoje()}" required></div>
               <div class="form-group"><label>Hora</label><input type="time" id="gb-ag-hora" value="${comp?.hora || ''}"></div>
@@ -1491,7 +1491,7 @@ PCF.Pages = PCF.Pages || {};
           status: document.getElementById('gb-ag-status').value,
         };
         if (isCompromissoAtrasado(data.data, data.hora)) {
-          alert('Data/horário atrasado!');
+          alert('Data/horÃ¡rio atrasado!');
           return;
         }
         if (isEdit) S.updateCompromisso(comp.id, data);
@@ -1501,13 +1501,13 @@ PCF.Pages = PCF.Pages || {};
       };
     };
 
-    /* ---- Modal: Diário ---- */
+    /* ---- Modal: DiÃ¡rio ---- */
     const showDiarioModal = (date, texto) => {
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal modal-lg">
-          <h3>📖 Editar Diário — ${_fmtDate(date)}</h3>
+          <h3>ðŸ“– Editar DiÃ¡rio â€” ${_fmtDate(date)}</h3>
           <form id="gb-diario-form">
             <div class="form-group">
               <label>Texto</label>
