@@ -1,20 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420" role="img" aria-labelledby="title desc">
   <title id="title">Promover o Bem</title>
-  <desc id="desc">Ilustracao de uma pomba com raios e o texto Promover o Bem.</desc>
+  <desc id="desc">Logomarca Promover o Bem com pomba central, raios laterais e texto em destaque.</desc>
+  <rect width="420" height="420" fill="#ffffff"/>
   <defs>
     <style>
-      .line { fill: none; stroke: #2b7a78; stroke-linecap: round; stroke-linejoin: round; }
-      .text { fill: #2b7a78; font-family: Georgia, "Times New Roman", serif; }
+      .stroke {
+        fill: none;
+        stroke: #2b7a78;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .brand {
+        fill: #2b7a78;
+        font-family: "Segoe Script", "Brush Script MT", "Lucida Handwriting", cursive;
+      }
     </style>
   </defs>
-  <g class="line" stroke-width="3.2">
-    <path d="M160 119c9-14 26-18 43-18-10 6-18 16-22 28 18-12 34-17 54-15-13 6-24 16-33 30 13-4 24-4 37 0-18 7-34 18-49 33-10-3-20-9-30-18" />
-    <path d="M160 119c-9-14-26-18-43-18 10 6 18 16 22 28-18-12-34-17-54-15 13 6 24 16 33 30-13-4-24-4-37 0 18 7 34 18 49 33 10-3 20-9 30-18" />
-    <path d="M149 135c4-18 11-33 21-42 10 9 17 24 21 42" />
-    <path d="M147 134c-8 14-12 28-12 43 0 20 11 32 25 32s25-12 25-32c0-15-4-29-12-43" />
-    <path d="M160 105c7 0 12 6 12 13s-5 13-12 13-12-6-12-13 5-13 12-13z" />
-    <path d="M74 168H14M82 156l-36-10M90 176l-34 12M96 144l-24-16M106 186l-22 18" />
-    <path d="M246 168h60M238 156l36-10M230 176l34 12M224 144l24-16M214 186l22 18" />
+
+  <g class="stroke" stroke-width="3.2">
+    <path d="M210 94c5 0 10 7 10 15s-5 15-10 15-10-7-10-15 5-15 10-15z"/>
+    <path d="M205 124c-9 9-14 23-14 39 0 23 9 42 19 42s19-19 19-42c0-16-5-30-14-39"/>
+    <path d="M207 134c-13-6-23-16-30-31-5-12-6-22-5-31 9 6 18 15 25 28 5 10 8 21 10 34"/>
+    <path d="M213 134c13-6 23-16 30-31 5-12 6-22 5-31-9 6-18 15-25 28-5 10-8 21-10 34"/>
+    <path d="M198 116c-16-13-37-20-59-21 11 7 22 16 32 29 8 10 14 21 18 33"/>
+    <path d="M222 116c16-13 37-20 59-21-11 7-22 16-32 29-8 10-14 21-18 33"/>
+    <path d="M189 134c-11-6-22-10-35-12 9 6 17 13 25 21"/>
+    <path d="M231 134c11-6 22-10 35-12-9 6-17 13-25 21"/>
+    <path d="M204 154c-4 10-6 20-6 31"/>
+    <path d="M216 154c4 10 6 20 6 31"/>
+
+    <path d="M95 170H24"/>
+    <path d="M109 152 58 133"/>
+    <path d="M118 188 63 209"/>
+    <path d="M132 140 89 113"/>
+    <path d="M145 202 104 232"/>
+    <path d="M160 131 132 96"/>
+
+    <path d="M325 170h71"/>
+    <path d="M311 152 362 133"/>
+    <path d="M302 188 357 209"/>
+    <path d="M288 140 331 113"/>
+    <path d="M275 202 316 232"/>
+    <path d="M260 131 288 96"/>
   </g>
-  <text x="160" y="258" text-anchor="middle" class="text" font-size="34">Promover o Bem</text>
+
+  <text x="210" y="306" text-anchor="middle" class="brand" font-size="58">Promover o Bem</text>
 </svg>
