@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Promover o Bem</title>
+  <desc id="desc">Ilustracao de uma pomba com raios e o texto Promover o Bem.</desc>
+  <defs>
+    <style>
+      .line { fill: none; stroke: #2b7a78; stroke-linecap: round; stroke-linejoin: round; }
+      .text { fill: #2b7a78; font-family: Georgia, "Times New Roman", serif; }
+    </style>
+  </defs>
+  <g class="line" stroke-width="3.2">
+    <path d="M160 119c9-14 26-18 43-18-10 6-18 16-22 28 18-12 34-17 54-15-13 6-24 16-33 30 13-4 24-4 37 0-18 7-34 18-49 33-10-3-20-9-30-18" />
+    <path d="M160 119c-9-14-26-18-43-18 10 6 18 16 22 28-18-12-34-17-54-15 13 6 24 16 33 30-13-4-24-4-37 0 18 7 34 18 49 33 10-3 20-9 30-18" />
+    <path d="M149 135c4-18 11-33 21-42 10 9 17 24 21 42" />
+    <path d="M147 134c-8 14-12 28-12 43 0 20 11 32 25 32s25-12 25-32c0-15-4-29-12-43" />
+    <path d="M160 105c7 0 12 6 12 13s-5 13-12 13-12-6-12-13 5-13 12-13z" />
+    <path d="M74 168H14M82 156l-36-10M90 176l-34 12M96 144l-24-16M106 186l-22 18" />
+    <path d="M246 168h60M238 156l36-10M230 176l34 12M224 144l24-16M214 186l22 18" />
+  </g>
+  <text x="160" y="258" text-anchor="middle" class="text" font-size="34">Promover o Bem</text>
+</svg>

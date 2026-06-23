@@ -208,6 +208,12 @@ PCF.App = (() => {
                 <a href="https://github.com/antoninocs1" target="_blank" rel="noopener noreferrer" class="landing-contact-btn">
                   ${_githubSvgSm} GitHub
                 </a>
+                <a href="https://promoverobem.blogspot.com/" target="_blank" rel="noopener noreferrer" class="landing-contact-btn">
+                  <i data-lucide="globe"></i> Blog
+                </a>
+                <a href="https://instagram.com/promoverobem" target="_blank" rel="noopener noreferrer" class="landing-contact-btn">
+                  <i data-lucide="instagram"></i> @promoverobem
+                </a>
               </div>
             </div>
             <div class="landing-about-stats">
@@ -228,8 +234,13 @@ PCF.App = (() => {
         </section>
 
         <footer class="landing-footer">
-          <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
-          <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
+          <div class="landing-footer-brand">
+            <img src="Img/promover-o-bem.svg" alt="Promover o Bem" class="landing-footer-logo">
+            <div class="landing-footer-copy">
+              <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
+              <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
+            </div>
+          </div>
         </footer>
 
       </div>`;
