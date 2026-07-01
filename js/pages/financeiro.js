@@ -82,7 +82,7 @@ PCF.Pages = PCF.Pages || {};
     const cats = S.getCategorias();
     container.innerHTML = `
       <div class="page">
-        <h2>Inserir Transação Financeira</h2>
+        <h2>Inserir Transação Financeira</h2><br>
         <div id="inserir-msg"></div>
         <form id="form-inserir" class="form">
           <div class="form-group"><label>Tipo de Operação</label>
@@ -457,7 +457,7 @@ PCF.Pages = PCF.Pages || {};
 
     container.innerHTML = `
       <div class="page">
-        <h2>4 Forças do Dinheiro</h2>
+        <h2>4 Forças do Dinheiro</h2><br>
         <p class="subtitle">Ciclo do Dinheiro — Visão geral das entradas, saídas, investimentos e saldo.</p>
 
         <div class="farol-banner" style="border-color:${farolCor}; background:${farolCor}15">

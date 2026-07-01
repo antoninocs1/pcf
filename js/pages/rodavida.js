@@ -265,7 +265,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="page rv-page">
           <div class="rv-topbar">
             <div>
-              <h2>🎯 Roda da Vida</h2>
+              <h2>🎯 Roda da Vida</h2><br>
               <p class="subtitle">Avalie seu nível de satisfação em cada área de vida</p>
             </div>
             <div class="rv-nav-area">
@@ -403,7 +403,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <div>
-              <h2>⚙️ Config. Roda da Vida</h2>
+              <h2>⚙️ Config. Roda da Vida</h2><br>
               <p class="subtitle">Gerencie os quadrantes e categorias da Roda da Vida</p>
             </div>
             <div class="page-actions">

@@ -13,9 +13,9 @@ PCF.Pages = PCF.Pages || {};
     const saved = S.getIMC();
     container.innerHTML = `
       <div class="page">
-        <h2>CÃ¡lculo do IMC</h2>
-        <p class="subtitle">IMC Ã© a sigla para Ãndice de Massa CorpÃ³rea, parÃ¢metro utilizado para avaliar se o peso estÃ¡ dentro do valor ideal para a altura.</p>
-        <p class="subtitle">O Ã­ndice Ã© calculado da seguinte maneira: IMC = Peso Ã· (Altura Ã— Altura)</p>
+        <h2>Cálculo do IMC</h2><br>
+        <p class="subtitle">IMC é a sigla para índice de Massa Corpórea, parâmetro utilizado para avaliar se o peso está dentro do valor ideal para a altura.</p>
+        <p class="subtitle">O índice é calculado da seguinte maneira: IMC = Peso ÷ (Altura × Altura)</p>
         <div class="imc-layout">
           <div class="imc-form">
             <div class="form-group"><label>Peso (Kg)</label><input type="number" id="imc-peso" step="0.1" min="0" placeholder="Ex: 65" value="${saved.peso || ''}"></div>
@@ -24,8 +24,8 @@ PCF.Pages = PCF.Pages || {};
             <div id="imc-result"></div>
           </div>
           <div class="imc-table-container">
-            <h3>Tabela de ReferÃªncia</h3>
-            <table class="table"><thead><tr><th>IMC</th><th>ClassificaÃ§Ã£o</th><th>Grau</th></tr></thead>
+            <h3>Tabela de Referência</h3>
+            <table class="table"><thead><tr><th>IMC</th><th>Classificação</th><th>Grau</th></tr></thead>
             <tbody>${H.IMC_CLASS.map((c, i) => `<tr id="imc-row-${i}"><td>${c.max === Infinity ? 'Maior que ' + c.min : i === 0 ? 'Menor que ' + c.max : 'Entre ' + c.min + ' e ' + c.max}</td><td>${c.nome}</td><td>${c.grau}</td></tr>`).join('')}</tbody></table>
           </div>
         </div>
@@ -86,7 +86,7 @@ PCF.Pages = PCF.Pages || {};
       const emocoes = S.getEmocoes();
       container.innerHTML = `
         <div class="page">
-          <h2>Análise das Emoções</h2>
+          <h2>Análise das Emoções</h2><br>
           <p class="subtitle">Escolha a emoção que melhor descreve como você está se sentindo agora.</p>
           <div class="emocoes-layout">
             <form id="form-emocao" class="form emocoes-form">
@@ -241,7 +241,7 @@ PCF.Pages = PCF.Pages || {};
 
     container.innerHTML = `
       <div class="page">
-        <h2>Relatório de Emoções</h2>
+        <h2>Relatório de Emoções</h2><br>
         <p class="subtitle">Análise e acompanhamento dos seus registros emocionais.</p>
         ${emocoes.length === 0 ? '<p class="empty-text">Nenhuma emoção registrada ainda. Registre emoções na página <a href="#emocoes">Emoções</a> para visualizar os gráficos.</p>' : `
         <div class="charts-grid">

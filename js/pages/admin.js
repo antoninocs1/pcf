@@ -1,6 +1,6 @@
 ﻿/* ========================================================
    PCF - pages/admin.js â€” Categorias CRUD, EmoÃ§Ãµes Config CRUD,
-   UsuÃ¡rios CRUD, Importar/Exportar CSV
+   Usuários CRUD, Importar/Exportar CSV
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
@@ -33,7 +33,7 @@ PCF.Pages = PCF.Pages || {};
             </select>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Tipo OperaÃ§Ã£o</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">AÃ§Ãµes</th></tr></thead>
+            <thead><tr><th>Tipo OperaÃ§Ã£o</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
             <tbody>${filtered.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma categoria</td></tr>' :
               filtered.map(c => `<tr>
                 <td><span class="tipo-badge ${c.tipoOperacao.toLowerCase()}">${c.tipoOperacao}</span></td>
@@ -51,7 +51,7 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('cat-filtro-tipo').onchange = function() { filtroTipo = this.value; render(); };
       document.getElementById('btn-add-cat').onclick = () => showCatModal();
       document.getElementById('btn-restaurar-cats').onclick = () => {
-        if (confirm('Restaurar categorias padrÃ£o? As categorias atuais serÃ£o substituÃ­das pelas categorias padrÃ£o.')) {
+        if (confirm('Restaurar categorias Padrão? As categorias atuais serÃ£o substituÃ­das pelas categorias Padrão.')) {
           S.restoreDefaultCategorias();
           filtroTipo = '';
           render();
@@ -306,21 +306,21 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>Gerenciar UsuÃ¡rios</h2>
+            <h2>Gerenciar Usuários</h2>
             <div class="contatos-search-wrap">
-              <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou e-mailâ€¦" value="${H.esc(_searchTerm)}">
+              <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou e-mail" value="${H.esc(_searchTerm)}">
               <button id="btn-usuarios-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-usuarios-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
-            <button id="btn-add-user" class="btn btn-primary">+ Novo UsuÃ¡rio</button>
+            <button id="btn-add-user" class="btn btn-primary">+ Novo Usuário</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th>Perfil</th><th style="width:100px">AÃ§Ãµes</th></tr></thead>
-            <tbody>${users.length === 0 ? `<tr><td colspan="8" class="empty-text">${term ? 'Nenhum usuÃ¡rio encontrado para "' + H.esc(term) + '"' : 'Nenhum usuÃ¡rio'}</td></tr>` :
+            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
+            <tbody>${users.length === 0 ? `<tr><td colspan="8" class="empty-text">${term ? 'Nenhum Usuário encontrado para "' + H.esc(term) + '"' : 'Nenhum Usuário'}</td></tr>` :
               users.map(u => `<tr>
                 <td>${H.esc(u.nome)}</td><td class="col-hide-mobile">${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td class="col-hide-mobile">${H.esc(u.telefone)}</td>
                 <td class="col-hide-mobile">${H.formatarData(u.dataNascimento)}</td><td class="col-hide-mobile">${H.formatarData(u.dataCadastro)}</td>
-                <td>${u.isAdmin ? '<span class="badge-admin">ðŸ‘‘ Admin</span>' : '<span class="badge-padrao">PadrÃ£o</span>'}</td>
+                <td>${u.isAdmin ? '<span class="badge-admin">Admin</span>' : '<span class="badge-padrao">Padrão</span>'}</td>
                 <td>
                   <button class="btn-icon" data-edit="${u.id}" title="Editar"><i data-lucide="pencil"></i></button>
                   <button class="btn-icon btn-danger" data-del="${u.id}" title="Remover"><i data-lucide="trash-2"></i></button>
@@ -345,8 +345,8 @@ PCF.Pages = PCF.Pages || {};
         const del = e.target.closest('[data-del]');
         if (del) {
           const uid = del.dataset.del;
-          if (uid === S.currentUserId()) { alert('NÃ£o Ã© possÃ­vel remover o usuÃ¡rio logado.'); return; }
-          if (confirm('Remover este usuÃ¡rio e todos os seus dados?')) { S.deleteUser(uid).then(() => render()); }
+          if (uid === S.currentUserId()) { alert('NÃ£o Ã© possÃ­vel remover o Usuário logado.'); return; }
+          if (confirm('Remover este Usuário e todos os seus dados?')) { S.deleteUser(uid).then(() => render()); }
         }
       };
     };
@@ -357,7 +357,7 @@ PCF.Pages = PCF.Pages || {};
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal modal-lg">
-          <h3>${isEdit ? 'Editar' : 'Novo'} UsuÃ¡rio</h3>
+          <h3>${isEdit ? 'Editar' : 'Novo'} Usuário</h3>
           <form id="user-modal-form">
             <div class="form-row">
               <div class="form-group"><label>Nome Completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
@@ -377,7 +377,7 @@ PCF.Pages = PCF.Pages || {};
             ${S.currentUserIsAdmin() ? `
             <div class="form-row">
               <div class="form-group">
-                <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> ðŸ‘‘ Administrador</label>
+                <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> Administrador</label>
                 <small class="text-muted">Somente administradores podem criar outros administradores.</small>
               </div>
             </div>` : ''}
@@ -433,7 +433,7 @@ PCF.Pages = PCF.Pages || {};
   PCF.Pages.importExport = (container) => {
     container.innerHTML = `
       <div class="page">
-        <h2>Importar / Exportar</h2>
+        <h2>Importar / Exportar</h2><br>
         <p class="subtitle">Exporte ou importe dados em formato CSV (compatível com Excel).</p>
 
         <div class="ie-grid">
@@ -665,14 +665,14 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>Contatos Pessoais</h2>
             <div class="contatos-search-wrap">
-              <input type="text" id="contatos-search" class="input-search" placeholder="Buscar pelo nomeâ€¦" value="${H.esc(_searchTerm)}">
+              <input type="text" id="contatos-search" class="input-search" placeholder="Buscar pelo nome" value="${H.esc(_searchTerm)}">
               <button id="btn-contatos-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-contatos-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
             <button id="btn-add-contato" class="btn btn-primary">+ Novo Contato</button>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th style="width:100px">AÃ§Ãµes</th></tr></thead>
+            <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th style="width:100px">Ações</th></tr></thead>
             <tbody>${contatos.length === 0 ? `<tr><td colspan="7" class="empty-text">${term ? 'Nenhum contato encontrado para "' + H.esc(term) + '"' : 'Nenhum contato cadastrado'}</td></tr>` :
               contatos.map(c => `<tr>
                 <td>${H.esc(c.nome)}</td><td class="col-hide-mobile">${H.esc(c.cpf)}</td><td>${H.esc(c.email)}</td><td class="col-hide-mobile">${H.esc(c.telefone)}</td>
@@ -880,7 +880,7 @@ PCF.Pages = PCF.Pages || {};
           </div>
           <p class="subtitle">Configure as abas e perguntas de reflexÃ£o exibidas no banner do DiÃ¡rio.</p>
           <div class="table-container"><table class="table">
-            <thead><tr><th style="width:60px">Ãcone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">AÃ§Ãµes</th></tr></thead>
+            <thead><tr><th style="width:60px">Ãcone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
             <tbody>${tabs.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma aba configurada</td></tr>' :
               tabs.map((t, idx) => `<tr>
                 <td style="font-size:1.4rem;text-align:center">${H.esc(t.icon || '')}</td>
