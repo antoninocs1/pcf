@@ -361,7 +361,7 @@ PCF.Pages = PCF.Pages || {};
           <form id="user-modal-form">
             <div class="form-row">
               <div class="form-group"><label>Nome Completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
-              <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00" required></div>
+              <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00"></div>
             </div>
             <div class="form-row">
               <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
@@ -656,21 +656,79 @@ PCF.Pages = PCF.Pages || {};
   PCF.Pages.contatos = (container) => {
     let _searchTerm = '';
 
+    const _todayMMDD = () => {
+      const t = new Date();
+      return `${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+    };
+
+    const _mmdd = (iso) => iso ? iso.slice(5) : '';
+
+    const _birthdayPanel = () => {
+      const todos = S.getContatos();
+      const hoje = _todayMMDD();
+      const session = S.getSession();
+      const userProfile = S.getUserById(session?.userId);
+      const userNasc = userProfile?.dataNascimento || '';
+      const anivHoje = [];
+      const anivMes = [];
+      const mesAtual = hoje.slice(0,2);
+
+      if (userNasc) {
+        const mmdd = _mmdd(userNasc);
+        if (mmdd.slice(0,2) === mesAtual) {
+          const isHoje = mmdd === hoje;
+          (isHoje ? anivHoje : anivMes).push({ nome: (userProfile.nome || 'Você') + ' 👑', nasc: userNasc, isUser: true, isHoje });
+        }
+      }
+
+      todos.forEach(c => {
+        if (!c.dataNascimento) return;
+        const mmdd = _mmdd(c.dataNascimento);
+        if (mmdd.slice(0,2) !== mesAtual) return;
+        const isHoje = mmdd === hoje;
+        (isHoje ? anivHoje : anivMes).push({ nome: c.nome, nasc: c.dataNascimento, isHoje });
+      });
+
+      if (!anivHoje.length && !anivMes.length) return '';
+      const fmtData = (iso) => H.formatarData ? H.formatarData(iso) : iso;
+
+      return `
+        <div class="aniversarios-panel">
+          <div class="aniversarios-title"><span>🎂</span> Aniversários</div>
+          ${anivHoje.map(a => `
+            <div class="aniversario-item aniversario-hoje">
+              <span class="aniversario-icon">🎉</span>
+              <span class="aniversario-nome">${H.esc(a.nome)}</span>
+              <span class="aniversario-data">${fmtData(a.nasc)} &mdash; <strong>HOJE!</strong></span>
+            </div>`).join('')}
+          ${anivMes.map(a => `
+            <div class="aniversario-item">
+              <span class="aniversario-icon">🎈</span>
+              <span class="aniversario-nome">${H.esc(a.nome)}</span>
+              <span class="aniversario-data">${fmtData(a.nasc)}</span>
+            </div>`).join('')}
+        </div>`;
+    };
+
     const render = () => {
       const todos = S.getContatos();
       const term = _searchTerm.trim().toLowerCase();
-      const contatos = term ? todos.filter(c => c.nome && c.nome.toLowerCase().includes(term)) : todos;
+      const contatos = term ? todos.filter(c =>
+        (c.nome  && c.nome.toLowerCase().includes(term)) ||
+        (c.email && c.email.toLowerCase().includes(term))
+      ) : todos;
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
             <h2>Contatos Pessoais</h2>
             <div class="contatos-search-wrap">
-              <input type="text" id="contatos-search" class="input-search" placeholder="Buscar pelo nome" value="${H.esc(_searchTerm)}">
+              <input type="text" id="contatos-search" class="input-search" placeholder="Buscar por nome ou e-mail" value="${H.esc(_searchTerm)}">
               <button id="btn-contatos-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-contatos-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
             <button id="btn-add-contato" class="btn btn-primary">+ Novo Contato</button>
           </div>
+          ${_birthdayPanel()}
           <div class="table-container"><table class="table">
             <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th style="width:100px">Ações</th></tr></thead>
             <tbody>${contatos.length === 0 ? `<tr><td colspan="7" class="empty-text">${term ? 'Nenhum contato encontrado para "' + H.esc(term) + '"' : 'Nenhum contato cadastrado'}</td></tr>` :
@@ -987,12 +1045,13 @@ PCF.Pages = PCF.Pages || {};
     let activeTab = 'emocoes';
 
     const TABS = [
-      { id: 'emocoes',  icon: '🧠', label: 'Emoções'      },
-      { id: 'habitos',  icon: '🌱', label: 'Hábitos'      },
-      { id: 'virtudes', icon: '💎', label: 'Virtudes'     },
-      { id: 'rodavida', icon: '🎯', label: 'Roda da Vida' },
-      { id: 'agenda',   icon: '📅', label: 'Agenda'       },
-      { id: 'diario',   icon: '📖', label: 'Diário'       },
+      { id: 'emocoes',   icon: '🧠', label: 'Emoções'      },
+      { id: 'habitos',   icon: '🌱', label: 'Hábitos'      },
+      { id: 'virtudes',  icon: '💎', label: 'Virtudes'     },
+      { id: 'rodavida',  icon: '🎯', label: 'Roda da Vida' },
+      { id: 'agenda',    icon: '📅', label: 'Agenda'       },
+      { id: 'planoacao', icon: '🗂', label: 'Plano de Ação' },
+      { id: 'diario',    icon: '📖', label: 'Diário'       },
     ];
 
     const _fmtDate = (d) => H.formatarData ? H.formatarData(d) : (d || '—');
@@ -1266,7 +1325,45 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
     };
 
-    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, agenda: renderAgenda, diario: renderDiario };
+    /* ---- Seção: Plano de Ação ---- */
+    const renderPlanoAcao = () => {
+      const acoes = S.getPlanoAcoes ? [...S.getPlanoAcoes()].sort((a, b) => (b.dataCadastro || '').localeCompare(a.dataCadastro || '')) : [];
+      const STATUS_COLORS_PA = { 'Pendente': '#f59e0b', 'Concluído': '#16a34a', 'Cancelado': '#dc2626', 'Em andamento': '#3b82f6' };
+      const contatos = S.getContatos ? S.getContatos() : [];
+      const contatosMap = Object.fromEntries(contatos.map(c => [c.id, c]));
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>🗂 Plano de Ação (5W2H) <span class="badge badge-neutral">${acoes.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#plano-acao" class="btn btn-secondary btn-sm">🗂 Ir ao Plano de Ação</a>
+              <button id="gb-clear-planoacao" class="btn btn-danger btn-sm"${acoes.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${acoes.length === 0 ? '<p class="empty-text">Nenhuma ação cadastrada</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>O quê?</th><th class="col-hide-mobile">Por quê?</th><th class="col-hide-mobile">Quando?</th><th class="col-hide-mobile">Quem?</th><th>Status</th><th style="width:60px">Ações</th></tr></thead>
+              <tbody>
+                ${acoes.map(a => {
+                  const cor = STATUS_COLORS_PA[a.status] || '#6b7280';
+                  const contato = contatosMap[a.whoContactId];
+                  return `<tr>
+                    <td><strong>${H.esc(a.what || '—')}</strong>${a.how ? `<br><small class="text-muted">${H.esc(a.how.slice(0,60))}</small>` : ''}</td>
+                    <td class="col-hide-mobile">${H.esc((a.why || '').slice(0,60))}${(a.why||'').length>60?'…':''}</td>
+                    <td class="col-hide-mobile">${a.whenDate ? _fmtDate(a.whenDate) + (a.whenTime ? ' ' + a.whenTime : '') : '—'}</td>
+                    <td class="col-hide-mobile">${H.esc(contato?.nome || a.who || '—')}</td>
+                    <td><span class="status-badge" style="background:${cor}">${H.esc(a.status || 'Pendente')}</span></td>
+                    <td><button class="btn-icon btn-danger" data-gb-del-pa="${a.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, agenda: renderAgenda, planoacao: renderPlanoAcao, diario: renderDiario };
 
     /* ---- Render principal ---- */
     const render = () => {
@@ -1320,6 +1417,9 @@ PCF.Pages = PCF.Pages || {};
       if (q('gb-clear-diario')) q('gb-clear-diario').onclick = () =>
         confirmClear('Diário', () => S.getDiario().length, () => S.saveDiario([]));
 
+      if (q('gb-clear-planoacao')) q('gb-clear-planoacao').onclick = () =>
+        confirmClear('Plano de Ação', () => (S.getPlanoAcoes ? S.getPlanoAcoes().length : 0), () => S.getPlanoAcoes && S.savePlanoAcoes && S.savePlanoAcoes([]));
+
       /* ---- Delegação de eventos nas linhas da tabela ---- */
       container.onclick = (e) => {
         /* Troca de aba */
@@ -1362,6 +1462,10 @@ PCF.Pages = PCF.Pages || {};
         if (editDiario) { const date = editDiario.dataset.gbEditDiario; const entry = S.getDiario().find(x => x.data === date); showDiarioModal(date, entry?.texto || ''); return; }
         const delDiario = e.target.closest('[data-gb-del-diario]');
         if (delDiario && confirm('Remover este registro do diário?')) { S.saveDiario(S.getDiario().filter(x => x.data !== delDiario.dataset.gbDelDiario)); render(); return; }
+
+        /* Plano de Ação */
+        const delPa = e.target.closest('[data-gb-del-pa]');
+        if (delPa && confirm('Remover esta ação do plano?')) { S.deletePlanoAcao && S.deletePlanoAcao(delPa.dataset.gbDelPa); render(); return; }
       };
     };
 

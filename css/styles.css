@@ -561,6 +561,54 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .table th, .table td { padding: 8px 8px; }
 }
 
+/* ==================== PARTÍCULAS ==================== */
+#pcf-particles { position: fixed; inset: 0; pointer-events: none; z-index: 9998; }
+
+.particle-toggle-wrap {
+  display: inline-flex; align-items: center; cursor: pointer;
+  margin-left: 6px; vertical-align: middle;
+}
+.particle-toggle-wrap input[type="checkbox"] {
+  width: 13px; height: 13px; margin: 0; accent-color: var(--accent);
+  flex-shrink: 0; cursor: pointer;
+}
+.particle-toggle-label {
+  font-size: 1rem; line-height: 1; margin-left: 2px; opacity: .65;
+  transition: opacity .2s, transform .2s;
+}
+.particle-toggle-wrap:hover .particle-toggle-label { opacity: 1; transform: scale(1.2); }
+.particle-toggle-wrap input:checked ~ .particle-toggle-label { opacity: 1; animation: snowSpin 3s linear infinite; }
+@keyframes snowSpin { 0%,100% { transform: rotate(-8deg) scale(1.1); } 50% { transform: rotate(8deg) scale(1.1); } }
+
+/* ==================== ANIVERSÁRIOS ==================== */
+.aniversarios-panel {
+  background: rgba(139,92,246,.08); border: 1px solid rgba(139,92,246,.25);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px;
+}
+.aniversarios-hoje-panel {
+  background: rgba(234,179,8,.10); border-color: rgba(234,179,8,.35);
+  animation: aniv-pulse 2s ease-in-out infinite;
+}
+@keyframes aniv-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(234,179,8,.15); }
+  50%      { box-shadow: 0 0 0 6px rgba(234,179,8,.0); }
+}
+.aniversarios-title {
+  font-size: .8rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
+}
+.aniversario-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+  font-size: .88rem;
+}
+.aniversario-item:last-child { border-bottom: none; }
+.aniversario-hoje { font-weight: 600; color: var(--warning); }
+.aniversario-icon { font-size: 1rem; flex-shrink: 0; }
+.aniversario-nome { flex: 1; }
+.aniversario-data { font-size: .8rem; color: var(--text-muted); white-space: nowrap; }
+.aniversario-hoje .aniversario-data { color: var(--warning); }
+
 /* ==================== FAROL FINANCEIRO ==================== */
 .farol-banner {
   display: flex;
@@ -2297,4 +2345,38 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .pcf-reports-grid { grid-template-columns: 1fr; }
   .pcf-module-chip { font-size: .82rem; padding: 7px 13px; }
 }
+
+/* ==================== SPINNER ==================== */
+.spinner {
+  width: 36px; height: 36px;
+  border: 4px solid rgba(255,255,255,.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: pcf-spin .7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes pcf-spin { to { transform: rotate(360deg); } }
+
+/* ==================== OVERLAY GOOGLE AUTH ==================== */
+#google-auth-overlay {
+  display: none;
+  position: absolute; inset: 0;
+  background: rgba(15,23,42,.82);
+  backdrop-filter: blur(3px);
+  border-radius: var(--radius-sm);
+  align-items: center; justify-content: center;
+  z-index: 10;
+  pointer-events: all;
+}
+.google-auth-overlay-inner {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--text); font-size: .9rem;
+}
+
+/* ==================== EFEITO NEVE / ESTRELAS ==================== */
+#pcf-particles { pointer-events: none; }
+/* Quando o efeito está ativo, garante que não bloqueie cliques */
+body:has(#pcf-particles) .main-content,
+body:has(#pcf-particles) .sidebar { position: relative; z-index: 1; }
+
 

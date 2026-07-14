@@ -219,6 +219,53 @@ const checkAndShowAlerts = () => {};
       const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
       const alertas = checkAlertas();
 
+      /* ---- Painel de Aniversários ---- */
+      const _buildBirthdayPanel = () => {
+        const contatosList = S.getContatos ? S.getContatos() : [];
+        const session = S.getSession ? S.getSession() : null;
+        const userProfile = session ? S.getUserById(session.userId) : null;
+        const hojeStr = H.hoje();
+        const mmddOf = function(iso) { return iso ? iso.slice(5) : ''; };
+        const mmAtual = hojeStr.slice(5, 7);
+        const hojeMMDD = hojeStr.slice(5);
+        const fmtD = function(iso) { return H.formatarData(iso); };
+        const anivHoje = [];
+        const anivMes = [];
+        if (userProfile && userProfile.dataNascimento) {
+          const md = mmddOf(userProfile.dataNascimento);
+          if (md.slice(0, 2) === mmAtual) {
+            const entry = { nome: (userProfile.nome || 'Você') + ' \uD83D\uDC51', nasc: userProfile.dataNascimento };
+            if (md === hojeMMDD) anivHoje.push(entry); else anivMes.push(entry);
+          }
+        }
+        contatosList.forEach(function(c) {
+          if (!c.dataNascimento) return;
+          const md = mmddOf(c.dataNascimento);
+          if (md.slice(0, 2) !== mmAtual) return;
+          const entry = { nome: c.nome, nasc: c.dataNascimento };
+          if (md === hojeMMDD) anivHoje.push(entry); else anivMes.push(entry);
+        });
+        if (!anivHoje.length && !anivMes.length) return '';
+        let html = '<div class="card" style="margin-top:1rem"><h3>\uD83C\uDF82 Anivers\u00E1rios do M\u00EAs</h3>';
+        if (anivHoje.length) {
+          html += '<div class="aniversarios-panel aniversarios-hoje-panel"><div class="aniversarios-title">\uD83C\uDF89 Aniversariantes de Hoje</div>';
+          anivHoje.forEach(function(a) {
+            html += '<div class="aniversario-item aniversario-hoje"><span class="aniversario-icon">\uD83C\uDF81</span><span class="aniversario-nome">' + H.esc(a.nome) + '</span><span class="aniversario-data">' + fmtD(a.nasc) + ' \u2014 <strong>HOJE!</strong></span></div>';
+          });
+          html += '</div>';
+        }
+        if (anivMes.length) {
+          html += '<div class="aniversarios-panel" style="margin-top:' + (anivHoje.length ? '12px' : '0') + '"><div class="aniversarios-title" style="color:var(--text-muted)">\uD83D\uDCC5 Outros no m\u00EAs</div>';
+          anivMes.forEach(function(a) {
+            html += '<div class="aniversario-item"><span class="aniversario-icon">\uD83C\uDF88</span><span class="aniversario-nome">' + H.esc(a.nome) + '</span><span class="aniversario-data">' + fmtD(a.nasc) + '</span></div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+        return html;
+      };
+      const birthdayHtml = _buildBirthdayPanel();
+
       container.innerHTML = `
         <div class="page">
           <div class="page-header page-header-agenda">
@@ -270,8 +317,7 @@ const checkAndShowAlerts = () => {};
                         data-ag-date="${cell.dateKey}"
                         aria-label="${cell.day} com ${cell.count} compromisso${cell.count === 1 ? '' : 's'}">
                         <span class="agenda-calendar-day">${cell.day}</span>
-                        ${cell.count > 0 ? `<span class="agenda-calendar-count">${cell.count > 99 ? '99+' : cell.count}</span>` : '<span class="agenda-calendar-count agenda-calendar-count-empty"></span>'}
-                      </button>`;
+divisão
                   }).join('')}
                 </div>
               </div>
@@ -361,8 +407,7 @@ const checkAndShowAlerts = () => {};
 
           <div class="card" style="margin-top:1rem">
             <h3>Ações do Plano vinculadas na Agenda (${acoesVinculadas.length})</h3>
-            ${acoesVinculadas.length === 0 ? '<p class="empty-text">Nenhuma ação do 5W2H vinculada à Agenda</p>' : `
-            <div class="table-wrapper">
+            ${acoesVinculadas.length === 0 ? '<p class="empty-text">Nenhuma ação do 5W2H vinculada à Agenda</p>' : `            <div class="table-wrapper">
               <table class="table">
                 <thead>
                   <tr>
@@ -389,6 +434,44 @@ const checkAndShowAlerts = () => {};
               </table>
             </div>`}
           </div>
+
+          ${(() => {
+            /* ---- Painel de Aniversários ---- */
+            const contatos = S.getContatos ? S.getContatos() : [];
+            const session = S.getSession ? S.getSession() : null;
+            const userProfile = session ? S.getUserById(session.userId) : null;
+            const hojeStr = H.hoje();
+            const _mmdd = (iso) => iso ? iso.slice(5) : '';
+            const mmAtual = hojeStr.slice(5,7);
+            const hojeMMDD = hojeStr.slice(5);
+            const fmtD = (iso) => H.formatarData(iso);
+            const anivHoje = [], anivMes = [];
+            if (userProfile && userProfile.dataNascimento) {
+              const md = _mmdd(userProfile.dataNascimento);
+              if (md.slice(0,2) === mmAtual) {
+                const arr = md === hojeMMDD ? anivHoje : anivMes;
+                arr.push({ nome: (userProfile.nome || 'Você') + ' 👑', nasc: userProfile.dataNascimento });
+              }
+            }
+            contatos.forEach(function(c) {
+              if (!c.dataNascimento) return;
+              const md = _mmdd(c.dataNascimento);
+              if (md.slice(0,2) !== mmAtual) return;
+              const arr = md === hojeMMDD ? anivHoje : anivMes;
+              arr.push({ nome: c.nome, nasc: c.dataNascimento });
+            });
+            if (!anivHoje.length && !anivMes.length) return '';
+            const hojeItems = anivHoje.map(function(a) {
+              return '<div class="aniversario-item aniversario-hoje"><span class="aniversario-icon">🎁</span><span class="aniversario-nome">' + H.esc(a.nome) + '</span><span class="aniversario-data">' + fmtD(a.nasc) + ' — <strong>HOJE!</strong></span></div>';
+            }).join('');
+            const mesItems = anivMes.map(function(a) {
+              return '<div class="aniversario-item"><span class="aniversario-icon">🎈</span><span class="aniversario-nome">' + H.esc(a.nome) + '</span><span class="aniversario-data">' + fmtD(a.nasc) + '</span></div>';
+            }).join('');
+            return '<div class="card" style="margin-top:1rem"><h3>🎂 Aniversários do Mês</h3>' +
+              (anivHoje.length ? '<div class="aniversarios-panel aniversarios-hoje-panel"><div class="aniversarios-title">🎉 Aniversariantes de Hoje</div>' + hojeItems + '</div>' : '') +
+              (anivMes.length ? '<div class="aniversarios-panel" style="margin-top:' + (anivHoje.length?'12px':'0') + '"><div class="aniversarios-title" style="color:var(--text-muted)">📅 Outros no mês</div>' + mesItems + '</div>' : '') +
+              '</div>';
+          })()
         </div>`;
 
       startClock();

@@ -389,15 +389,43 @@ PCF.App = (() => {
       }
     };
     document.getElementById('btn-google-login').onclick = async () => {
-      const btn = document.getElementById('btn-google-login');
-      btn.disabled = true;
-      btn.textContent = 'Aguarde…';
-      const res = await S.loginWithGoogle();
-      if (res.ok || res.msg === '') {
-        // onAuthStateChanged cuida do loadAll + initApp
-        return;
+      const btn      = document.getElementById('btn-google-login');
+      const emailEl  = document.getElementById('login-email');
+      const passEl   = document.getElementById('login-pass');
+      const submitEl = document.querySelector('#login-form button[type="submit"]');
+      const formEl   = document.getElementById('login-form');
+
+      const _setDisabled = (v) => {
+        btn.disabled = v;
+        if (emailEl)  emailEl.disabled  = v;
+        if (passEl)   passEl.disabled   = v;
+        if (submitEl) submitEl.disabled = v;
+      };
+
+      /* Mostra overlay sobre o formulário de e-mail/senha */
+      let overlay = document.getElementById('google-auth-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'google-auth-overlay';
+        overlay.innerHTML = `
+          <div class="google-auth-overlay-inner">
+            <div class="spinner" style="width:22px;height:22px;border-width:3px"></div>
+            <span>Aguardando autenticação Google…</span>
+          </div>`;
+        if (formEl) formEl.style.position = 'relative';
+        if (formEl) formEl.appendChild(overlay);
       }
-      btn.disabled = false;
+      overlay.style.display = 'flex';
+
+      _setDisabled(true);
+      btn.innerHTML = `${_googleSvg} <span>Aguarde…</span>`;
+
+      const res = await S.loginWithGoogle();
+
+      /* Remove overlay e reativa se falhou */
+      overlay.style.display = 'none';
+      if (res.ok || res.msg === '') return; // onAuthStateChanged cuida do restante
+      _setDisabled(false);
       btn.innerHTML = `${_googleSvg} Entrar com Google`;
       const el = document.getElementById('login-error');
       el.textContent = res.msg;
@@ -721,7 +749,12 @@ PCF.App = (() => {
         <aside class="sidebar" id="sidebar">
           <div class="sidebar-header">
             <div class="sidebar-header-top">
-              <h1><i data-lucide="banknote" class="header-logo-icon"></i> PCF</h1>
+              <h1><i data-lucide="banknote" class="header-logo-icon"></i> PCF
+                <label class="particle-toggle-wrap" title="Ativar efeito de neve / estrelas">
+                  <input type="checkbox" id="particle-toggle-input" ${localStorage.getItem('pcf_particles') === '1' ? 'checked' : ''}>
+                  <span class="particle-toggle-label" title="Efeito neve / estrelas">❄️</span>
+                </label>
+              </h1>
               <div class="theme-toggle-wrap">
                 <i data-lucide="moon" class="theme-toggle-icon"></i>
                 <label class="theme-switch" title="Alternar tema claro/escuro">
@@ -749,6 +782,16 @@ PCF.App = (() => {
     // onAuthStateChanged cuidará do renderLogin após signOut
     const gearBtn = document.getElementById('btn-meu-perfil');
     if (gearBtn) gearBtn.onclick = openMeuPerfil;
+    // Toggle de partículas
+    const partInp = document.getElementById('particle-toggle-input');
+    if (partInp) {
+      partInp.checked = localStorage.getItem('pcf_particles') === '1';
+      partInp.onchange = () => {
+        localStorage.setItem('pcf_particles', partInp.checked ? '1' : '0');
+        if (partInp.checked) _particleStart(); else _particleStop();
+      };
+      if (partInp.checked) _particleStart();
+    }
     document.getElementById('btn-home-back').onclick = () => { location.hash = '#home'; };
     document.getElementById('sidebar-toggle').onclick = () => {
       document.getElementById('sidebar').classList.toggle('open');
@@ -1132,6 +1175,123 @@ PCF.App = (() => {
     window.onhashchange = route;
     if (!location.hash) location.hash = '#home';
     else route();
+  };
+
+  /* ==================== EFEITO DE NEVE / ESTRELAS CAINDO ==================== */
+  let _particleRAF = null;
+  let _particleCanvas = null;
+
+  const _particleStart = () => {
+    _particleStop();
+    const canvas = document.createElement('canvas');
+    canvas.id = 'pcf-particles';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;opacity:1';
+    document.body.appendChild(canvas);
+    _particleCanvas = canvas;
+
+    const ctx = canvas.getContext('2d');
+    const N = 120;
+    let W = canvas.width  = window.innerWidth;
+    let H2 = canvas.height = window.innerHeight;
+
+    const onResize = () => {
+      W = canvas.width  = window.innerWidth;
+      H2 = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', onResize);
+
+    /* Determina tema para escolher cores */
+    const isDark = () => (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+
+    /* Cria partículas — mix de flocos de neve e estrelas brilhantes */
+    const STAR_CHARS = ['❄', '✦', '✧', '⋆', '·', '•', '★'];
+    const mkParticle = () => {
+      const type = Math.random() < 0.55 ? 'circle' : 'star';
+      return {
+        type,
+        x:      Math.random() * W,
+        y:      Math.random() * H2 - H2,       // começa acima da tela
+        vy:     0.4 + Math.random() * 1.4,      // velocidade de queda
+        vx:     (Math.random() - 0.5) * 0.5,    // drift lateral leve
+        r:      type === 'circle' ? 1.5 + Math.random() * 3.5 : 6 + Math.random() * 10,
+        a:      0.35 + Math.random() * 0.65,
+        phase:  Math.random() * Math.PI * 2,     // fase da oscilação
+        speed:  0.008 + Math.random() * 0.015,   // velocidade da oscilação
+        amp:    10 + Math.random() * 25,          // amplitude da oscilação horizontal
+        char:   STAR_CHARS[Math.floor(Math.random() * STAR_CHARS.length)],
+        twinklePhase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.04 + Math.random() * 0.08,
+      };
+    };
+    const pts = Array.from({ length: N }, mkParticle);
+
+    const draw = () => {
+      if (!_particleCanvas) return;
+      ctx.clearRect(0, 0, W, H2);
+      const dark = isDark();
+      const baseColor = dark ? '255,255,255' : '59,130,246';
+
+      pts.forEach(p => {
+        p.phase += p.speed;
+        p.twinklePhase += p.twinkleSpeed;
+        const tw = 0.5 + 0.5 * Math.sin(p.twinklePhase);   // 0..1 pulsante
+        const alpha = p.a * (dark ? (0.4 + 0.6 * tw) : (0.25 + 0.45 * tw));
+
+        /* Movimento: queda + oscilação senoidal horizontal */
+        p.y += p.vy;
+        p.x += p.vx + Math.sin(p.phase) * 0.4;
+
+        /* Reset quando sai pela base */
+        if (p.y > H2 + 20) {
+          p.y = -20;
+          p.x = Math.random() * W;
+        }
+        if (p.x < -20) p.x = W + 20;
+        if (p.x > W + 20) p.x = -20;
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        if (p.type === 'circle') {
+          /* Floco de neve — círculo com brilho */
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+          grad.addColorStop(0, `rgba(${baseColor},1)`);
+          grad.addColorStop(1, `rgba(${baseColor},0)`);
+          ctx.fillStyle = grad;
+          ctx.shadowBlur = 6 + 8 * tw;
+          ctx.shadowColor = `rgba(${baseColor},0.9)`;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        } else {
+          /* Estrela / símbolo unicode caindo */
+          const scale = 0.6 + 0.4 * tw;
+          ctx.font = `${p.r * scale}px serif`;
+          ctx.fillStyle = `rgba(${baseColor},1)`;
+          ctx.shadowBlur = 10 * tw;
+          ctx.shadowColor = `rgba(${baseColor},0.8)`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(p.char, p.x, p.y);
+          ctx.shadowBlur = 0;
+        }
+        ctx.restore();
+      });
+
+      _particleRAF = requestAnimationFrame(draw);
+    };
+    draw();
+    canvas._onResize = onResize;
+  };
+
+  const _particleStop = () => {
+    if (_particleRAF) { cancelAnimationFrame(_particleRAF); _particleRAF = null; }
+    if (_particleCanvas) {
+      window.removeEventListener('resize', _particleCanvas._onResize);
+      _particleCanvas.remove();
+      _particleCanvas = null;
+    }
   };
 
   const boot = () => {
