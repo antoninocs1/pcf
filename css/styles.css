@@ -2374,34 +2374,41 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 
 /* ==================== EFEITO LANTERNA / GLOW CARD ==================== */
 /*
-  Quando body.glow-effect está ativo, cada .card recebe um
-  radial-gradient posicionado pelo cursor (variáveis --gx / --gy
-  atualizadas via JS), criando o efeito de lanterna do vídeo.
+  Baseado em https://www.youtube.com/watch?v=7YOfkEFAWC8
+  .pcf-luz é injetada via JS dentro de cada .card no hover.
+  mix-blend-mode: screen sobrepõe a luz sem cobrir o conteúdo do card.
 */
 .glow-effect .card {
-  background-image: radial-gradient(
-    320px circle at var(--gx, -9999px) var(--gy, -9999px),
-    rgba(59,130,246,.28) 0%,
-    transparent 72%
-  );
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
 }
-[data-theme="light"] .glow-effect .card {
-  background-image: radial-gradient(
-    320px circle at var(--gx, -9999px) var(--gy, -9999px),
-    rgba(59,130,246,.18) 0%,
-    transparent 72%
+.pcf-luz {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 102, 255, 0.65) 0%,
+    rgba(0, 102, 255, 0) 70%
   );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity 0.15s ease;
+  will-change: transform, opacity;
 }
-/* Cards coloridos — glow mais sutil */
-.glow-effect .card-receita,
-.glow-effect .card-despesa,
-.glow-effect .card-saldo,
-.glow-effect .card-investimento {
-  background-image: radial-gradient(
-    280px circle at var(--gx, -9999px) var(--gy, -9999px),
-    rgba(255,255,255,.12) 0%,
-    transparent 70%
+[data-theme="light"] .pcf-luz {
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.35) 0%,
+    rgba(59, 130, 246, 0) 70%
   );
+  mix-blend-mode: multiply;
 }
 
 

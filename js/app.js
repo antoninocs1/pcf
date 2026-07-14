@@ -1178,19 +1178,38 @@ PCF.App = (() => {
   };
 
   /* ==================== EFEITO LANTERNA (GLOW CARD) ==================== */
+  /*
+   * Implementação baseada no vídeo https://www.youtube.com/watch?v=7YOfkEFAWC8
+   * Uma div .pcf-luz é injetada dentro de cada card e segue o cursor do mouse.
+   * mix-blend-mode: screen cria o efeito de lanterna real sem cobrir o conteúdo.
+   */
   let _glowCurrentCard = null;
+
+  const _getLuz = (card) => {
+    let luz = card.querySelector('.pcf-luz');
+    if (!luz) {
+      luz = document.createElement('div');
+      luz.className = 'pcf-luz';
+      luz.setAttribute('aria-hidden', 'true');
+      card.insertBefore(luz, card.firstChild);
+    }
+    return luz;
+  };
 
   const _glowMouseMove = (e) => {
     const overCard = e.target.closest('.card');
     if (_glowCurrentCard && _glowCurrentCard !== overCard) {
-      _glowCurrentCard.style.setProperty('--gx', '-9999px');
-      _glowCurrentCard.style.setProperty('--gy', '-9999px');
+      const prevLuz = _glowCurrentCard.querySelector('.pcf-luz');
+      if (prevLuz) { prevLuz.style.opacity = '0'; }
       _glowCurrentCard = null;
     }
     if (overCard) {
+      const luz = _getLuz(overCard);
       const rect = overCard.getBoundingClientRect();
-      overCard.style.setProperty('--gx', (e.clientX - rect.left) + 'px');
-      overCard.style.setProperty('--gy', (e.clientY - rect.top) + 'px');
+      const x = e.clientX - rect.left - 175;
+      const y = e.clientY - rect.top - 175;
+      luz.style.transform = `translate(${x}px, ${y}px)`;
+      luz.style.opacity = '1';
       _glowCurrentCard = overCard;
     }
   };
@@ -1205,11 +1224,9 @@ PCF.App = (() => {
   const _particleStop = () => {
     document.body.classList.remove('glow-effect');
     document.removeEventListener('mousemove', _glowMouseMove);
-    if (_glowCurrentCard) {
-      _glowCurrentCard.style.setProperty('--gx', '-9999px');
-      _glowCurrentCard.style.setProperty('--gy', '-9999px');
-      _glowCurrentCard = null;
-    }
+    /* Remove todas as divs .pcf-luz injetadas */
+    document.querySelectorAll('.pcf-luz').forEach(el => el.remove());
+    _glowCurrentCard = null;
   };
 
   const boot = () => {

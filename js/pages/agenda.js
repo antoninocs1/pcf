@@ -472,7 +472,7 @@ const checkAndShowAlerts = () => {};
               (anivHoje.length ? '<div class="aniversarios-panel aniversarios-hoje-panel"><div class="aniversarios-title">🎉 Aniversariantes de Hoje</div>' + hojeItems + '</div>' : '') +
               (anivMes.length ? '<div class="aniversarios-panel" style="margin-top:' + (anivHoje.length?'12px':'0') + '"><div class="aniversarios-title" style="color:var(--text-muted)">📅 Outros no mês</div>' + mesItems + '</div>' : '') +
               '</div>';
-          })()
+          })()}
         </div>`;
 
       startClock();
