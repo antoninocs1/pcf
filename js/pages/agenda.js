@@ -317,7 +317,8 @@ const checkAndShowAlerts = () => {};
                         data-ag-date="${cell.dateKey}"
                         aria-label="${cell.day} com ${cell.count} compromisso${cell.count === 1 ? '' : 's'}">
                         <span class="agenda-calendar-day">${cell.day}</span>
-divisão
+                        ${cell.count > 0 ? `<span class="agenda-calendar-count">${cell.count}</span>` : ''}
+                      </button>`;
                   }).join('')}
                 </div>
               </div>

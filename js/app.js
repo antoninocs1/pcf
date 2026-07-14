@@ -750,9 +750,9 @@ PCF.App = (() => {
           <div class="sidebar-header">
             <div class="sidebar-header-top">
               <h1><i data-lucide="banknote" class="header-logo-icon"></i> PCF
-                <label class="particle-toggle-wrap" title="Ativar efeito de neve / estrelas">
+                <label class="particle-toggle-wrap" title="Ativar efeito lanterna nos cards">
                   <input type="checkbox" id="particle-toggle-input" ${localStorage.getItem('pcf_particles') === '1' ? 'checked' : ''}>
-                  <span class="particle-toggle-label" title="Efeito neve / estrelas">❄️</span>
+                  <span class="particle-toggle-label" title="Efeito lanterna">🔦</span>
                 </label>
               </h1>
               <div class="theme-toggle-wrap">
@@ -1177,120 +1177,38 @@ PCF.App = (() => {
     else route();
   };
 
-  /* ==================== EFEITO DE NEVE / ESTRELAS CAINDO ==================== */
-  let _particleRAF = null;
-  let _particleCanvas = null;
+  /* ==================== EFEITO LANTERNA (GLOW CARD) ==================== */
+  let _glowCurrentCard = null;
+
+  const _glowMouseMove = (e) => {
+    const overCard = e.target.closest('.card');
+    if (_glowCurrentCard && _glowCurrentCard !== overCard) {
+      _glowCurrentCard.style.setProperty('--gx', '-9999px');
+      _glowCurrentCard.style.setProperty('--gy', '-9999px');
+      _glowCurrentCard = null;
+    }
+    if (overCard) {
+      const rect = overCard.getBoundingClientRect();
+      overCard.style.setProperty('--gx', (e.clientX - rect.left) + 'px');
+      overCard.style.setProperty('--gy', (e.clientY - rect.top) + 'px');
+      _glowCurrentCard = overCard;
+    }
+  };
 
   const _particleStart = () => {
     _particleStop();
-    const canvas = document.createElement('canvas');
-    canvas.id = 'pcf-particles';
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;opacity:1';
-    document.body.appendChild(canvas);
-    _particleCanvas = canvas;
-
-    const ctx = canvas.getContext('2d');
-    const N = 120;
-    let W = canvas.width  = window.innerWidth;
-    let H2 = canvas.height = window.innerHeight;
-
-    const onResize = () => {
-      W = canvas.width  = window.innerWidth;
-      H2 = canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', onResize);
-
-    /* Determina tema para escolher cores */
-    const isDark = () => (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
-
-    /* Cria partículas — mix de flocos de neve e estrelas brilhantes */
-    const STAR_CHARS = ['❄', '✦', '✧', '⋆', '·', '•', '★'];
-    const mkParticle = () => {
-      const type = Math.random() < 0.55 ? 'circle' : 'star';
-      return {
-        type,
-        x:      Math.random() * W,
-        y:      Math.random() * H2 - H2,       // começa acima da tela
-        vy:     0.4 + Math.random() * 1.4,      // velocidade de queda
-        vx:     (Math.random() - 0.5) * 0.5,    // drift lateral leve
-        r:      type === 'circle' ? 1.5 + Math.random() * 3.5 : 6 + Math.random() * 10,
-        a:      0.35 + Math.random() * 0.65,
-        phase:  Math.random() * Math.PI * 2,     // fase da oscilação
-        speed:  0.008 + Math.random() * 0.015,   // velocidade da oscilação
-        amp:    10 + Math.random() * 25,          // amplitude da oscilação horizontal
-        char:   STAR_CHARS[Math.floor(Math.random() * STAR_CHARS.length)],
-        twinklePhase: Math.random() * Math.PI * 2,
-        twinkleSpeed: 0.04 + Math.random() * 0.08,
-      };
-    };
-    const pts = Array.from({ length: N }, mkParticle);
-
-    const draw = () => {
-      if (!_particleCanvas) return;
-      ctx.clearRect(0, 0, W, H2);
-      const dark = isDark();
-      const baseColor = dark ? '255,255,255' : '59,130,246';
-
-      pts.forEach(p => {
-        p.phase += p.speed;
-        p.twinklePhase += p.twinkleSpeed;
-        const tw = 0.5 + 0.5 * Math.sin(p.twinklePhase);   // 0..1 pulsante
-        const alpha = p.a * (dark ? (0.4 + 0.6 * tw) : (0.25 + 0.45 * tw));
-
-        /* Movimento: queda + oscilação senoidal horizontal */
-        p.y += p.vy;
-        p.x += p.vx + Math.sin(p.phase) * 0.4;
-
-        /* Reset quando sai pela base */
-        if (p.y > H2 + 20) {
-          p.y = -20;
-          p.x = Math.random() * W;
-        }
-        if (p.x < -20) p.x = W + 20;
-        if (p.x > W + 20) p.x = -20;
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-
-        if (p.type === 'circle') {
-          /* Floco de neve — círculo com brilho */
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-          grad.addColorStop(0, `rgba(${baseColor},1)`);
-          grad.addColorStop(1, `rgba(${baseColor},0)`);
-          ctx.fillStyle = grad;
-          ctx.shadowBlur = 6 + 8 * tw;
-          ctx.shadowColor = `rgba(${baseColor},0.9)`;
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        } else {
-          /* Estrela / símbolo unicode caindo */
-          const scale = 0.6 + 0.4 * tw;
-          ctx.font = `${p.r * scale}px serif`;
-          ctx.fillStyle = `rgba(${baseColor},1)`;
-          ctx.shadowBlur = 10 * tw;
-          ctx.shadowColor = `rgba(${baseColor},0.8)`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(p.char, p.x, p.y);
-          ctx.shadowBlur = 0;
-        }
-        ctx.restore();
-      });
-
-      _particleRAF = requestAnimationFrame(draw);
-    };
-    draw();
-    canvas._onResize = onResize;
+    /* Ativa efeito lanterna via classe CSS no body */
+    document.body.classList.add('glow-effect');
+    document.addEventListener('mousemove', _glowMouseMove, { passive: true });
   };
 
   const _particleStop = () => {
-    if (_particleRAF) { cancelAnimationFrame(_particleRAF); _particleRAF = null; }
-    if (_particleCanvas) {
-      window.removeEventListener('resize', _particleCanvas._onResize);
-      _particleCanvas.remove();
-      _particleCanvas = null;
+    document.body.classList.remove('glow-effect');
+    document.removeEventListener('mousemove', _glowMouseMove);
+    if (_glowCurrentCard) {
+      _glowCurrentCard.style.setProperty('--gx', '-9999px');
+      _glowCurrentCard.style.setProperty('--gy', '-9999px');
+      _glowCurrentCard = null;
     }
   };
 

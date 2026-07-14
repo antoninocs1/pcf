@@ -562,7 +562,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 
 /* ==================== PARTÍCULAS ==================== */
-#pcf-particles { position: fixed; inset: 0; pointer-events: none; z-index: 9998; }
+#pcf-particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 
 .particle-toggle-wrap {
   display: inline-flex; align-items: center; cursor: pointer;
@@ -577,8 +577,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   transition: opacity .2s, transform .2s;
 }
 .particle-toggle-wrap:hover .particle-toggle-label { opacity: 1; transform: scale(1.2); }
-.particle-toggle-wrap input:checked ~ .particle-toggle-label { opacity: 1; animation: snowSpin 3s linear infinite; }
-@keyframes snowSpin { 0%,100% { transform: rotate(-8deg) scale(1.1); } 50% { transform: rotate(8deg) scale(1.1); } }
+.particle-toggle-wrap input:checked ~ .particle-toggle-label { opacity: 1; }
 
 /* ==================== ANIVERSÁRIOS ==================== */
 .aniversarios-panel {
@@ -2373,10 +2372,36 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   color: var(--text); font-size: .9rem;
 }
 
-/* ==================== EFEITO NEVE / ESTRELAS ==================== */
-#pcf-particles { pointer-events: none; }
-/* Quando o efeito está ativo, garante que não bloqueie cliques */
-body:has(#pcf-particles) .main-content,
-body:has(#pcf-particles) .sidebar { position: relative; z-index: 1; }
+/* ==================== EFEITO LANTERNA / GLOW CARD ==================== */
+/*
+  Quando body.glow-effect está ativo, cada .card recebe um
+  radial-gradient posicionado pelo cursor (variáveis --gx / --gy
+  atualizadas via JS), criando o efeito de lanterna do vídeo.
+*/
+.glow-effect .card {
+  background-image: radial-gradient(
+    320px circle at var(--gx, -9999px) var(--gy, -9999px),
+    rgba(59,130,246,.28) 0%,
+    transparent 72%
+  );
+}
+[data-theme="light"] .glow-effect .card {
+  background-image: radial-gradient(
+    320px circle at var(--gx, -9999px) var(--gy, -9999px),
+    rgba(59,130,246,.18) 0%,
+    transparent 72%
+  );
+}
+/* Cards coloridos — glow mais sutil */
+.glow-effect .card-receita,
+.glow-effect .card-despesa,
+.glow-effect .card-saldo,
+.glow-effect .card-investimento {
+  background-image: radial-gradient(
+    280px circle at var(--gx, -9999px) var(--gy, -9999px),
+    rgba(255,255,255,.12) 0%,
+    transparent 70%
+  );
+}
 
 
