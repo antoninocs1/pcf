@@ -14,6 +14,8 @@ PCF.App = (() => {
   const destroyCharts = () => {
     _chartInstances.forEach(c => c.destroy()); _chartInstances = [];
     if (_homeClockInterval) { clearInterval(_homeClockInterval); _homeClockInterval = null; }
+    // Reseta referência do card atual do efeito lanterna (nova página será renderizada)
+    _glowCurrentCard = null;
   };
   const registerChart = (c) => { _chartInstances.push(c); return c; };
 
@@ -749,19 +751,20 @@ PCF.App = (() => {
         <aside class="sidebar" id="sidebar">
           <div class="sidebar-header">
             <div class="sidebar-header-top">
-              <h1><i data-lucide="banknote" class="header-logo-icon"></i> PCF
-                <label class="particle-toggle-wrap" title="Ativar efeito lanterna nos cards">
+              <h1><i data-lucide="banknote" class="header-logo-icon"></i> PCF</h1>
+              <div class="sidebar-controls">
+                <div class="theme-toggle-wrap">
+                  <i data-lucide="moon" class="theme-toggle-icon"></i>
+                  <label class="theme-switch" title="Alternar tema claro/escuro">
+                    <input type="checkbox" id="theme-toggle-input">
+                    <span class="theme-switch-slider"></span>
+                  </label>
+                  <i data-lucide="sun" class="theme-toggle-icon"></i>
+                </div>
+                <label class="particle-toggle-wrap" title="Ativar/desativar efeito lanterna">
                   <input type="checkbox" id="particle-toggle-input" ${localStorage.getItem('pcf_particles') === '1' ? 'checked' : ''}>
-                  <span class="particle-toggle-label" title="Efeito lanterna">🔦</span>
+                  <span class="particle-toggle-label">🔦</span>
                 </label>
-              </h1>
-              <div class="theme-toggle-wrap">
-                <i data-lucide="moon" class="theme-toggle-icon"></i>
-                <label class="theme-switch" title="Alternar tema claro/escuro">
-                  <input type="checkbox" id="theme-toggle-input">
-                  <span class="theme-switch-slider"></span>
-                </label>
-                <i data-lucide="sun" class="theme-toggle-icon"></i>
               </div>
             </div>
             <div class="user-info">
@@ -1185,8 +1188,15 @@ PCF.App = (() => {
    */
   let _glowCurrentCard = null;
 
+  /* Seletores de elementos que recebem o efeito lanterna */
+  const _findGlowTarget = (el) =>
+    el.closest('.card') ||
+    el.closest('.chart-container') ||
+    el.closest('.ie-section') ||
+    el.closest('.gb-section');
+
   const _getLuz = (card) => {
-    let luz = card.querySelector('.pcf-luz');
+    let luz = card.querySelector(':scope > .pcf-luz');
     if (!luz) {
       luz = document.createElement('div');
       luz.className = 'pcf-luz';
@@ -1197,8 +1207,9 @@ PCF.App = (() => {
   };
 
   const _glowMouseMove = (e) => {
-    const overCard = e.target.closest('.card');
-    if (_glowCurrentCard && _glowCurrentCard !== overCard) {
+    const overCard = _findGlowTarget(e.target);
+    // Se o card anterior mudou ou saiu do DOM, apaga sua luz
+    if (_glowCurrentCard && (_glowCurrentCard !== overCard || !document.contains(_glowCurrentCard))) {
       const prevLuz = _glowCurrentCard.querySelector('.pcf-luz');
       if (prevLuz) { prevLuz.style.opacity = '0'; }
       _glowCurrentCard = null;
