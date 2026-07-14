@@ -1,5 +1,5 @@
 ﻿/* ========================================================
-   PCF - pages/admin.js â€” Categorias CRUD, EmoÃ§Ãµes Config CRUD,
+   PCF - pages/admin.js - Categorias CRUD, Emoções Config CRUD,
    Usuários CRUD, Importar/Exportar CSV
    ======================================================== */
 window.PCF = window.PCF || {};
@@ -20,7 +20,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>Config. Categorias</h2>
             <div style="display:flex;gap:8px;align-items:center">
-              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar PadrÃµes</button>
+              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
               <button id="btn-add-cat" class="btn btn-primary">+ Nova Categoria</button>
             </div>
           </div>
@@ -33,7 +33,7 @@ PCF.Pages = PCF.Pages || {};
             </select>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Tipo OperaÃ§Ã£o</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
+            <thead><tr><th>Tipo Operação</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
             <tbody>${filtered.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma categoria</td></tr>' :
               filtered.map(c => `<tr>
                 <td><span class="tipo-badge ${c.tipoOperacao.toLowerCase()}">${c.tipoOperacao}</span></td>
@@ -51,7 +51,7 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('cat-filtro-tipo').onchange = function() { filtroTipo = this.value; render(); };
       document.getElementById('btn-add-cat').onclick = () => showCatModal();
       document.getElementById('btn-restaurar-cats').onclick = () => {
-        if (confirm('Restaurar categorias Padrão? As categorias atuais serÃ£o substituÃ­das pelas categorias Padrão.')) {
+        if (confirm('Restaurar categorias Padrão? As categorias atuais serão substituídas pelas categorias Padrão.')) {
           S.restoreDefaultCategorias();
           filtroTipo = '';
           render();
@@ -73,7 +73,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="modal">
           <h3>${isEdit ? 'Editar' : 'Nova'} Categoria</h3>
           <form id="cat-modal-form">
-            <div class="form-group"><label>Tipo de OperaÃ§Ã£o</label>
+            <div class="form-group"><label>Tipo de Operação</label>
               <select id="cat-m-tipo" required ${isEdit ? 'disabled' : ''}>
                 <option value="DESPESA" ${cat?.tipoOperacao === 'DESPESA' ? 'selected' : ''}>DESPESA</option>
                 <option value="RECEITA" ${cat?.tipoOperacao === 'RECEITA' ? 'selected' : ''}>RECEITA</option>
@@ -97,7 +97,7 @@ PCF.Pages = PCF.Pages || {};
       const addSubcatRow = (nome = '', tipo = '') => {
         const row = document.createElement('div');
         row.className = 'subcat-row';
-        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="VariÃ¡vel" ${tipo === 'VariÃ¡vel' ? 'selected' : ''}>VariÃ¡vel</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover"><i data-lucide="trash-2"></i></button>`;
+        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="Variável" ${tipo === 'Variável' ? 'selected' : ''}>Variável</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover"><i data-lucide="trash-2"></i></button>`;
         row.querySelector('.subcat-del').onclick = () => row.remove();
         document.getElementById('subcat-list').appendChild(row);
       };
@@ -290,7 +290,7 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
-  /* ==================== USUÃRIOS CRUD ==================== */
+  /* ==================== USUÁRIOS CRUD ==================== */
   PCF.Pages.usuarios = (container) => {
     let _searchTerm = '';
 
@@ -320,7 +320,7 @@ PCF.Pages = PCF.Pages || {};
               users.map(u => `<tr>
                 <td>${H.esc(u.nome)}</td><td class="col-hide-mobile">${H.esc(u.cpf)}</td><td>${H.esc(u.email)}</td><td class="col-hide-mobile">${H.esc(u.telefone)}</td>
                 <td class="col-hide-mobile">${H.formatarData(u.dataNascimento)}</td><td class="col-hide-mobile">${H.formatarData(u.dataCadastro)}</td>
-                <td>${u.isAdmin ? '<span class="badge-admin">Admin</span>' : '<span class="badge-padrao">Padrão</span>'}</td>
+                <td>${u.isAdmin ? '<span class="badge-admin">👑 Admin </span>' : '<span class="badge-padrao">👤 Padrão</span>'}</td>
                 <td>
                   <button class="btn-icon" data-edit="${u.id}" title="Editar"><i data-lucide="pencil"></i></button>
                   <button class="btn-icon btn-danger" data-del="${u.id}" title="Remover"><i data-lucide="trash-2"></i></button>
@@ -345,7 +345,7 @@ PCF.Pages = PCF.Pages || {};
         const del = e.target.closest('[data-del]');
         if (del) {
           const uid = del.dataset.del;
-          if (uid === S.currentUserId()) { alert('NÃ£o Ã© possÃ­vel remover o Usuário logado.'); return; }
+          if (uid === S.currentUserId()) { alert('Não é possível remover o Usuário logado.'); return; }
           if (confirm('Remover este Usuário e todos os seus dados?')) { S.deleteUser(uid).then(() => render()); }
         }
       };
@@ -399,7 +399,7 @@ PCF.Pages = PCF.Pages || {};
         const errEl = document.getElementById('um-error');
         const p1 = document.getElementById('um-pass').value;
         const p2 = document.getElementById('um-pass2').value;
-        if (p1 && p1 !== p2) { errEl.textContent = 'As senhas nÃ£o coincidem'; errEl.style.display = 'block'; return; }
+        if (p1 && p1 !== p2) { errEl.textContent = 'As senhas não coincidem'; errEl.style.display = 'block'; return; }
 
         const data = {
           nome: document.getElementById('um-nome').value.trim(),
@@ -418,7 +418,7 @@ PCF.Pages = PCF.Pages || {};
           const res = await S.updateUser(user.id, data);
           if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
         } else {
-          if (!p1) { errEl.textContent = 'Senha Ã© obrigatÃ³ria'; errEl.style.display = 'block'; return; }
+          if (!p1) { errEl.textContent = 'Senha é obrigatória'; errEl.style.display = 'block'; return; }
           const res = await S.createUser(data, p1);
           if (!res.ok) { errEl.textContent = res.msg; errEl.style.display = 'block'; return; }
         }
@@ -468,7 +468,7 @@ PCF.Pages = PCF.Pages || {};
           </div>
           <div class="ie-section">
             <h3><i data-lucide="trash-2"></i> Limpar Bases</h3>
-            <p class="text-muted">Remove todos os registros da base selecionada. Esta ação não pode ser desfeita.</p>
+            <p class="text-muted">Remove todos os registros da base selecionada. Esta ação não pode ser desfeita.</p><br>
             <div class="ie-buttons">
               <button id="clear-trans" class="btn btn-danger">Limpar Transações Financeiras</button>
               <button id="clear-emocoes" class="btn btn-danger">Limpar Registros de Emoções</button>
@@ -485,14 +485,14 @@ PCF.Pages = PCF.Pages || {};
         </div>
       </div>`;
 
-    // EXPORTAR TRANSAÃ‡Ã•ES
+    // EXPORTAR TRANSAÇÕES
     document.getElementById('exp-trans').onclick = () => {
       const trans = S.getTransacoes();
       const headers = ['data','dia','mes','ano','tipoOperacao','categoria','subcategoria','item','valor','formaPagamento','tipo'];
       H.downloadCSV(H.toCSV(trans, headers), 'transacoes.csv');
     };
 
-    // EXPORTAR USUÃRIOS
+    // EXPORTAR USUÁRIOS
     document.getElementById('exp-users').onclick = () => {
       const users = S.getUsers().map(u => ({ ...u, senhaHash: undefined }));
       const headers = ['id','nome','cpf','email','telefone','dataNascimento','login','dataCadastro'];
@@ -506,7 +506,7 @@ PCF.Pages = PCF.Pages || {};
       H.downloadCSV(H.toCSV(rows, ['tipoOperacao', 'categoria', 'subcategorias']), 'categorias.csv');
     };
 
-    // EXPORTAR EMOÃ‡Ã•ES
+    // EXPORTAR EMOÇÕES
     document.getElementById('exp-emocoes').onclick = () => {
       const emos = S.getEmocoes();
       const headers = ['data','hora','situacaoDescricao','emocaoSuperior','emocaoMedia','emocaoInferior','intensidade'];
@@ -531,7 +531,7 @@ PCF.Pages = PCF.Pages || {};
       setTimeout(() => { if (el) el.innerHTML = ''; }, 4000);
     };
 
-    // IMPORTAR TRANSAÃ‡Ã•ES
+    // IMPORTAR TRANSAÇÕES
     document.getElementById('imp-trans').onchange = function() {
       const file = this.files[0];
       if (!file) return;
@@ -560,7 +560,7 @@ PCF.Pages = PCF.Pages || {};
       inputEl.value = '';
     };
 
-    // IMPORTAR USUÃRIOS
+    // IMPORTAR USUÁRIOS
     document.getElementById('imp-users').onchange = function() {
       const file = this.files[0];
       if (!file) return;
@@ -752,7 +752,7 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
-  /* ==================== DIÃRIO ==================== */
+  /* ==================== DIÁRIO ==================== */
   PCF.Pages.diario = (container) => {
     const userId = S.currentUserId();
     const KEY = `pcf_diario_${userId}`;
@@ -784,8 +784,8 @@ PCF.Pages = PCF.Pages || {};
 
           <div class="diario-sugestoes">
             <div class="diario-sugestoes-header">
-              <span>ðŸ’¡ <strong>SugestÃµes de reflexÃ£o</strong></span>
-              <small class="text-muted">Clique em uma pergunta para inserir no diÃ¡rio</small>
+              <span>💡 <strong>Sugestões de reflexão</strong></span>
+              <small class="text-muted">Clique em uma pergunta para inserir no diário</small>
             </div>
             <div class="diario-tabs-bar">
               ${TABS_SUGESTOES.map(t => `<button class="diario-tab${t.id === sugestoesTab ? ' active' : ''}" data-tab="${t.id}">${t.icon} ${t.label}</button>`).join('')}
@@ -868,19 +868,19 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
-  /* ==================== CONFIG DIÃRIO ==================== */
+  /* ==================== CONFIG DIÁRIO ==================== */
   PCF.Pages.diarioConfig = (container) => {
     const render = () => {
       const tabs = S.getDiarioTabs();
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2><i data-lucide="settings"></i> Config. DiÃ¡rio</h2>
+            <h2><i data-lucide="settings"></i> Config. Diário</h2>
             <button id="btn-add-dtab" class="btn btn-primary">+ Nova Aba</button>
           </div>
-          <p class="subtitle">Configure as abas e perguntas de reflexÃ£o exibidas no banner do DiÃ¡rio.</p>
+          <p class="subtitle">Configure as abas e perguntas de reflexão exibidas no banner do Diário.</p>
           <div class="table-container"><table class="table">
-            <thead><tr><th style="width:60px">Ãcone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
+            <thead><tr><th style="width:60px">Ícone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
             <tbody>${tabs.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma aba configurada</td></tr>' :
               tabs.map((t, idx) => `<tr>
                 <td style="font-size:1.4rem;text-align:center">${H.esc(t.icon || '')}</td>
@@ -1501,7 +1501,7 @@ PCF.Pages = PCF.Pages || {};
       };
     };
 
-    /* ---- Modal: DiÃ¡rio ---- */
+    /* ---- Modal: Diário ---- */
     const showDiarioModal = (date, texto) => {
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';

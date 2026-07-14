@@ -377,7 +377,7 @@ PCF.Store = (() => {
       if (forceKeys !== null) { if (forceKeys.includes(key)) _set(key, data); }
       else { if (_get(key) === null) _set(key, data); }
     };
-    // Categorias padrão
+    // Categorias padrão — subcategorias com tipo Fixo/Variável conforme base do usuário antoninocs
     const cats = [
       { id: _uid(), tipoOperacao: 'RECEITA', categoria: 'Salário Líquido', subcategorias: [] },
       { id: _uid(), tipoOperacao: 'RECEITA', categoria: '13º Salário', subcategorias: [] },
@@ -387,18 +387,93 @@ PCF.Store = (() => {
       { id: _uid(), tipoOperacao: 'RECEITA', categoria: 'Renda Extra', subcategorias: [] },
       { id: _uid(), tipoOperacao: 'RECEITA', categoria: 'Saldo mês anterior', subcategorias: [] },
       { id: _uid(), tipoOperacao: 'RECEITA', categoria: 'Outros', subcategorias: [] },
-      { id: _uid(), tipoOperacao: 'INVESTIMENTO', categoria: 'Investimentos', subcategorias: ['Aposentadoria / Previdência Oficial (INSS)', 'Previdência Privada', 'Aplicação em fundos / CDB', 'Poupança', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'INVESTIMENTO', categoria: 'Sonhos', subcategorias: ['Colchão Financeiro', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Habitação', subcategorias: ['Aluguel', 'Condomínio', 'IPTU', 'Energia / Luz', 'Água', 'Internet', 'Telefone / Celular', 'Gás', 'Materiais de Construção', 'Seguro do imóvel', 'Assinatura', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Mercado / Alimentação', subcategorias: ['Mercado / Feira', 'Padaria', 'Restaurante', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Saúde', subcategorias: ['Médico / Dentista / Laboratório', 'Plano de Saúde', 'Plano Odontológico', 'Medicamentos (farmácia, remédios)', 'Terapia', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Transporte', subcategorias: ['Seguro de carro', 'Combustível', 'Lavagem', 'IPVA', 'Mecânico', 'Estacionamento / pedágio', 'Transporte (ônibus, metrô, taxi, UBER)', 'Passagem de Avião', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Educação', subcategorias: ['Escola', 'Cursos', 'Faculdade', 'Seminário', 'Livro', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Despesas Pessoais', subcategorias: ['Higiene Pessoal', 'Barbeiro, cabeleireiro, manicure', 'Vestuário', 'Academia', 'Seguro de Vida', 'Lazer', 'Diversos'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Doação', subcategorias: ['Instituição Religiosa', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Merecimento', subcategorias: ['Dinheiro', 'Lazer', 'Diversos'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Financiamento / Empréstimo', subcategorias: ['Financiamento', 'Empréstimo', 'Consórcio', 'IR (Pagamento - DARF)', 'Outros'] },
-      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Compras Evitadas', subcategorias: ['Bolão', 'Diversos'] },
+      { id: _uid(), tipoOperacao: 'INVESTIMENTO', categoria: 'Investimentos', subcategorias: [
+        { nome: 'Aposentadoria / Previdência Oficial (INSS)', tipo: 'Fixo' },
+        { nome: 'Previdência Privada', tipo: 'Fixo' },
+        { nome: 'Aplicação em fundos / CDB', tipo: 'Variável' },
+        { nome: 'Poupança', tipo: 'Variável' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'INVESTIMENTO', categoria: 'Sonhos', subcategorias: [
+        { nome: 'Colchão Financeiro', tipo: 'Variável' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Habitação', subcategorias: [
+        { nome: 'Aluguel', tipo: 'Fixo' },
+        { nome: 'Condomínio', tipo: 'Fixo' },
+        { nome: 'IPTU', tipo: 'Fixo' },
+        { nome: 'Energia / Luz', tipo: 'Fixo' },
+        { nome: 'Água', tipo: 'Fixo' },
+        { nome: 'Internet', tipo: 'Fixo' },
+        { nome: 'Telefone / Celular', tipo: 'Fixo' },
+        { nome: 'Gás', tipo: 'Variável' },
+        { nome: 'Materiais de Construção', tipo: 'Variável' },
+        { nome: 'Seguro do imóvel', tipo: 'Fixo' },
+        { nome: 'Assinatura', tipo: 'Fixo' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Mercado / Alimentação', subcategorias: [
+        { nome: 'Mercado / Feira', tipo: 'Variável' },
+        { nome: 'Padaria', tipo: 'Variável' },
+        { nome: 'Restaurante', tipo: 'Variável' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Saúde', subcategorias: [
+        { nome: 'Médico / Dentista / Laboratório', tipo: 'Variável' },
+        { nome: 'Plano de Saúde', tipo: 'Fixo' },
+        { nome: 'Plano Odontológico', tipo: 'Fixo' },
+        { nome: 'Medicamentos (farmácia, remédios)', tipo: 'Variável' },
+        { nome: 'Terapia', tipo: 'Fixo' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Transporte', subcategorias: [
+        { nome: 'Seguro de carro', tipo: 'Fixo' },
+        { nome: 'Combustível', tipo: 'Variável' },
+        { nome: 'Lavagem', tipo: 'Variável' },
+        { nome: 'IPVA', tipo: 'Fixo' },
+        { nome: 'Mecânico', tipo: 'Variável' },
+        { nome: 'Estacionamento / pedágio', tipo: 'Variável' },
+        { nome: 'Transporte (ônibus, metrô, taxi, UBER)', tipo: 'Variável' },
+        { nome: 'Passagem de Avião', tipo: 'Variável' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Educação', subcategorias: [
+        { nome: 'Escola', tipo: 'Fixo' },
+        { nome: 'Cursos', tipo: 'Variável' },
+        { nome: 'Faculdade', tipo: 'Fixo' },
+        { nome: 'Seminário', tipo: 'Variável' },
+        { nome: 'Livro', tipo: 'Variável' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Despesas Pessoais', subcategorias: [
+        { nome: 'Higiene Pessoal', tipo: 'Variável' },
+        { nome: 'Barbeiro, cabeleireiro, manicure', tipo: 'Variável' },
+        { nome: 'Vestuário', tipo: 'Variável' },
+        { nome: 'Academia', tipo: 'Fixo' },
+        { nome: 'Seguro de Vida', tipo: 'Fixo' },
+        { nome: 'Lazer', tipo: 'Variável' },
+        { nome: 'Diversos', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Doação', subcategorias: [
+        { nome: 'Instituição Religiosa', tipo: 'Fixo' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Merecimento', subcategorias: [
+        { nome: 'Dinheiro', tipo: 'Variável' },
+        { nome: 'Lazer', tipo: 'Variável' },
+        { nome: 'Diversos', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Financiamento / Empréstimo', subcategorias: [
+        { nome: 'Financiamento', tipo: 'Fixo' },
+        { nome: 'Empréstimo', tipo: 'Fixo' },
+        { nome: 'Consórcio', tipo: 'Fixo' },
+        { nome: 'IR (Pagamento - DARF)', tipo: 'Variável' },
+        { nome: 'Outros', tipo: 'Variável' },
+      ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: 'Compras Evitadas', subcategorias: [
+        { nome: 'Bolão', tipo: 'Variável' },
+        { nome: 'Diversos', tipo: 'Variável' },
+      ] },
     ];
     _seedIfEmpty(`pcf_categorias_${userId}`, cats);
 

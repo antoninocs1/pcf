@@ -197,6 +197,10 @@ input[type="color"], select, textarea {
   font-family: inherit; outline: none; transition: border-color .2s; width: 100%;
 }
 input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+input:disabled, select:disabled, textarea:disabled {
+  background: #1a2540; color: var(--text-dim); border-color: var(--border);
+  opacity: .65; cursor: not-allowed;
+}
 input[type="color"] { height: 42px; padding: 4px; cursor: pointer; }
 input[type="range"] { width: 100%; accent-color: var(--accent); }
 textarea { resize: vertical; }
@@ -502,6 +506,19 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   /* Barra de busca ocupa linha própria no mobile */
   .contatos-search-wrap { flex: 1 1 100%; order: 3; }
   .contatos-search-wrap .input-search { flex: 1; min-width: 0; width: 100%; }
+  /* Charts empilhados */
+  .charts-grid { grid-template-columns: 1fr; }
+  /* Subcat row: empilha nome e tipo no mobile */
+  .subcat-row { flex-wrap: wrap; }
+  .subcat-row .subcat-nome { min-width: 0; }
+  .subcat-row .subcat-tipo { width: 100px; flex-shrink: 0; }
+  /* IE grid */
+  .ie-grid { grid-template-columns: 1fr; }
+  /* Tabela de categorias: chips de subcategorias quebram melhor */
+  .subcats-list { max-width: 100%; }
+  /* Filtros: direção coluna em telas pequenas */
+  .filters { flex-direction: row; flex-wrap: wrap; }
+  .filters select { min-width: 140px; flex: 1; }
 }
 
 @media (max-width: 480px) {
@@ -535,6 +552,13 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   /* Filtros: selects em coluna quando não há espaço */
   .filters { flex-direction: column; align-items: stretch; }
   .filters select { width: 100%; min-width: 0; }
+  /* Subcat row: empilha completamente em telas muito pequenas */
+  .subcat-row { flex-direction: column; align-items: stretch; }
+  .subcat-row .subcat-tipo { width: 100%; }
+  /* Cabeçalho de página: botões em wrap */
+  .page-header > div { flex-wrap: wrap; gap: 6px; }
+  /* Tabela: padding menor */
+  .table th, .table td { padding: 8px 8px; }
 }
 
 /* ==================== FAROL FINANCEIRO ==================== */
