@@ -14,8 +14,6 @@ PCF.App = (() => {
   const destroyCharts = () => {
     _chartInstances.forEach(c => c.destroy()); _chartInstances = [];
     if (_homeClockInterval) { clearInterval(_homeClockInterval); _homeClockInterval = null; }
-    // Reseta referência do card atual do efeito lanterna (nova página será renderizada)
-    _glowCurrentCard = null;
   };
   const registerChart = (c) => { _chartInstances.push(c); return c; };
 
@@ -159,6 +157,9 @@ PCF.App = (() => {
               <button id="landing-theme-toggle" class="landing-nav-contact" title="Alternar tema claro/escuro" aria-label="Alternar tema">
                 <i data-lucide="sun" id="ltg-sun"></i>
                 <i data-lucide="moon" id="ltg-moon"></i>
+              </button>
+              <button id="landing-glow-toggle" class="landing-nav-contact glow-toggle-button" title="Alternar efeito lanterna" aria-label="Alternar efeito lanterna" aria-pressed="${localStorage.getItem('pcf_particles') === '1'}">
+                <i data-lucide="flashlight"></i>
               </button>
             </nav>
             <button class="landing-nav-toggle" id="landing-nav-toggle" aria-label="Abrir menu">
@@ -320,6 +321,25 @@ PCF.App = (() => {
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('pcf_theme', next);
       };
+    }
+
+    /* Toggle efeito lanterna (landing) */
+    const landingGlowBtn = document.getElementById('landing-glow-toggle');
+    if (landingGlowBtn) {
+      const setLandingGlowState = (enabled) => {
+        landingGlowBtn.setAttribute('aria-pressed', String(enabled));
+        landingGlowBtn.classList.toggle('active', enabled);
+        landingGlowBtn.title = enabled ? 'Desativar efeito lanterna' : 'Ativar efeito lanterna';
+      };
+      const initiallyEnabled = localStorage.getItem('pcf_particles') === '1';
+      setLandingGlowState(initiallyEnabled);
+      landingGlowBtn.onclick = () => {
+        const enabled = landingGlowBtn.getAttribute('aria-pressed') !== 'true';
+        localStorage.setItem('pcf_particles', enabled ? '1' : '0');
+        setLandingGlowState(enabled);
+        if (enabled) _particleStart(); else _particleStop();
+      };
+      if (initiallyEnabled) _particleStart();
     }
 
     /* Mobile nav toggle */
@@ -761,10 +781,9 @@ PCF.App = (() => {
                   </label>
                   <i data-lucide="sun" class="theme-toggle-icon"></i>
                 </div>
-                <label class="particle-toggle-wrap" title="Ativar/desativar efeito lanterna">
-                  <input type="checkbox" id="particle-toggle-input" ${localStorage.getItem('pcf_particles') === '1' ? 'checked' : ''}>
-                  <span class="particle-toggle-label">🔦</span>
-                </label>
+                <button id="particle-toggle-button" class="glow-toggle-button" title="Alternar efeito lanterna" aria-label="Alternar efeito lanterna" aria-pressed="${localStorage.getItem('pcf_particles') === '1'}">
+                  <i data-lucide="flashlight"></i>
+                </button>
               </div>
             </div>
             <div class="user-info">
@@ -785,15 +804,22 @@ PCF.App = (() => {
     // onAuthStateChanged cuidará do renderLogin após signOut
     const gearBtn = document.getElementById('btn-meu-perfil');
     if (gearBtn) gearBtn.onclick = openMeuPerfil;
-    // Toggle de partículas
-    const partInp = document.getElementById('particle-toggle-input');
-    if (partInp) {
-      partInp.checked = localStorage.getItem('pcf_particles') === '1';
-      partInp.onchange = () => {
-        localStorage.setItem('pcf_particles', partInp.checked ? '1' : '0');
-        if (partInp.checked) _particleStart(); else _particleStop();
+    // Toggle do efeito lanterna
+    const partBtn = document.getElementById('particle-toggle-button');
+    if (partBtn) {
+      const setGlowButtonState = (enabled) => {
+        partBtn.setAttribute('aria-pressed', String(enabled));
+        partBtn.title = enabled ? 'Desativar efeito lanterna' : 'Ativar efeito lanterna';
       };
-      if (partInp.checked) _particleStart();
+      const initiallyEnabled = localStorage.getItem('pcf_particles') === '1';
+      setGlowButtonState(initiallyEnabled);
+      partBtn.onclick = () => {
+        const enabled = partBtn.getAttribute('aria-pressed') !== 'true';
+        localStorage.setItem('pcf_particles', enabled ? '1' : '0');
+        setGlowButtonState(enabled);
+        if (enabled) _particleStart(); else _particleStop();
+      };
+      if (initiallyEnabled) _particleStart();
     }
     document.getElementById('btn-home-back').onclick = () => { location.hash = '#home'; };
     document.getElementById('sidebar-toggle').onclick = () => {
@@ -1180,49 +1206,29 @@ PCF.App = (() => {
     else route();
   };
 
-  /* ==================== EFEITO LANTERNA (GLOW CARD) ==================== */
-  /*
-   * Implementação baseada no vídeo https://www.youtube.com/watch?v=7YOfkEFAWC8
-   * Uma div .pcf-luz é injetada dentro de cada card e segue o cursor do mouse.
-   * mix-blend-mode: screen cria o efeito de lanterna real sem cobrir o conteúdo.
-   */
-  let _glowCurrentCard = null;
-
-  /* Seletores de elementos que recebem o efeito lanterna */
-  const _findGlowTarget = (el) =>
-    el.closest('.card') ||
-    el.closest('.chart-container') ||
-    el.closest('.ie-section') ||
-    el.closest('.gb-section');
-
-  const _getLuz = (card) => {
-    let luz = card.querySelector(':scope > .pcf-luz');
+  /* ==================== EFEITO LANTERNA GLOBAL ==================== */
+  const _getLuz = () => {
+    let luz = document.getElementById('pcf-luz-global');
     if (!luz) {
       luz = document.createElement('div');
+      luz.id = 'pcf-luz-global';
       luz.className = 'pcf-luz';
       luz.setAttribute('aria-hidden', 'true');
-      card.insertBefore(luz, card.firstChild);
+      document.body.appendChild(luz);
     }
     return luz;
   };
 
   const _glowMouseMove = (e) => {
-    const overCard = _findGlowTarget(e.target);
-    // Se o card anterior mudou ou saiu do DOM, apaga sua luz
-    if (_glowCurrentCard && (_glowCurrentCard !== overCard || !document.contains(_glowCurrentCard))) {
-      const prevLuz = _glowCurrentCard.querySelector('.pcf-luz');
-      if (prevLuz) { prevLuz.style.opacity = '0'; }
-      _glowCurrentCard = null;
-    }
-    if (overCard) {
-      const luz = _getLuz(overCard);
-      const rect = overCard.getBoundingClientRect();
-      const x = e.clientX - rect.left - 175;
-      const y = e.clientY - rect.top - 175;
-      luz.style.transform = `translate(${x}px, ${y}px)`;
-      luz.style.opacity = '1';
-      _glowCurrentCard = overCard;
-    }
+    const luz = _getLuz();
+    luz.style.setProperty('--glow-x', `${e.clientX}px`);
+    luz.style.setProperty('--glow-y', `${e.clientY}px`);
+    luz.style.opacity = '1';
+  };
+
+  const _glowMouseLeave = () => {
+    const luz = document.getElementById('pcf-luz-global');
+    if (luz) luz.style.opacity = '0';
   };
 
   const _particleStart = () => {
@@ -1230,14 +1236,15 @@ PCF.App = (() => {
     /* Ativa efeito lanterna via classe CSS no body */
     document.body.classList.add('glow-effect');
     document.addEventListener('mousemove', _glowMouseMove, { passive: true });
+    document.documentElement.addEventListener('mouseleave', _glowMouseLeave);
   };
 
   const _particleStop = () => {
     document.body.classList.remove('glow-effect');
     document.removeEventListener('mousemove', _glowMouseMove);
+    document.documentElement.removeEventListener('mouseleave', _glowMouseLeave);
     /* Remove todas as divs .pcf-luz injetadas */
     document.querySelectorAll('.pcf-luz').forEach(el => el.remove());
-    _glowCurrentCard = null;
   };
 
   const boot = () => {

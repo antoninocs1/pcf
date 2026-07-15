@@ -1201,6 +1201,14 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .hab-frase-dia { flex-direction: column; gap: 8px; }
 }
 
+/* Controles do header do sidebar (tema + lanterna lado a lado) */
+.sidebar-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 /* ==================== THEME TOGGLE SWITCH ==================== */
 .sidebar-header-top {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
@@ -1473,7 +1481,28 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   color: var(--text-muted); text-decoration: none; transition: color .2s, background .2s;
 }
 .landing-nav-contact:hover { color: var(--accent); background: rgba(59,130,246,.1); text-decoration: none; }
+.landing-nav-contact.active,
+.landing-nav-contact[aria-pressed="true"] {
+  color: var(--accent);
+  background: rgba(59,130,246,.16);
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,.28);
+}
 .landing-nav-contact svg { width: 18px; height: 18px; display: block; }
+
+.glow-toggle-button {
+  width: 34px; height: 34px; padding: 0; border: 1px solid transparent;
+  border-radius: 8px; background: transparent; color: var(--text-muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: color .2s, background .2s, border-color .2s, box-shadow .2s, filter .2s;
+}
+.glow-toggle-button svg { width: 18px; height: 18px; display: block; }
+.glow-toggle-button:hover { color: var(--text); background: rgba(148,163,184,.12); }
+.glow-toggle-button[aria-pressed="true"] {
+  color: #facc15; background: rgba(250,204,21,.14); border-color: rgba(250,204,21,.42);
+  box-shadow: 0 0 10px rgba(250,204,21,.38), inset 0 0 8px rgba(59,130,246,.16);
+  filter: drop-shadow(0 0 4px rgba(250,204,21,.75));
+}
+.glow-toggle-button[aria-pressed="false"] { color: #64748b; filter: grayscale(1); }
 
 .landing-nav-toggle {
   display: none; background: none; border: 1px solid var(--border);
@@ -2372,56 +2401,27 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   color: var(--text); font-size: .9rem;
 }
 
-/* ==================== EFEITO LANTERNA / GLOW CARD ==================== */
+/* ==================== EFEITO LANTERNA GLOBAL ==================== */
 /*
   Baseado em https://www.youtube.com/watch?v=7YOfkEFAWC8
-  .pcf-luz é injetada via JS dentro de cada .card/.chart-container no hover.
-  mix-blend-mode: screen sobrepõe a luz sem cobrir o conteúdo do card.
+  Uma camada fixa acompanha o cursor e ilumina toda a aplicação.
 */
-.glow-effect .card,
-.glow-effect .chart-container,
-.glow-effect .ie-section,
-.glow-effect .gb-section {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
 .pcf-luz {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(
-    circle,
-    rgba(100, 170, 255, 0.85) 0%,
-    rgba(0, 102, 255, 0.45) 35%,
-    rgba(0, 102, 255, 0) 70%
-  );
-  border-radius: 50%;
+  --glow-x: 50vw;
+  --glow-y: 50vh;
+  position: fixed;
+  inset: 0;
   pointer-events: none;
-  z-index: 999;
-  opacity: 0;
+  z-index: 2147483646;
+  background: radial-gradient(circle 280px at var(--glow-x) var(--glow-y), rgba(64,156,255,.48) 0%, rgba(30,116,255,.22) 38%, rgba(0,76,255,.07) 62%, transparent 76%);
   mix-blend-mode: screen;
-  transition: opacity 0.12s ease;
-  will-change: transform, opacity;
+  opacity: 0;
+  transition: opacity .14s ease;
+  will-change: background, opacity;
 }
 [data-theme="light"] .pcf-luz {
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.4) 0%,
-    rgba(59, 130, 246, 0.15) 40%,
-    rgba(59, 130, 246, 0) 70%
-  );
+  background: radial-gradient(circle 280px at var(--glow-x) var(--glow-y), rgba(14,165,233,.22) 0%, rgba(37,99,235,.11) 42%, transparent 76%);
   mix-blend-mode: multiply;
-}
-
-/* Controles do header do sidebar (tema + lanterna lado a lado) */
-.sidebar-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
 }
 
 
