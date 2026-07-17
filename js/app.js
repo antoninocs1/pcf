@@ -36,7 +36,11 @@ PCF.App = (() => {
     { icon: 'user',          title: 'Contatos',        desc: 'Organize seus contatos pessoais com informações de acesso rápido e fácil consulta.' },
   ];
 
+  let _loginScreenRendered = false;
+  let _sidebarKeyboardController = null;
+
   const renderLogin = () => {
+    _loginScreenRendered = true;
     const featureCards = _featuresData.map(f => `
       <div class="landing-feature-card">
         <div class="landing-feature-icon"><i data-lucide="${f.icon}"></i></div>
@@ -796,7 +800,8 @@ PCF.App = (() => {
             ${renderNav()}
           </nav>
         </aside>
-        <button id="sidebar-toggle" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+        <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="Fechar menu" tabindex="-1"></button>
+        <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false"><i data-lucide="menu"></i></button>
         <button id="btn-home-back" class="btn-home-back" title="Tela Inicial"><i data-lucide="home"></i></button>
         <main class="main-content" id="main-content"></main>
       </div>`;
@@ -822,12 +827,29 @@ PCF.App = (() => {
       if (initiallyEnabled) _particleStart();
     }
     document.getElementById('btn-home-back').onclick = () => { location.hash = '#home'; };
-    document.getElementById('sidebar-toggle').onclick = () => {
-      document.getElementById('sidebar').classList.toggle('open');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const closeMobileSidebar = () => {
+      sidebar.classList.remove('open');
+      document.body.classList.remove('sidebar-open');
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+      sidebarToggle.setAttribute('aria-label', 'Abrir menu');
     };
+    sidebarToggle.onclick = () => {
+      const isOpen = sidebar.classList.toggle('open');
+      document.body.classList.toggle('sidebar-open', isOpen);
+      sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+      sidebarToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+    };
+    document.getElementById('sidebar-backdrop').onclick = closeMobileSidebar;
+    _sidebarKeyboardController?.abort();
+    _sidebarKeyboardController = new AbortController();
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) closeMobileSidebar();
+    }, { signal: _sidebarKeyboardController.signal });
     document.getElementById('sidebar-nav').addEventListener('click', (e) => {
       if (e.target.closest('.nav-link')) {
-        document.getElementById('sidebar').classList.remove('open');
+        closeMobileSidebar();
       }
     });
   };
@@ -1186,6 +1208,11 @@ PCF.App = (() => {
 
   const initApp = () => {
     if (!S.getSession()) { renderLogin(); return; }
+    if (_loginScreenRendered) {
+      _navSaveExpanded({});
+      location.hash = '#home';
+      _loginScreenRendered = false;
+    }
     renderShell();
     if (window.lucide) lucide.createIcons();
     initThemeToggle();
