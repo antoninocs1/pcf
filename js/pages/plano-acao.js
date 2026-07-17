@@ -26,10 +26,11 @@ PCF.Pages = PCF.Pages || {};
       const ativo = document.getElementById('pa-agenda-ativo').checked;
       const dateEl = document.getElementById('pa-when-date');
       const timeEl = document.getElementById('pa-when-time');
-      dateEl.disabled = !ativo;
-      timeEl.disabled = !ativo;
       dateEl.required = ativo;
       timeEl.required = ativo;
+      document.getElementById('pa-when-hint').textContent = ativo
+        ? 'Data e hora são obrigatórias para gerar o lembrete na Agenda.'
+        : 'Campos opcionais. Ative o vínculo abaixo para gerar um lembrete na Agenda.';
     };
 
     const resetForm = () => {
@@ -58,7 +59,7 @@ PCF.Pages = PCF.Pages || {};
             <h2><i data-lucide="list-todo"></i> Plano de Ação 5W2H</h2>
           </div>
 
-          <div class="card">
+          <div class="card plano-acao-card">
             <h3>Nova ação</h3>
             <form id="pa-form" class="plano-acao-form">
               <div class="form-group">
@@ -89,20 +90,26 @@ PCF.Pages = PCF.Pages || {};
                 <input type="text" id="pa-how-much" placeholder="Ex.: R$ 150,00">
               </div>
               <div class="form-group">
-                <label>Quando? (When) - Data</label>
-                <input type="date" id="pa-when-date" value="${H.hoje()}">
-              </div>
-              <div class="form-group">
-                <label>Quando? (When) - Hora</label>
-                <input type="time" id="pa-when-time" value="${H.horaAtual()}">
-              </div>
-              <div class="form-group">
                 <label>Status</label>
                 <select id="pa-status">
                   ${STATUS_OPTS.map(s => `<option value="${s}">${s}</option>`).join('')}
                 </select>
               </div>
-              <div class="form-group plano-acao-checkbox-group">
+              <fieldset class="plano-acao-when plano-acao-form-span-2">
+                <legend>Quando? (When)</legend>
+                <div class="plano-acao-when-fields">
+                  <div class="form-group">
+                    <label for="pa-when-date">Data</label>
+                    <input type="date" id="pa-when-date" value="${H.hoje()}">
+                  </div>
+                  <div class="form-group">
+                    <label for="pa-when-time">Hora</label>
+                    <input type="time" id="pa-when-time" value="${H.horaAtual()}">
+                  </div>
+                </div>
+                <small id="pa-when-hint" class="form-hint"></small>
+              </fieldset>
+              <div class="form-group plano-acao-checkbox-group plano-acao-form-span-2">
                 <label class="plano-acao-checkbox">
                   <input type="checkbox" id="pa-agenda-ativo">
                   <span>Vincular na Agenda e gerar lembrete</span>
@@ -115,7 +122,7 @@ PCF.Pages = PCF.Pages || {};
             </form>
           </div>
 
-          <div class="card" style="margin-top:1rem">
+          <div class="card plano-acao-card plano-acao-table-card">
             <h3>Tabela 5W2H (${acoes.length})</h3>
             ${acoes.length === 0 ? '<p class="empty-text">Nenhuma ação cadastrada</p>' : `
               <div class="table-wrapper">
@@ -143,7 +150,7 @@ PCF.Pages = PCF.Pages || {};
                         <td>${H.esc(getWhoLabel(acao))}</td>
                         <td>${H.esc(acao.how || '—')}</td>
                         <td>${H.esc(acao.howMuch || '—')}</td>
-                        <td>${acao.agendaAtivo && acao.whenDate ? `${H.formatarData(acao.whenDate)} ${acao.whenTime || ''}` : '—'}</td>
+                        <td>${acao.whenDate ? `${H.formatarData(acao.whenDate)} ${acao.whenTime || ''}` : '—'}</td>
                         <td><span class="status-badge" style="background:${STATUS_COLORS[acao.status] || '#6b7280'}">${acao.status}</span></td>
                         <td>${acao.agendaAtivo ? '<span class="badge badge-info">Sim</span>' : '<span class="badge badge-neutral">Não</span>'}</td>
                         <td class="actions-cell">
@@ -174,8 +181,8 @@ PCF.Pages = PCF.Pages || {};
           who: getContatoNome(whoContactId),
           how: document.getElementById('pa-how').value.trim(),
           howMuch: document.getElementById('pa-how-much').value.trim(),
-          whenDate: agendaAtivo ? document.getElementById('pa-when-date').value : '',
-          whenTime: agendaAtivo ? document.getElementById('pa-when-time').value : '',
+          whenDate: document.getElementById('pa-when-date').value,
+          whenTime: document.getElementById('pa-when-time').value,
           agendaAtivo,
           status: document.getElementById('pa-status').value,
         };
