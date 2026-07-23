@@ -210,7 +210,13 @@ PCF.Pages = PCF.Pages || {};
     ctx.font = `${Math.max(isCompact ? 8 : 9, sz * 0.022)}px 'Inter', sans-serif`;
     allCats.forEach((cat, i) => {
       const angle = start + (i + 0.5) * step;
-      const rawX = cx + lblR * Math.cos(angle);
+      const cosAngle = Math.cos(angle);
+      // Os setores laterais têm bastante área livre no celular. Deslocá-los
+      // horizontalmente evita que o texto fique sobre a circunferência.
+      const lateralOffset = isCompact && Math.abs(cosAngle) > 0.65
+        ? Math.sign(cosAngle) * sz * 0.07
+        : 0;
+      const rawX = cx + lblR * cosAngle + lateralOffset;
       const x = isCompact ? Math.max(18, Math.min(sz - 18, rawX)) : rawX;
       const y = cy + lblR * Math.sin(angle);
       ctx.textAlign = 'center';
