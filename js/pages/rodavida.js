@@ -117,7 +117,10 @@ PCF.Pages = PCF.Pages || {};
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const cx = sz / 2, cy = sz / 2;
-    const outerMargin = Math.max(56, sz * 0.19);
+    // No celular, aproveita melhor a largura: a margem anterior consumia quase
+    // 40% do canvas e fazia a roda parecer pequena, embora o canvas fosse largo.
+    const isCompact = sz <= 520;
+    const outerMargin = isCompact ? Math.max(38, sz * 0.115) : Math.max(56, sz * 0.19);
     const maxR  = Math.max(84, (sz / 2) - outerMargin);
     const allCats = config.flatMap(q => q.categorias);
     const n     = allCats.length;   // normalmente 12
@@ -200,8 +203,8 @@ PCF.Pages = PCF.Pages || {};
 
     /* ── rótulos curtos fora da roda ── */
     const sidePad = Math.max(18, sz * 0.06);
-    const lblR = maxR + sz * 0.04;
-    ctx.font = `${Math.max(9, sz * 0.022)}px 'Inter', sans-serif`;
+    const lblR = maxR + sz * (isCompact ? 0.035 : 0.04);
+    ctx.font = `${Math.max(isCompact ? 8 : 9, sz * 0.022)}px 'Inter', sans-serif`;
     allCats.forEach((cat, i) => {
       const angle = start + (i + 0.5) * step;
       const x = cx + lblR * Math.cos(angle);

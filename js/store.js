@@ -370,6 +370,28 @@ PCF.Store = (() => {
     return all;
   };
 
+  /*
+   * Catálogo padrão de hábitos baseado na configuração administrativa.
+   * Mantido sem id/data para que cada usuário receba registros independentes.
+   */
+  const HABITOS_DEFAULT = [
+    { chavePadrao: 'agua-2l', nome: 'Beber 2L de água', descricao: 'Hidratação diária', categoria: 'Saúde', meta: '8x ao dia', icone: '💧', cor: '#3b82f6', ativo: true, tipoExecucao: 'ocorrencias', metaDiaria: 8, duracaoMinutos: 1 },
+    { chavePadrao: 'exercicio', nome: 'Exercício físico', descricao: 'Pelo menos 30 minutos', categoria: 'Exercício', meta: '5x/semana', icone: '🏃', cor: '#16a34a', ativo: true, tipoExecucao: 'duracao', metaDiaria: 1, duracaoMinutos: 30 },
+    { chavePadrao: 'estudo', nome: 'Estudo', descricao: '1 hora de estudo', categoria: 'Mente', meta: 'Diário', icone: '📖', cor: '#c13ef5', ativo: true, tipoExecucao: 'duracao', metaDiaria: 1, duracaoMinutos: 60 },
+    { chavePadrao: 'leitura', nome: 'Leitura', descricao: '20 minutos de leitura', categoria: 'Mente', meta: 'Diário', icone: '📚', cor: '#8b5cf6', ativo: true, tipoExecucao: 'duracao', metaDiaria: 1, duracaoMinutos: 20 },
+    { chavePadrao: 'meditacao-oracao', nome: 'Meditação / Oração', descricao: 'Momento de reflexão e gratidão', categoria: 'Mente', meta: 'Diário', icone: '🧘', cor: '#f59e0b', ativo: true, tipoExecucao: 'duracao', metaDiaria: 1, duracaoMinutos: 10 },
+    { chavePadrao: 'alimentacao-saudavel', nome: 'Alimentação saudável', descricao: 'Evitar ultraprocessados', categoria: 'Alimentação', meta: '3 refeições ao dia', icone: '🍎', cor: '#dc2626', ativo: true, tipoExecucao: 'ocorrencias', metaDiaria: 3, duracaoMinutos: 1 },
+    { chavePadrao: 'sono', nome: 'Dormir 7–8 horas', descricao: 'Qualidade do sono', categoria: 'Sono', meta: 'Diário', icone: '😴', cor: '#0ea5e9', ativo: true, tipoExecucao: 'duracao', metaDiaria: 1, duracaoMinutos: 420 },
+    { chavePadrao: 'gratidao', nome: 'Gratidão', descricao: 'Anotar 3 coisas pelas quais sou grato', categoria: 'Mente', meta: '3 registros ao dia', icone: '🙏', cor: '#ec4899', ativo: true, tipoExecucao: 'ocorrencias', metaDiaria: 3, duracaoMinutos: 1 },
+    { chavePadrao: 'violao', nome: 'Tocar Violão', descricao: 'Praticar violão por 20 minutos', categoria: 'Lazer', meta: 'Diário', icone: '🎸', cor: '#fcff40', ativo: true, tipoExecucao: 'duracao', metaDiaria: 1, duracaoMinutos: 20 },
+  ];
+
+  const _criarHabitosDefault = () => HABITOS_DEFAULT.map(h => ({
+    id: _uid(),
+    dataCriacao: new Date().toISOString().split('T')[0],
+    ...h,
+  }));
+
   /* ---------- SEED DEFAULTS ---------- */
   // forceKeys: quando fornecido, sobrescreve APENAS as chaves listadas; caso contrário, só escreve se vazio
   const _seedDefaults = (userId, forceKeys = null) => {
@@ -520,19 +542,7 @@ PCF.Store = (() => {
     ];
     _seedIfEmpty(`pcf_emocoes_config_${userId}`, emoConfig);
 
-    // Hábitos padrão
-    const habitos = [
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Beber 2L de água', descricao: 'Hidratação diária', categoria: 'Saúde', meta: 'Diário', icone: '💧', cor: '#3b82f6', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Exercício físico', descricao: 'Pelo menos 30 minutos', categoria: 'Exercício', meta: '5x/semana', icone: '🏃', cor: '#16a34a', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Estudo', descricao: '1 hora de estudo', categoria: 'Mente', meta: 'Diário', icone: '📖', cor: '#c13ef5', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Leitura', descricao: '20 minutos de leitura', categoria: 'Mente', meta: 'Diário', icone: '📚', cor: '#8b5cf6', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Meditação / Oração', descricao: 'Momento de reflexão e gratidão', categoria: 'Mente', meta: 'Diário', icone: '🧘', cor: '#f59e0b', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Alimentação saudável', descricao: 'Evitar ultraprocessados', categoria: 'Alimentação', meta: 'Diário', icone: '🍎', cor: '#dc2626', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Dormir 7–8 horas', descricao: 'Qualidade do sono', categoria: 'Sono', meta: 'Diário', icone: '😴', cor: '#0ea5e9', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Gratidão', descricao: 'Anotar 3 coisas pelas quais sou grato', categoria: 'Mente', meta: 'Diário', icone: '🙏', cor: '#ec4899', ativo: true },
-      { id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], nome: 'Tocar Violão', descricao: 'Praticar violão por 20 minutos', categoria: 'Lazer', meta: 'Diário', icone: '🎸', cor: '#fcff40f1', ativo: true },
-   ];
-    _seedIfEmpty(`pcf_habitos_${userId}`, habitos);
+    _seedIfEmpty(`pcf_habitos_${userId}`, _criarHabitosDefault());
 
     // Virtudes padrão (Tabela das Virtudes — Peterson & Seligman + virtudes cristãs/estoicas)
     const virtudes = [
@@ -1835,7 +1845,30 @@ PCF.Store = (() => {
 
   /* ---------- HÁBITOS ---------- */
   const _hkU = () => `pcf_habitos_${currentUserId()}`;
-  const getHabitos = () => _get(_hkU()) || [];
+  const _nomeHabitoNormalizado = (nome) => String(nome || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const getHabitos = () => {
+    const key = _hkU();
+    const atuais = _get(key) || [];
+    let mudou = false;
+    const normalizados = atuais.map(h => {
+      const padrao = HABITOS_DEFAULT.find(p =>
+        p.chavePadrao === h.chavePadrao ||
+        _nomeHabitoNormalizado(p.nome) === _nomeHabitoNormalizado(h.nome)
+      );
+      if (!padrao) return h;
+      const complemento = {};
+      ['chavePadrao', 'tipoExecucao', 'metaDiaria', 'duracaoMinutos'].forEach(campo => {
+        if (h[campo] === undefined || h[campo] === null || h[campo] === '') {
+          complemento[campo] = padrao[campo];
+          mudou = true;
+        }
+      });
+      return Object.keys(complemento).length ? { ...h, ...complemento } : h;
+    });
+    if (mudou) _set(key, normalizados);
+    return normalizados;
+  };
   const saveHabitos = (h) => _set(_hkU(), h);
   const addHabito = (h) => { const all = getHabitos(); all.push({ id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], ...h }); saveHabitos(all); return all; };
   const updateHabito = (id, data) => { const all = getHabitos(); const i = all.findIndex(h => h.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveHabitos(all); } return all; };

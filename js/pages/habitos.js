@@ -74,12 +74,34 @@ PCF.Pages = PCF.Pages || {};
     { val: 100, label: '100%' },
   ];
 
+  const formatTempoHabito = (segundos) => {
+    const total = Math.max(0, Math.floor(Number(segundos) || 0));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return h > 0
+      ? `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  const tipoHabito = (habito) =>
+    habito.tipoExecucao || (/água|agua/i.test(habito.nome || '') ? 'ocorrencias' : 'duracao');
+  const metaOcorrencias = (habito) =>
+    Math.max(1, parseInt(habito.metaDiaria, 10) || (/água|agua/i.test(habito.nome || '') ? 8 : 1));
+  const duracaoSegundos = (habito) => Math.max(60, (parseInt(habito.duracaoMinutos, 10) || 1) * 60);
+  const momentoAtualHabito = () => {
+    const hora = new Date().getHours();
+    return hora < 12 ? 'manha' : hora < 18 ? 'tarde' : 'noite';
+  };
+
   /* ======================================================
      1. CHECK-IN DIÁRIO (Dashboard de Hábitos)
      ====================================================== */
   PCF.Pages.habitos = (container) => {
+    if (container._habTimerInterval) clearInterval(container._habTimerInterval);
     let selectedDate = H.hoje();
     let fraseExibida = getFraseHoje();
+    let timerInterval = null;
 
     /* Salva momento e intensidade sem re-renderizar */
     const saveExtras = (habitoId) => {
@@ -108,10 +130,12 @@ PCF.Pages = PCF.Pages || {};
     };
 
     const render = () => {
+      if (timerInterval) clearInterval(timerInterval);
       const habitos = S.getHabitos().filter(h => h.ativo !== false);
       const registros = S.getRegistrosHabitos();
       const regDia = registros.filter(r => r.data === selectedDate);
-      const completosHoje = regDia.filter(r => r.completo).length;
+      const idsAtivos = new Set(habitos.map(h => h.id));
+      const completosHoje = regDia.filter(r => r.completo && idsAtivos.has(r.habitoId)).length;
       const totalHoje = habitos.length;
       const pctHoje = totalHoje > 0 ? Math.round((completosHoje / totalHoje) * 100) : 0;
       const corPct = pctHoje >= 80 ? 'var(--success)' : pctHoje >= 50 ? 'var(--warning)' : 'var(--danger)';
@@ -157,9 +181,22 @@ PCF.Pages = PCF.Pages || {};
                 const streak      = calcStreak(h.id, registros);
                 const intensidade = (reg && 'intensidade' in reg) ? reg.intensidade : 100;
                 const momento     = reg?.momento || '';
+                const tipo        = tipoHabito(h);
+                const ocorrencias = Array.isArray(reg?.ocorrencias) ? reg.ocorrencias : [];
+                const okCount     = ocorrencias.filter(o => o.resultado === 'ok').length;
+                const nokCount    = ocorrencias.filter(o => o.resultado === 'nok').length;
+                const metaDia     = metaOcorrencias(h);
+                const pctOcorr    = Math.min(100, Math.round((okCount / metaDia) * 100));
+                const execucao    = reg?.execucao || null;
+                const percentualAutomatico = reg?.modoRegistro === 'execucao';
+                const duracao     = duracaoSegundos(h);
+                const decorrido   = execucao?.status === 'executando'
+                  ? Math.min(duracao, Math.max(0, Math.floor((Date.now() - execucao.iniciadoEm) / 1000)))
+                  : Math.min(duracao, execucao?.decorrido || 0);
+                const pctTempo    = Math.min(100, Math.round((decorrido / duracao) * 100));
                 return `
                 <div class="hab-item ${done ? 'done' : ''}" data-id="${h.id}">
-                  <button type="button" class="hab-check-btn ${done ? 'checked' : ''}" data-toggle="${h.id}" title="${done ? 'Desmarcar' : 'Marcar como concluído'}">
+                  <button type="button" class="hab-check-btn ${done ? 'checked' : ''}" data-toggle="${h.id}" title="${done ? 'Desmarcar registro' : 'Registrar manualmente'}">
                     ${done ? '✅' : '⬜'}
                   </button>
                   <div class="hab-item-icon" style="background:${h.cor || '#3b82f6'}22;color:${h.cor || '#3b82f6'}">${h.icone || '⭐'}</div>
@@ -169,7 +206,39 @@ PCF.Pages = PCF.Pages || {};
                     <div class="hab-item-meta">
                       ${h.categoria ? `<span class="hab-item-cat">${H.esc(h.categoria)}</span>` : ''}
                       ${h.meta ? `<span class="chip-small">${H.esc(h.meta)}</span>` : ''}
+                      <span class="chip-small">${tipo === 'ocorrencias' ? 'Por ocorrências' : 'Por duração'}</span>
                       ${streak > 0 ? `<span class="hab-streak">🔥 ${streak} dia${streak !== 1 ? 's' : ''}</span>` : ''}
+                    </div>
+                    <div class="hab-exec-panel" data-exec-panel="${h.id}">
+                      ${tipo === 'ocorrencias' ? `
+                        <div class="hab-exec-summary">
+                          <span><strong data-ok-count="${h.id}">${okCount}</strong> / ${metaDia} OK</span>
+                          <span class="hab-nok"><strong data-nok-count="${h.id}">${nokCount}</strong> NOK</span>
+                          <span><strong data-occ-pct="${h.id}">${pctOcorr}</strong>%</span>
+                        </div>
+                        <div class="hab-progress"><span data-occ-bar="${h.id}" style="width:${pctOcorr}%;background:${h.cor || '#3b82f6'}"></span></div>
+                        <div class="hab-exec-actions">
+                          <button type="button" class="btn btn-primary btn-sm" data-occ-ok="${h.id}" ${selectedDate !== H.hoje() ? 'disabled' : ''}><i data-lucide="play"></i> Executar (OK)</button>
+                          <button type="button" class="btn btn-outline btn-sm" data-occ-nok="${h.id}" ${selectedDate !== H.hoje() ? 'disabled' : ''}><i data-lucide="x"></i> Não realizado (NOK)</button>
+                        </div>
+                      ` : `
+                        <div class="hab-timer ${execucao?.status === 'executando' ? 'running' : ''}" data-timer="${h.id}" data-start="${execucao?.iniciadoEm || ''}" data-duration="${duracao}">
+                          <div class="hab-timer-values">
+                            <span><small>Crescente</small><strong data-elapsed="${h.id}">${formatTempoHabito(decorrido)}</strong></span>
+                            <span><small>Restante</small><strong data-remaining="${h.id}">${formatTempoHabito(duracao - decorrido)}</strong></span>
+                            <span><small>Progresso</small><strong data-time-pct="${h.id}">${pctTempo}%</strong></span>
+                          </div>
+                          <div class="hab-progress"><span data-time-bar="${h.id}" style="width:${pctTempo}%;background:${h.cor || '#3b82f6'}"></span></div>
+                          <div class="hab-exec-actions">
+                            ${execucao?.status === 'executando' ? `
+                              <button type="button" class="btn btn-success btn-sm" data-finish="${h.id}" ${pctTempo < 100 ? 'disabled title="Aguarde o tempo programado"' : ''}><i data-lucide="check"></i> Concluir</button>
+                              <button type="button" class="btn btn-danger btn-sm" data-cancel-exec="${h.id}"><i data-lucide="x"></i> Cancelar</button>
+                            ` : `
+                              <button type="button" class="btn btn-primary btn-sm" data-start-exec="${h.id}" ${selectedDate !== H.hoje() ? 'disabled title="A execução só pode ser iniciada na data de hoje"' : ''}><i data-lucide="play"></i> Executar</button>
+                            `}
+                          </div>
+                        </div>
+                      `}
                     </div>
                   </div>
                   <div class="hab-item-obs">
@@ -183,12 +252,14 @@ PCF.Pages = PCF.Pages || {};
                       <option value="manha"${momento === 'manha' ? ' selected' : ''}>🌅 Manhã</option>
                       <option value="tarde"${momento === 'tarde' ? ' selected' : ''}>☀️ Tarde</option>
                       <option value="noite"${momento === 'noite' ? ' selected' : ''}>🌙 Noite</option>
+                      <option value="ao_longo_dia"${momento === 'ao_longo_dia' ? ' selected' : ''}>🔄 Ao longo do dia</option>
                     </select>
                     <span class="hab-extras-label" title="% de realização do hábito">✅ Realizado</span>
                     <div class="hab-int-slider-wrap">
                       <div class="hab-int-track-wrap">
                         <input type="range" class="hab-int-slider" data-int="${h.id}"
-                          min="0" max="100" step="25" value="${intensidade}"${done ? '' : ' disabled'}>
+                          min="0" max="100" step="25" value="${intensidade}"${done && !percentualAutomatico ? '' : ' disabled'}
+                          title="${percentualAutomatico ? 'Percentual calculado automaticamente pela execução' : 'Percentual informado manualmente'}">
                         <span class="hab-int-bubble" data-bubble="${h.id}"></span>
                       </div>
                     </div>
@@ -215,15 +286,134 @@ PCF.Pages = PCF.Pages || {};
           const momentoEl  = container.querySelector(`[data-momento="${habitoId}"]`);
           const sliderEl   = container.querySelector(`.hab-int-slider[data-int="${habitoId}"]`);
           const newCompleto = !reg?.completo;
+          const execucaoManual = reg?.execucao?.status === 'executando'
+            ? { ...reg.execucao, status: 'cancelado', canceladoEm: Date.now() }
+            : reg?.execucao;
           S.upsertRegistroHabito({
             habitoId, data: selectedDate, completo: newCompleto,
             observacao:  obsEl?.value.trim() || '',
             momento:     newCompleto ? (momentoEl?.value || reg?.momento || '') : (reg?.momento || ''),
             intensidade: sliderEl ? parseInt(sliderEl.value) : (reg && 'intensidade' in reg ? reg.intensidade : 100),
+            modoRegistro: 'manual',
+            ...(execucaoManual ? { execucao: execucaoManual } : {}),
           });
           render();
         };
       });
+
+      const getRegistro = (habitoId) =>
+        S.getRegistrosHabitos().find(r => r.habitoId === habitoId && r.data === selectedDate);
+
+      container.querySelectorAll('[data-occ-ok], [data-occ-nok]').forEach(btn => {
+        btn.onclick = () => {
+          const habitoId = btn.dataset.occOk || btn.dataset.occNok;
+          const habito = S.getHabitos().find(h => h.id === habitoId);
+          const reg = getRegistro(habitoId);
+          const ocorrencias = [...(reg?.ocorrencias || []), {
+            id: S._uid(),
+            resultado: btn.dataset.occOk ? 'ok' : 'nok',
+            registradoEm: new Date().toISOString(),
+          }];
+          const ok = ocorrencias.filter(o => o.resultado === 'ok').length;
+          S.upsertRegistroHabito({
+            habitoId,
+            data: selectedDate,
+            ocorrencias,
+            completo: ok >= metaOcorrencias(habito),
+            momento: reg?.momento || 'ao_longo_dia',
+            intensidade: Math.min(100, Math.round((ok / metaOcorrencias(habito)) * 100)),
+            modoRegistro: 'execucao',
+          });
+          render();
+        };
+      });
+
+      container.querySelectorAll('[data-start-exec]').forEach(btn => {
+        btn.onclick = () => {
+          const habitoId = btn.dataset.startExec;
+          const reg = getRegistro(habitoId);
+          S.upsertRegistroHabito({
+            habitoId,
+            data: selectedDate,
+            completo: false,
+            execucao: { status: 'executando', iniciadoEm: Date.now(), decorrido: 0 },
+            momento: momentoAtualHabito(),
+            intensidade: 0,
+            modoRegistro: 'execucao',
+          });
+          render();
+        };
+      });
+
+      container.querySelectorAll('[data-finish]').forEach(btn => {
+        btn.onclick = () => {
+          const habitoId = btn.dataset.finish;
+          const habito = S.getHabitos().find(h => h.id === habitoId);
+          const reg = getRegistro(habitoId);
+          const decorrido = Math.min(duracaoSegundos(habito), Math.floor((Date.now() - reg.execucao.iniciadoEm) / 1000));
+          if (decorrido < duracaoSegundos(habito)) return;
+          S.upsertRegistroHabito({
+            habitoId,
+            data: selectedDate,
+            completo: true,
+            execucao: { ...reg.execucao, status: 'concluido', finalizadoEm: Date.now(), decorrido },
+            intensidade: Math.min(100, Math.round((decorrido / duracaoSegundos(habito)) * 100)),
+            modoRegistro: 'execucao',
+          });
+          render();
+        };
+      });
+
+      container.querySelectorAll('[data-cancel-exec]').forEach(btn => {
+        btn.onclick = () => {
+          const habitoId = btn.dataset.cancelExec;
+          const reg = getRegistro(habitoId);
+          const habito = S.getHabitos().find(h => h.id === habitoId);
+          const decorrido = Math.min(duracaoSegundos(habito), Math.floor((Date.now() - reg.execucao.iniciadoEm) / 1000));
+          S.upsertRegistroHabito({
+            habitoId,
+            data: selectedDate,
+            completo: false,
+            execucao: { ...reg.execucao, status: 'cancelado', canceladoEm: Date.now(), decorrido },
+          });
+          render();
+        };
+      });
+
+      const atualizarTimers = () => {
+        const timersAtivos = container.querySelectorAll('.hab-timer.running');
+        if (!timersAtivos.length && timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          container._habTimerInterval = null;
+          return;
+        }
+        timersAtivos.forEach(el => {
+          const id = el.dataset.timer;
+          const duracao = Number(el.dataset.duration);
+          const decorrido = Math.min(duracao, Math.max(0, Math.floor((Date.now() - Number(el.dataset.start)) / 1000)));
+          const restante = Math.max(0, duracao - decorrido);
+          const pct = Math.min(100, Math.round((decorrido / duracao) * 100));
+          const elapsedEl = el.querySelector(`[data-elapsed="${id}"]`);
+          const remainingEl = el.querySelector(`[data-remaining="${id}"]`);
+          const pctEl = el.querySelector(`[data-time-pct="${id}"]`);
+          const barEl = el.querySelector(`[data-time-bar="${id}"]`);
+          const finishEl = el.querySelector(`[data-finish="${id}"]`);
+          if (elapsedEl) elapsedEl.textContent = formatTempoHabito(decorrido);
+          if (remainingEl) remainingEl.textContent = formatTempoHabito(restante);
+          if (pctEl) pctEl.textContent = pct + '%';
+          if (barEl) barEl.style.width = pct + '%';
+          if (finishEl && pct >= 100) {
+            finishEl.disabled = false;
+            finishEl.title = 'Concluir hábito';
+          }
+        });
+      };
+      atualizarTimers();
+      if (container.querySelector('.hab-timer.running')) {
+        timerInterval = setInterval(atualizarTimers, 1000);
+        container._habTimerInterval = timerInterval;
+      }
 
       /* Eventos: momento e intensidade (auto-save sem re-render) */
       container.querySelectorAll('.hab-momento-sel').forEach(sel => {
@@ -569,13 +759,14 @@ PCF.Pages = PCF.Pages || {};
                   <th>Ícone</th>
                   <th>Nome</th>
                   <th>Categoria</th>
+                  <th>Tipo</th>
                   <th>Meta / Frequência</th>
                   <th>Status</th>
                   <th style="width:100px">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                ${habitos.length === 0 ? '<tr><td colspan="6" class="empty-text">Nenhum hábito cadastrado</td></tr>' :
+                ${habitos.length === 0 ? '<tr><td colspan="7" class="empty-text">Nenhum hábito cadastrado</td></tr>' :
                   habitos.map(h => `
                   <tr>
                     <td><span style="font-size:1.5rem;color:${h.cor || '#3b82f6'}">${h.icone || '⭐'}</span></td>
@@ -584,6 +775,7 @@ PCF.Pages = PCF.Pages || {};
                       ${h.descricao ? `<br><small class="text-muted">${H.esc(h.descricao)}</small>` : ''}
                     </td>
                     <td><span class="chip-small">${H.esc(h.categoria || '—')}</span></td>
+                    <td>${tipoHabito(h) === 'ocorrencias' ? 'Por ocorrências' : 'Por duração'}</td>
                     <td>${H.esc(h.meta || '—')}</td>
                     <td><span class="tipo-badge ${h.ativo !== false ? 'receita' : 'despesa'}">${h.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
                     <td>
@@ -650,6 +842,24 @@ PCF.Pages = PCF.Pages || {};
               <input type="color" id="hab-cor" value="${hab?.cor || '#3b82f6'}">
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tipo de acompanhamento *</label>
+              <select id="hab-tipo">
+                <option value="ocorrencias" ${tipoHabito(hab || {}) === 'ocorrencias' ? 'selected' : ''}>Por ocorrências (contagem OK/NOK)</option>
+                <option value="duracao" ${tipoHabito(hab || {}) === 'duracao' ? 'selected' : ''}>Por duração (cronômetro)</option>
+              </select>
+              <small class="text-muted">Use ocorrências para ações rápidas, como beber água.</small>
+            </div>
+            <div class="form-group" id="hab-campo-ocorrencias">
+              <label>Meta diária de execuções</label>
+              <input type="number" id="hab-meta-diaria" min="1" step="1" value="${hab?.metaDiaria || 1}">
+            </div>
+            <div class="form-group" id="hab-campo-duracao">
+              <label>Tempo programado (minutos)</label>
+              <input type="number" id="hab-duracao" min="1" step="1" value="${hab?.duracaoMinutos || 30}">
+            </div>
+          </div>
           <div class="form-group">
             <label>Descrição</label>
             <input type="text" id="hab-desc" value="${H.esc(hab?.descricao || '')}" placeholder="Opcional">
@@ -701,6 +911,14 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('hab-icone-preview').textContent = v;
     };
 
+    const atualizarCamposTipo = () => {
+      const porOcorrencias = document.getElementById('hab-tipo').value === 'ocorrencias';
+      document.getElementById('hab-campo-ocorrencias').style.display = porOcorrencias ? '' : 'none';
+      document.getElementById('hab-campo-duracao').style.display = porOcorrencias ? 'none' : '';
+    };
+    document.getElementById('hab-tipo').onchange = atualizarCamposTipo;
+    atualizarCamposTipo();
+
     document.getElementById('hab-m-cancel').onclick = () => overlay.remove();
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
@@ -714,6 +932,9 @@ PCF.Pages = PCF.Pages || {};
         icone: document.getElementById('hab-icone-val').value,
         cor: document.getElementById('hab-cor').value,
         ativo: document.getElementById('hab-ativo').checked,
+        tipoExecucao: document.getElementById('hab-tipo').value,
+        metaDiaria: Math.max(1, parseInt(document.getElementById('hab-meta-diaria').value, 10) || 1),
+        duracaoMinutos: Math.max(1, parseInt(document.getElementById('hab-duracao').value, 10) || 1),
       };
       if (isEdit) S.updateHabito(hab.id, data);
       else S.addHabito(data);

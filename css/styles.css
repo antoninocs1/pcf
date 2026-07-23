@@ -565,7 +565,10 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .page-header h2 { font-size: 1.3rem; }
   /* Roda da Vida: topbar sem padding excessivo */
   .rv-topbar { padding-right: 46px; }
-  .rv-wheel-area { padding-inline: 2px; }
+  .rv-wheel-area {
+    width: calc(100% + 20px); max-width: none;
+    margin-inline: -10px; padding-inline: 0;
+  }
   /* Filtros: selects em coluna quando não há espaço */
   .filters { flex-direction: column; align-items: stretch; }
   .filters select { width: 100%; min-width: 0; }
@@ -2482,6 +2485,40 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 [data-theme="light"] .pcf-luz {
   background: radial-gradient(circle 280px at var(--glow-x) var(--glow-y), rgba(14,165,233,.22) 0%, rgba(37,99,235,.11) 42%, transparent 76%);
   mix-blend-mode: multiply;
+}
+
+/* ==================== EXECUÇÃO DE HÁBITOS ==================== */
+.hab-exec-panel { margin-top: 12px; max-width: 560px; }
+.hab-exec-summary {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 7px; font-size: .82rem; color: var(--text-muted);
+}
+.hab-exec-summary strong { color: var(--text); }
+.hab-exec-summary .hab-nok strong { color: var(--danger); }
+.hab-progress {
+  width: 100%; height: 9px; overflow: hidden; border-radius: 999px;
+  background: rgba(148,163,184,.2); margin: 7px 0 10px;
+}
+.hab-progress > span {
+  display: block; height: 100%; min-width: 0; border-radius: inherit;
+  transition: width .35s ease;
+}
+.hab-exec-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.hab-exec-actions .btn-success { background: var(--success); color: #fff; border-color: var(--success); }
+.hab-timer-values {
+  display: grid; grid-template-columns: repeat(3, minmax(90px, 1fr)); gap: 8px;
+}
+.hab-timer-values span {
+  display: flex; flex-direction: column; gap: 2px; padding: 8px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: rgba(148,163,184,.06);
+}
+.hab-timer-values small { color: var(--text-muted); font-size: .7rem; }
+.hab-timer-values strong { font-variant-numeric: tabular-nums; font-size: 1rem; }
+.hab-timer.running [data-remaining] { color: var(--accent); }
+@media (max-width: 600px) {
+  .hab-timer-values { grid-template-columns: 1fr 1fr; }
+  .hab-timer-values span:last-child { grid-column: 1 / -1; }
 }
 
 
