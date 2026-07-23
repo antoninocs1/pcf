@@ -205,13 +205,14 @@ PCF.Pages = PCF.Pages || {};
 
     /* ── rótulos curtos fora da roda ── */
     const sidePad = Math.max(18, sz * 0.06);
-    const lblR = maxR + sz * 0.04;
+    // No celular, mantém uma faixa visível entre a circunferência e os nomes.
+    const lblR = maxR + sz * (isCompact ? 0.07 : 0.04);
     ctx.font = `${Math.max(isCompact ? 8 : 9, sz * 0.022)}px 'Inter', sans-serif`;
     const canvasBg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0f172a';
     allCats.forEach((cat, i) => {
       const angle = start + (i + 0.5) * step;
       const rawX = cx + lblR * Math.cos(angle);
-      const x = isCompact ? Math.max(24, Math.min(sz - 24, rawX)) : rawX;
+      const x = isCompact ? Math.max(18, Math.min(sz - 18, rawX)) : rawX;
       const y = cy + lblR * Math.sin(angle);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
