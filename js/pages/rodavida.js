@@ -208,7 +208,6 @@ PCF.Pages = PCF.Pages || {};
     // No celular, mantém uma faixa visível entre a circunferência e os nomes.
     const lblR = maxR + sz * (isCompact ? 0.07 : 0.04);
     ctx.font = `${Math.max(isCompact ? 8 : 9, sz * 0.022)}px 'Inter', sans-serif`;
-    const canvasBg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0f172a';
     allCats.forEach((cat, i) => {
       const angle = start + (i + 0.5) * step;
       const rawX = cx + lblR * Math.cos(angle);
@@ -218,14 +217,6 @@ PCF.Pages = PCF.Pages || {};
       ctx.textBaseline = 'middle';
       ctx.fillStyle = cat.cor;
       const lbl = (cat.labelCurto || cat.label.split('–')[0].trim()).split(' ').slice(0, 2).join(' ');
-      if (isCompact) {
-        // Cria uma pequena área limpa atrás do texto para a borda da roda não
-        // atravessar as letras nos pontos em que há pouco espaço lateral.
-        ctx.strokeStyle = canvasBg;
-        ctx.lineWidth = 5;
-        ctx.lineJoin = 'round';
-        ctx.strokeText(lbl, x, y);
-      }
       ctx.fillText(lbl, x, y);
     });
 
