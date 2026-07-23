@@ -205,24 +205,28 @@ PCF.Pages = PCF.Pages || {};
 
     /* ── rótulos curtos fora da roda ── */
     const sidePad = Math.max(18, sz * 0.06);
-    // No celular, mantém uma faixa visível entre a circunferência e os nomes.
-    const lblR = maxR + sz * (isCompact ? 0.07 : 0.04);
-    ctx.font = `${Math.max(isCompact ? 8 : 9, sz * 0.022)}px 'Inter', sans-serif`;
+    const labelFontSize = Math.max(isCompact ? 8 : 9, sz * 0.022);
+    ctx.font = `${labelFontSize}px 'Inter', sans-serif`;
     allCats.forEach((cat, i) => {
       const angle = start + (i + 0.5) * step;
       const cosAngle = Math.cos(angle);
-      // Os setores laterais têm bastante área livre no celular. Deslocá-los
-      // horizontalmente evita que o texto fique sobre a circunferência.
-      const lateralOffset = isCompact && Math.abs(cosAngle) > 0.65
-        ? Math.sign(cosAngle) * sz * 0.07
-        : 0;
-      const rawX = cx + lblR * cosAngle + lateralOffset;
-      const x = isCompact ? Math.max(18, Math.min(sz - 18, rawX)) : rawX;
-      const y = cy + lblR * Math.sin(angle);
+      const sinAngle = Math.sin(angle);
+      const lbl = (cat.labelCurto || cat.label.split('–')[0].trim()).split(' ').slice(0, 2).join(' ');
+      const halfTextWidth = ctx.measureText(lbl).width / 2;
+      // A projeção do retângulo do texto sobre o raio determina o afastamento
+      // mínimo necessário para que nenhuma letra fique sobre a circunferência.
+      const textProjection = halfTextWidth * Math.abs(cosAngle)
+        + (labelFontSize * 0.55) * Math.abs(sinAngle);
+      const labelGap = isCompact ? 5 : sz * 0.04;
+      const labelRadius = maxR + (isCompact ? textProjection + labelGap : labelGap);
+      const rawX = cx + labelRadius * cosAngle;
+      const x = isCompact
+        ? Math.max(halfTextWidth + 4, Math.min(sz - halfTextWidth - 4, rawX))
+        : rawX;
+      const y = cy + labelRadius * sinAngle;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = cat.cor;
-      const lbl = (cat.labelCurto || cat.label.split('–')[0].trim()).split(' ').slice(0, 2).join(' ');
       ctx.fillText(lbl, x, y);
     });
 
