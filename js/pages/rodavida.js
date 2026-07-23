@@ -119,7 +119,9 @@ PCF.Pages = PCF.Pages || {};
     const cx = sz / 2, cy = sz / 2;
     // No celular, aproveita melhor a largura: a margem anterior consumia quase
     // 40% do canvas e fazia a roda parecer pequena, embora o canvas fosse largo.
-    const isCompact = sz <= 520;
+    // O tamanho do canvas no desktop pode ser 500px; por isso a decisão deve
+    // considerar o viewport, não o canvas, para não alterar o layout desktop.
+    const isCompact = window.matchMedia('(max-width: 480px)').matches;
     const outerMargin = isCompact ? Math.max(38, sz * 0.115) : Math.max(56, sz * 0.19);
     const maxR  = Math.max(84, (sz / 2) - outerMargin);
     const allCats = config.flatMap(q => q.categorias);
