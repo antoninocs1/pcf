@@ -109,27 +109,27 @@ PCF.Pages = PCF.Pages || {};
     if (!canvas) return;
 
     const sz = canvas.offsetWidth || 480;
+    const isCompact = window.matchMedia('(max-width: 480px)').matches;
+    const drawingH = isCompact ? Math.round(sz * 1.16) : sz;
     const dpr = window.devicePixelRatio || 1;
     canvas.width  = Math.round(sz * dpr);
-    canvas.height = Math.round(sz * dpr);
+    canvas.height = Math.round(drawingH * dpr);
     canvas.style.width = `${sz}px`;
-    canvas.style.height = `${sz}px`;
+    canvas.style.height = `${drawingH}px`;
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const cx = sz / 2, cy = sz / 2;
-    // No celular, aproveita melhor a largura: a margem anterior consumia quase
-    // 40% do canvas e fazia a roda parecer pequena, embora o canvas fosse largo.
-    // O tamanho do canvas no desktop pode ser 500px; por isso a decisão deve
-    // considerar o viewport, não o canvas, para não alterar o layout desktop.
-    const isCompact = window.matchMedia('(max-width: 480px)').matches;
-    const outerMargin = isCompact ? Math.max(38, sz * 0.115) : Math.max(56, sz * 0.19);
-    const maxR  = Math.max(84, (sz / 2) - outerMargin);
+    const cx = sz / 2, cy = drawingH / 2;
+    // No celular o círculo usa 86% da largura; a altura adicional reserva
+    // faixas exclusivas para os títulos dos quadrantes.
+    const maxR = isCompact
+      ? Math.max(100, sz * 0.43)
+      : Math.max(84, (sz / 2) - Math.max(56, sz * 0.19));
     const allCats = config.flatMap(q => q.categorias);
     const n     = allCats.length;   // normalmente 12
     const step  = (2 * Math.PI) / n;
     const start = -Math.PI / 2;    // começa em cima (12h)
 
-    ctx.clearRect(0, 0, sz, sz);
+    ctx.clearRect(0, 0, sz, drawingH);
 
     /* ── fundo dos setores (transparente) ── */
     allCats.forEach((cat, i) => {
@@ -205,11 +205,12 @@ PCF.Pages = PCF.Pages || {};
 
     /* ── rótulos curtos fora da roda ── */
     const sidePad = Math.max(18, sz * 0.06);
-    const lblR = maxR + sz * (isCompact ? 0.035 : 0.04);
+    const lblR = maxR + sz * (isCompact ? 0.025 : 0.04);
     ctx.font = `${Math.max(isCompact ? 8 : 9, sz * 0.022)}px 'Inter', sans-serif`;
     allCats.forEach((cat, i) => {
       const angle = start + (i + 0.5) * step;
-      const x = cx + lblR * Math.cos(angle);
+      const rawX = cx + lblR * Math.cos(angle);
+      const x = isCompact ? Math.max(24, Math.min(sz - 24, rawX)) : rawX;
       const y = cy + lblR * Math.sin(angle);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -220,12 +221,13 @@ PCF.Pages = PCF.Pages || {};
 
     /* ── rótulos de quadrante nos cantos ── */
     ctx.font = `bold ${Math.max(10, sz * 0.025)}px 'Inter', sans-serif`;
-    const quadrantInsetX = Math.max(28, sz * 0.13);
+    const quadrantInsetX = isCompact ? 12 : Math.max(28, sz * 0.13);
+    const quadrantPadY = isCompact ? 5 : sidePad;
     const quadrantAnchors = [
-      { x: sz - quadrantInsetX, y: sidePad, align: 'right', baseline: 'top' },
-      { x: sz - quadrantInsetX, y: sz - sidePad, align: 'right', baseline: 'bottom' },
-      { x: quadrantInsetX, y: sz - sidePad, align: 'left', baseline: 'bottom' },
-      { x: quadrantInsetX, y: sidePad, align: 'left', baseline: 'top' },
+      { x: sz - quadrantInsetX, y: quadrantPadY, align: 'right', baseline: 'top' },
+      { x: sz - quadrantInsetX, y: drawingH - quadrantPadY, align: 'right', baseline: 'bottom' },
+      { x: quadrantInsetX, y: drawingH - quadrantPadY, align: 'left', baseline: 'bottom' },
+      { x: quadrantInsetX, y: quadrantPadY, align: 'left', baseline: 'top' },
     ];
     config.forEach((q, qi) => {
       const anchor = quadrantAnchors[qi] || quadrantAnchors[0];
