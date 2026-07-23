@@ -448,12 +448,12 @@ PCF.Pages = PCF.Pages || {};
                   <tbody>
                     ${q.categorias.map((cat, ci) => `
                       <tr data-qi="${qi}" data-ci="${ci}">
-                        <td>${cat.icon}</td>
-                        <td>${H.esc(cat.label)}</td>
-                        <td><small>${H.esc(cat.labelCurto || '')}</small></td>
-                        <td><span class="rvc-cor-dot" style="background:${cat.cor}"></span></td>
-                        <td><small>${INTEGRACAO_OPTS.find(o=>o.value===cat.integracaoFonte)?.label || '—'}</small></td>
-                        <td class="rvc-cat-acts">
+                        <td data-label="Ícone">${cat.icon}</td>
+                        <td data-label="Nome">${H.esc(cat.label)}</td>
+                        <td data-label="Rótulo"><small>${H.esc(cat.labelCurto || '')}</small></td>
+                        <td data-label="Cor"><span class="rvc-cor-dot" style="background:${cat.cor}"></span></td>
+                        <td data-label="Integração"><small>${INTEGRACAO_OPTS.find(o=>o.value===cat.integracaoFonte)?.label || '—'}</small></td>
+                        <td class="rvc-cat-acts" data-label="Ações">
                           <button class="btn btn-sm btn-outline rvc-edit-cat" data-qi="${qi}" data-ci="${ci}" title="Editar"><i data-lucide="pencil"></i></button>
                           <button class="btn btn-sm btn-outline rvc-del-cat" data-qi="${qi}" data-ci="${ci}" title="Remover" style="color:var(--danger)"><i data-lucide="trash-2"></i></button>
                         </td>
@@ -469,11 +469,11 @@ PCF.Pages = PCF.Pages || {};
 
         <!-- Modal quadrante -->
         <div id="rvc-quad-modal" class="modal-overlay" style="display:none">
-          <div class="modal-box">
+          <div class="modal modal-box">
             <h3 id="rvc-qm-title">Quadrante</h3>
             <div class="form-group"><label>Nome do quadrante</label><input id="rvc-qm-nome" class="form-control" type="text"></div>
             <div class="form-group"><label>Cor</label><input id="rvc-qm-cor" class="form-control" type="color"></div>
-            <div class="modal-footer">
+            <div class="modal-actions">
               <button id="rvc-qm-ok"  class="btn btn-primary">Salvar</button>
               <button id="rvc-qm-cancel" class="btn btn-outline">Cancelar</button>
             </div>
@@ -482,7 +482,7 @@ PCF.Pages = PCF.Pages || {};
 
         <!-- Modal categoria -->
         <div id="rvc-cat-modal" class="modal-overlay" style="display:none">
-          <div class="modal-box">
+          <div class="modal modal-box">
             <h3 id="rvc-cm-title">Categoria</h3>
             <div class="form-row">
               <div class="form-group" style="flex:0 0 70px"><label>Ícone</label><input id="rvc-cm-icon" class="form-control" type="text" maxlength="4" placeholder="🎯"></div>
@@ -498,7 +498,7 @@ PCF.Pages = PCF.Pages || {};
                 ${INTEGRACAO_OPTS.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
               </select>
             </div>
-            <div class="modal-footer">
+            <div class="modal-actions">
               <button id="rvc-cm-ok"     class="btn btn-primary">Salvar</button>
               <button id="rvc-cm-cancel" class="btn btn-outline">Cancelar</button>
             </div>

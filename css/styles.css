@@ -1353,7 +1353,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   border-color: rgba(59,130,246,.3);
 }
 .diario-header-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.diario-today { margin-bottom: 24px; }
+.diario-today { display: block; margin-bottom: 24px; }
 .diario-day-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .diario-day-title h3 { margin: 0; }
 .diario-textarea {
@@ -1407,8 +1407,8 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 
   /* Editor */
   .diario-day-title { flex-wrap: wrap; gap: 6px; }
-  .diario-textarea { min-height: 180px; font-size: 1rem; padding: 10px; }
-  .diario-today-actions { gap: 8px; }
+  .diario-textarea { min-height: 280px; font-size: 1rem; padding: 12px; }
+  .diario-today-actions { width: 100%; gap: 8px; }
   .diario-today-actions .btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
 
   /* Índice de registros */
@@ -1684,7 +1684,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 
 /* Config. Roda da Vida */
 .rvc-quads { display: flex; flex-direction: column; gap: 20px; }
-.rvc-quad-card { padding: 16px; }
+.rvc-quad-card { display: block; padding: 16px; }
 .rvc-quad-head {
   display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
   flex-wrap: wrap;
@@ -1696,6 +1696,40 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .rvc-cat-acts { white-space: nowrap; }
 .rvc-cor-dot { display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: middle; }
 .rvc-add-cat-wrap { padding: 4px 0; }
+
+@media (max-width: 600px) {
+  .rvc-quads { gap: 14px; }
+  .rvc-quad-card { padding: 14px 12px; }
+  .rvc-quad-head { align-items: center; }
+  .rvc-quad-head strong { min-width: 0; overflow-wrap: anywhere; }
+  .rvc-quad-actions {
+    flex: 1 1 100%; display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 6px; margin-top: 4px;
+  }
+  .rvc-quad-actions .btn { width: 100%; min-width: 0; min-height: 40px; }
+  .rvc-cat-table, .rvc-cat-table tbody, .rvc-cat-table tr, .rvc-cat-table td {
+    display: block; width: 100%; box-sizing: border-box;
+  }
+  .rvc-cat-table thead { display: none; }
+  .rvc-cat-table { background: transparent; overflow: visible; }
+  .rvc-cat-table tr {
+    padding: 8px 10px; margin-bottom: 10px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: rgba(148,163,184,.04);
+  }
+  .rvc-cat-table td {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 6px 0; border: 0; white-space: normal; text-align: right;
+  }
+  .rvc-cat-table td::before {
+    content: attr(data-label); color: var(--text-muted); font-size: .75rem;
+    font-weight: 600; text-transform: uppercase; text-align: left;
+  }
+  .rvc-cat-table .rvc-cat-acts { white-space: normal; }
+  .rvc-cat-table .rvc-cat-acts .btn { min-width: 44px; min-height: 40px; }
+  .rvc-add-cat, .rvc-add-cat-wrap { width: 100%; }
+  .modal-box .modal-actions .btn { flex: 1 1 120px; }
+}
 
 /* ==================== LIGHT THEME ==================== */
 [data-theme="light"] {
