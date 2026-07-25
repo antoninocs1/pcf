@@ -66,14 +66,6 @@ PCF.Pages = PCF.Pages || {};
     return candidata;
   };
 
-  const INTENSIDADES = [
-    { val: 0,   label: '0-25%' },
-    { val: 25,  label: '25%'  },
-    { val: 50,  label: '50%'  },
-    { val: 75,  label: '75%'  },
-    { val: 100, label: '100%' },
-  ];
-
   const formatTempoHabito = (segundos) => {
     const total = Math.max(0, Math.floor(Number(segundos) || 0));
     const h = Math.floor(total / 3600);
@@ -102,6 +94,12 @@ PCF.Pages = PCF.Pages || {};
     let selectedDate = H.hoje();
     let fraseExibida = getFraseHoje();
     let timerInterval = null;
+    const paineisAbertos = new Set();
+    const intensidadeDoSlider = (slider) => {
+      if (!slider) return 100;
+      const max = Math.max(1, Number(slider.max) || 1);
+      return Math.min(100, Math.round((Number(slider.value) / max) * 100));
+    };
 
     /* Salva momento e intensidade sem re-renderizar */
     const saveExtras = (habitoId) => {
@@ -114,7 +112,7 @@ PCF.Pages = PCF.Pages || {};
         habitoId, data: selectedDate, completo: true,
         observacao:  obsEl?.value.trim() || '',
         momento:     momentoEl?.value || '',
-        intensidade: sliderEl ? parseInt(sliderEl.value) : 100,
+        intensidade: intensidadeDoSlider(sliderEl),
       });
     };
 
@@ -175,6 +173,12 @@ PCF.Pages = PCF.Pages || {};
               <a href="#habitos-config" class="btn btn-primary" style="display:inline-flex;margin-top:12px">⚙️ Cadastrar Hábitos</a>
             </div>` : `
             <div class="hab-list" id="hab-check-list">
+              <div class="hab-list-head" aria-hidden="true">
+                <span>Hábito</span>
+                <span>Status</span>
+                <span>Acompanhamento</span>
+                <span>Observação</span>
+              </div>
               ${habitos.map(h => {
                 const reg         = regDia.find(r => r.habitoId === h.id);
                 const done        = reg?.completo || false;
@@ -190,26 +194,71 @@ PCF.Pages = PCF.Pages || {};
                 const execucao    = reg?.execucao || null;
                 const percentualAutomatico = reg?.modoRegistro === 'execucao';
                 const duracao     = duracaoSegundos(h);
+                const tempoSalvo  = Math.max(0, Number(execucao?.decorrido) || 0);
                 const decorrido   = execucao?.status === 'executando'
-                  ? Math.min(duracao, Math.max(0, Math.floor((Date.now() - execucao.iniciadoEm) / 1000)))
-                  : Math.min(duracao, execucao?.decorrido || 0);
+                  ? Math.min(duracao, tempoSalvo + Math.max(0, Math.floor((Date.now() - execucao.iniciadoEm) / 1000)))
+                  : Math.min(duracao, tempoSalvo);
                 const pctTempo    = Math.min(100, Math.round((decorrido / duracao) * 100));
+                const painelAberto = paineisAbertos.has(h.id);
+                const sliderMax = tipo === 'ocorrencias' ? metaDia : Math.max(1, Math.round(duracao / 60));
+                const sliderValorAutomatico = tipo === 'ocorrencias'
+                  ? Math.min(sliderMax, okCount)
+                  : Math.min(sliderMax, Math.floor(decorrido / 60));
+                const sliderValor = percentualAutomatico
+                  ? sliderValorAutomatico
+                  : Math.min(sliderMax, Math.round((intensidade / 100) * sliderMax));
+                const realizadoTexto = tipo === 'ocorrencias'
+                  ? `(${okCount}/${metaDia})`
+                  : `(${formatTempoHabito(decorrido)} de ${sliderMax} min)`;
                 return `
                 <div class="hab-item ${done ? 'done' : ''}" data-id="${h.id}">
-                  <button type="button" class="hab-check-btn ${done ? 'checked' : ''}" data-toggle="${h.id}" title="${done ? 'Desmarcar registro' : 'Registrar manualmente'}">
-                    ${done ? '✅' : '⬜'}
-                  </button>
-                  <div class="hab-item-icon" style="background:${h.cor || '#3b82f6'}22;color:${h.cor || '#3b82f6'}">${h.icone || '⭐'}</div>
-                  <div class="hab-item-info">
-                    <div class="hab-item-nome">${H.esc(h.nome)}</div>
-                    ${h.descricao ? `<div class="hab-item-desc">${H.esc(h.descricao)}</div>` : ''}
-                    <div class="hab-item-meta">
-                      ${h.categoria ? `<span class="hab-item-cat">${H.esc(h.categoria)}</span>` : ''}
-                      ${h.meta ? `<span class="chip-small">${H.esc(h.meta)}</span>` : ''}
-                      <span class="chip-small">${tipo === 'ocorrencias' ? 'Por ocorrências' : 'Por duração'}</span>
-                      ${streak > 0 ? `<span class="hab-streak">🔥 ${streak} dia${streak !== 1 ? 's' : ''}</span>` : ''}
+                  <div class="hab-item-identity">
+                    <div class="hab-item-icon" style="background:${h.cor || '#3b82f6'}22;color:${h.cor || '#3b82f6'}">${h.icone || '⭐'}</div>
+                    <div class="hab-item-info">
+                      <div class="hab-item-nome">${H.esc(h.nome)}</div>
+                      ${h.descricao ? `<div class="hab-item-desc">${H.esc(h.descricao)}</div>` : ''}
+                      <div class="hab-item-meta">
+                        ${h.categoria ? `<span class="hab-item-cat">${H.esc(h.categoria)}</span>` : ''}
+                        ${streak > 0 ? `<span class="hab-streak">🔥 ${streak} dia${streak !== 1 ? 's' : ''}</span>` : ''}
+                      </div>
                     </div>
-                    <div class="hab-exec-panel" data-exec-panel="${h.id}">
+                  </div>
+                  <button type="button" class="hab-check-btn ${done ? 'checked' : ''}" data-toggle="${h.id}" title="${done ? 'Desmarcar registro' : 'Registrar manualmente'}" aria-label="${done ? 'Desmarcar' : 'Marcar'} ${H.esc(h.nome)}">
+                    ${done ? '<i data-lucide="check"></i>' : ''}
+                  </button>
+                  <div class="hab-item-extras${done ? '' : ' hab-extras-off'}">
+                    <div class="hab-momento-control">
+                      <span class="hab-extras-label" title="Momento do dia">📍 Momento</span>
+                      <select class="hab-momento-sel" data-momento="${h.id}"${done ? '' : ' disabled'}>
+                        <option value=""${momento === '' ? ' selected' : ''}>— selecione —</option>
+                        <option value="manha"${momento === 'manha' ? ' selected' : ''}>🌅 Manhã</option>
+                        <option value="tarde"${momento === 'tarde' ? ' selected' : ''}>☀️ Tarde</option>
+                        <option value="noite"${momento === 'noite' ? ' selected' : ''}>🌙 Noite</option>
+                        <option value="ao_longo_dia"${momento === 'ao_longo_dia' ? ' selected' : ''}>🔄 Ao longo do dia</option>
+                      </select>
+                    </div>
+                    <div class="hab-realizado-control">
+                      <span class="hab-extras-label" title="Quantidade realizada do hábito">✅ Realizado <b data-realizado="${h.id}">${realizadoTexto}</b></span>
+                      <div class="hab-int-slider-wrap">
+                        <div class="hab-int-track-wrap">
+                          <input type="range" class="hab-int-slider" data-int="${h.id}"
+                            data-unit="${tipo === 'ocorrencias' ? 'ocorrência' : 'min'}"
+                            min="0" max="${sliderMax}" step="1" value="${sliderValor}"${done && !percentualAutomatico ? '' : ' disabled'}
+                            title="${percentualAutomatico ? 'Percentual calculado automaticamente pela execução' : 'Percentual informado manualmente'}">
+                          <span class="hab-int-bubble" data-bubble="${h.id}"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm hab-controls-toggle" data-controls-toggle="${h.id}" aria-expanded="${painelAberto}">
+                      <i data-lucide="sliders-horizontal"></i> Controles
+                      <i data-lucide="${painelAberto ? 'chevron-up' : 'chevron-down'}"></i>
+                    </button>
+                  </div>
+                  <div class="hab-item-obs">
+                    <input type="text" class="hab-obs-input" data-obs="${h.id}"
+                      placeholder="Observação..." value="${H.esc(reg?.observacao || '')}">
+                  </div>
+                  <div class="hab-exec-panel${painelAberto ? ' is-open' : ''}" data-exec-panel="${h.id}">
                       ${tipo === 'ocorrencias' ? `
                         <div class="hab-exec-summary">
                           <span><strong data-ok-count="${h.id}">${okCount}</strong> / ${metaDia} OK</span>
@@ -218,11 +267,11 @@ PCF.Pages = PCF.Pages || {};
                         </div>
                         <div class="hab-progress"><span data-occ-bar="${h.id}" style="width:${pctOcorr}%;background:${h.cor || '#3b82f6'}"></span></div>
                         <div class="hab-exec-actions">
-                          <button type="button" class="btn btn-primary btn-sm" data-occ-ok="${h.id}" ${selectedDate !== H.hoje() ? 'disabled' : ''}><i data-lucide="play"></i> Executar (OK)</button>
+                          <button type="button" class="btn btn-primary btn-sm" data-occ-ok="${h.id}" ${selectedDate !== H.hoje() ? 'disabled' : ''}><i data-lucide="check"></i> Registrar (OK)</button>
                           <button type="button" class="btn btn-outline btn-sm" data-occ-nok="${h.id}" ${selectedDate !== H.hoje() ? 'disabled' : ''}><i data-lucide="x"></i> Não realizado (NOK)</button>
                         </div>
                       ` : `
-                        <div class="hab-timer ${execucao?.status === 'executando' ? 'running' : ''}" data-timer="${h.id}" data-start="${execucao?.iniciadoEm || ''}" data-duration="${duracao}">
+                        <div class="hab-timer ${execucao?.status === 'executando' ? 'running' : ''}" data-timer="${h.id}" data-start="${execucao?.iniciadoEm || ''}" data-base="${tempoSalvo}" data-duration="${duracao}">
                           <div class="hab-timer-values">
                             <span><small>Crescente</small><strong data-elapsed="${h.id}">${formatTempoHabito(decorrido)}</strong></span>
                             <span><small>Restante</small><strong data-remaining="${h.id}">${formatTempoHabito(duracao - decorrido)}</strong></span>
@@ -231,38 +280,23 @@ PCF.Pages = PCF.Pages || {};
                           <div class="hab-progress"><span data-time-bar="${h.id}" style="width:${pctTempo}%;background:${h.cor || '#3b82f6'}"></span></div>
                           <div class="hab-exec-actions">
                             ${execucao?.status === 'executando' ? `
-                              <button type="button" class="btn btn-success btn-sm" data-finish="${h.id}" ${pctTempo < 100 ? 'disabled title="Aguarde o tempo programado"' : ''}><i data-lucide="check"></i> Concluir</button>
-                              <button type="button" class="btn btn-danger btn-sm" data-cancel-exec="${h.id}"><i data-lucide="x"></i> Cancelar</button>
+                              <button type="button" class="btn btn-success btn-sm" data-finish="${h.id}"><i data-lucide="check"></i> Concluir</button>
+                              ${pctTempo < 100 ? `<button type="button" class="btn btn-outline btn-sm" data-pause-exec="${h.id}"><i data-lucide="pause"></i> Pausar</button>` : ''}
+                              <button type="button" class="btn btn-danger btn-sm" data-reset-exec="${h.id}"><i data-lucide="rotate-ccw"></i> Zerar/Limpar</button>
+                            ` : execucao?.status === 'pausado' ? `
+                              ${pctTempo < 100 ? `<button type="button" class="btn btn-primary btn-sm" data-start-exec="${h.id}" ${selectedDate !== H.hoje() ? 'disabled' : ''}><i data-lucide="play"></i> Retomar</button>` : ''}
+                              <button type="button" class="btn btn-success btn-sm" data-finish="${h.id}"><i data-lucide="check"></i> Concluir</button>
+                              <button type="button" class="btn btn-danger btn-sm" data-reset-exec="${h.id}"><i data-lucide="rotate-ccw"></i> Zerar/Limpar</button>
+                            ` : execucao?.status === 'concluido' ? `
+                              <button type="button" class="btn btn-success btn-sm" disabled><i data-lucide="check-circle"></i> Concluído</button>
+                              <button type="button" class="btn btn-danger btn-sm" data-reset-exec="${h.id}"><i data-lucide="rotate-ccw"></i> Zerar/Limpar</button>
                             ` : `
                               <button type="button" class="btn btn-primary btn-sm" data-start-exec="${h.id}" ${selectedDate !== H.hoje() ? 'disabled title="A execução só pode ser iniciada na data de hoje"' : ''}><i data-lucide="play"></i> Executar</button>
+                              ${execucao ? `<button type="button" class="btn btn-danger btn-sm" data-reset-exec="${h.id}"><i data-lucide="rotate-ccw"></i> Zerar/Limpar</button>` : ''}
                             `}
                           </div>
                         </div>
                       `}
-                    </div>
-                  </div>
-                  <div class="hab-item-obs">
-                    <input type="text" class="hab-obs-input" data-obs="${h.id}"
-                      placeholder="Observação..." value="${H.esc(reg?.observacao || '')}">
-                  </div>
-                  <div class="hab-item-extras${done ? '' : ' hab-extras-off'}">
-                    <span class="hab-extras-label" title="Momento do dia">📍 Momento</span>
-                    <select class="hab-momento-sel" data-momento="${h.id}"${done ? '' : ' disabled'}>
-                      <option value=""${momento === '' ? ' selected' : ''}>— selecione —</option>
-                      <option value="manha"${momento === 'manha' ? ' selected' : ''}>🌅 Manhã</option>
-                      <option value="tarde"${momento === 'tarde' ? ' selected' : ''}>☀️ Tarde</option>
-                      <option value="noite"${momento === 'noite' ? ' selected' : ''}>🌙 Noite</option>
-                      <option value="ao_longo_dia"${momento === 'ao_longo_dia' ? ' selected' : ''}>🔄 Ao longo do dia</option>
-                    </select>
-                    <span class="hab-extras-label" title="% de realização do hábito">✅ Realizado</span>
-                    <div class="hab-int-slider-wrap">
-                      <div class="hab-int-track-wrap">
-                        <input type="range" class="hab-int-slider" data-int="${h.id}"
-                          min="0" max="100" step="25" value="${intensidade}"${done && !percentualAutomatico ? '' : ' disabled'}
-                          title="${percentualAutomatico ? 'Percentual calculado automaticamente pela execução' : 'Percentual informado manualmente'}">
-                        <span class="hab-int-bubble" data-bubble="${h.id}"></span>
-                      </div>
-                    </div>
                   </div>
                 </div>`;
               }).join('')}
@@ -277,6 +311,14 @@ PCF.Pages = PCF.Pages || {};
 
       document.getElementById('hab-data').onchange = function () { selectedDate = this.value; render(); };
       const _btnHoje = document.getElementById('btn-hab-hoje'); if (_btnHoje) _btnHoje.onclick = () => { selectedDate = H.hoje(); render(); };
+
+      container.querySelectorAll('[data-controls-toggle]').forEach(btn => {
+        btn.onclick = () => {
+          const habitoId = btn.dataset.controlsToggle;
+          paineisAbertos.has(habitoId) ? paineisAbertos.delete(habitoId) : paineisAbertos.add(habitoId);
+          render();
+        };
+      });
 
       container.querySelectorAll('[data-toggle]').forEach(btn => {
         btn.onclick = () => {
@@ -293,7 +335,7 @@ PCF.Pages = PCF.Pages || {};
             habitoId, data: selectedDate, completo: newCompleto,
             observacao:  obsEl?.value.trim() || '',
             momento:     newCompleto ? (momentoEl?.value || reg?.momento || '') : (reg?.momento || ''),
-            intensidade: sliderEl ? parseInt(sliderEl.value) : (reg && 'intensidade' in reg ? reg.intensidade : 100),
+            intensidade: sliderEl ? intensidadeDoSlider(sliderEl) : (reg && 'intensidade' in reg ? reg.intensidade : 100),
             modoRegistro: 'manual',
             ...(execucaoManual ? { execucao: execucaoManual } : {}),
           });
@@ -332,13 +374,16 @@ PCF.Pages = PCF.Pages || {};
         btn.onclick = () => {
           const habitoId = btn.dataset.startExec;
           const reg = getRegistro(habitoId);
+          const tempoSalvo = reg?.execucao?.status === 'pausado'
+            ? Math.max(0, Number(reg.execucao.decorrido) || 0)
+            : 0;
           S.upsertRegistroHabito({
             habitoId,
             data: selectedDate,
             completo: false,
-            execucao: { status: 'executando', iniciadoEm: Date.now(), decorrido: 0 },
-            momento: momentoAtualHabito(),
-            intensidade: 0,
+            execucao: { status: 'executando', iniciadoEm: Date.now(), decorrido: tempoSalvo },
+            momento: reg?.momento || momentoAtualHabito(),
+            intensidade: reg?.execucao?.status === 'pausado' ? (reg.intensidade || 0) : 0,
             modoRegistro: 'execucao',
           });
           render();
@@ -346,17 +391,30 @@ PCF.Pages = PCF.Pages || {};
       });
 
       container.querySelectorAll('[data-finish]').forEach(btn => {
-        btn.onclick = () => {
+        btn.onclick = (event) => {
+          event.preventDefault();
+          event.stopPropagation();
           const habitoId = btn.dataset.finish;
           const habito = S.getHabitos().find(h => h.id === habitoId);
           const reg = getRegistro(habitoId);
-          const decorrido = Math.min(duracaoSegundos(habito), Math.floor((Date.now() - reg.execucao.iniciadoEm) / 1000));
-          if (decorrido < duracaoSegundos(habito)) return;
+          if (!habito || !reg?.execucao) return;
+          const tempoSalvo = Math.max(0, Number(reg?.execucao?.decorrido) || 0);
+          const tempoAtual = reg?.execucao?.status === 'executando'
+            ? Math.max(0, Math.floor((Date.now() - reg.execucao.iniciadoEm) / 1000))
+            : 0;
+          const decorrido = Math.min(duracaoSegundos(habito), tempoSalvo + tempoAtual);
+          const execucaoConcluida = {
+            ...reg.execucao,
+            status: 'concluido',
+            finalizadoEm: Date.now(),
+            decorrido,
+          };
           S.upsertRegistroHabito({
             habitoId,
             data: selectedDate,
             completo: true,
-            execucao: { ...reg.execucao, status: 'concluido', finalizadoEm: Date.now(), decorrido },
+            execucao: execucaoConcluida,
+            momento: reg.momento || momentoAtualHabito(),
             intensidade: Math.min(100, Math.round((decorrido / duracaoSegundos(habito)) * 100)),
             modoRegistro: 'execucao',
           });
@@ -364,17 +422,37 @@ PCF.Pages = PCF.Pages || {};
         };
       });
 
-      container.querySelectorAll('[data-cancel-exec]').forEach(btn => {
+      container.querySelectorAll('[data-pause-exec]').forEach(btn => {
         btn.onclick = () => {
-          const habitoId = btn.dataset.cancelExec;
+          const habitoId = btn.dataset.pauseExec;
           const reg = getRegistro(habitoId);
           const habito = S.getHabitos().find(h => h.id === habitoId);
-          const decorrido = Math.min(duracaoSegundos(habito), Math.floor((Date.now() - reg.execucao.iniciadoEm) / 1000));
+          const decorrido = Math.min(
+            duracaoSegundos(habito),
+            Math.max(0, Number(reg.execucao.decorrido) || 0) + Math.max(0, Math.floor((Date.now() - reg.execucao.iniciadoEm) / 1000))
+          );
           S.upsertRegistroHabito({
             habitoId,
             data: selectedDate,
             completo: false,
-            execucao: { ...reg.execucao, status: 'cancelado', canceladoEm: Date.now(), decorrido },
+            execucao: { ...reg.execucao, status: 'pausado', pausadoEm: Date.now(), decorrido },
+            intensidade: Math.min(100, Math.round((decorrido / duracaoSegundos(habito)) * 100)),
+            modoRegistro: 'execucao',
+          });
+          render();
+        };
+      });
+
+      container.querySelectorAll('[data-reset-exec]').forEach(btn => {
+        btn.onclick = () => {
+          const habitoId = btn.dataset.resetExec;
+          S.upsertRegistroHabito({
+            habitoId,
+            data: selectedDate,
+            completo: false,
+            execucao: null,
+            intensidade: 0,
+            modoRegistro: 'execucao',
           });
           render();
         };
@@ -391,22 +469,21 @@ PCF.Pages = PCF.Pages || {};
         timersAtivos.forEach(el => {
           const id = el.dataset.timer;
           const duracao = Number(el.dataset.duration);
-          const decorrido = Math.min(duracao, Math.max(0, Math.floor((Date.now() - Number(el.dataset.start)) / 1000)));
+          const decorrido = Math.min(duracao, Math.max(0, Number(el.dataset.base) || 0) + Math.max(0, Math.floor((Date.now() - Number(el.dataset.start)) / 1000)));
           const restante = Math.max(0, duracao - decorrido);
           const pct = Math.min(100, Math.round((decorrido / duracao) * 100));
           const elapsedEl = el.querySelector(`[data-elapsed="${id}"]`);
           const remainingEl = el.querySelector(`[data-remaining="${id}"]`);
           const pctEl = el.querySelector(`[data-time-pct="${id}"]`);
           const barEl = el.querySelector(`[data-time-bar="${id}"]`);
-          const finishEl = el.querySelector(`[data-finish="${id}"]`);
+          const pauseEl = el.querySelector(`[data-pause-exec="${id}"]`);
+          const realizadoEl = container.querySelector(`[data-realizado="${id}"]`);
           if (elapsedEl) elapsedEl.textContent = formatTempoHabito(decorrido);
           if (remainingEl) remainingEl.textContent = formatTempoHabito(restante);
           if (pctEl) pctEl.textContent = pct + '%';
           if (barEl) barEl.style.width = pct + '%';
-          if (finishEl && pct >= 100) {
-            finishEl.disabled = false;
-            finishEl.title = 'Concluir hábito';
-          }
+          if (realizadoEl) realizadoEl.textContent = `(${formatTempoHabito(decorrido)} de ${Math.round(duracao / 60)} min)`;
+          if (pauseEl && pct >= 100) pauseEl.remove();
         });
       };
       atualizarTimers();
@@ -427,9 +504,19 @@ PCF.Pages = PCF.Pages || {};
       const updateBubble = (sl) => {
         const bubble = container.querySelector(`.hab-int-bubble[data-bubble="${sl.dataset.int}"]`);
         if (!bubble) return;
-        const pct = parseInt(sl.value) / 100;
+        const valor = Number(sl.value);
+        const max = Math.max(1, Number(sl.max) || 1);
+        const pct = valor / max;
         bubble.style.left = `calc(${pct * 100}% + ${(8 - 16 * pct).toFixed(1)}px)`;
-        bubble.textContent = INTENSIDADES.find(iv => iv.val === parseInt(sl.value))?.label || sl.value + '%';
+        bubble.style.transform = pct >= .8
+          ? 'translateX(-100%)'
+          : pct <= .2
+            ? 'translateX(0)'
+            : 'translateX(-50%)';
+        const unidade = sl.dataset.unit === 'min'
+          ? 'min'
+          : `ocorrência${valor === 1 ? '' : 's'}`;
+        bubble.textContent = `${valor}/${max} ${unidade} · ${Math.round(pct * 100)}%`;
       };
       container.querySelectorAll('.hab-int-slider').forEach(sl => {
         updateBubble(sl);
@@ -450,7 +537,7 @@ PCF.Pages = PCF.Pages || {};
             habitoId: h.id, data: selectedDate, completo: reg?.completo || false,
             observacao:  obsEl.value.trim(),
             momento:     momentoEl?.value || '',
-            intensidade: sliderEl ? parseInt(sliderEl.value) : (reg && 'intensidade' in reg ? reg.intensidade : 100),
+            intensidade: sliderEl ? intensidadeDoSlider(sliderEl) : (reg && 'intensidade' in reg ? reg.intensidade : 100),
           });
         });
         const msg = document.createElement('div');
