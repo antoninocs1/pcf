@@ -355,8 +355,13 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 /* ==================== SUBCAT ROWS (Config. Categorias) ==================== */
 .subcat-list { display: flex; flex-direction: column; gap: 6px; }
 .subcat-row { display: flex; align-items: center; gap: 8px; }
-.subcat-row .subcat-nome { flex: 1; }
-.subcat-row .subcat-tipo { width: 110px; }
+.subcat-row .subcat-nome { flex: 1 1 0; min-width: 0; }
+.subcat-row .subcat-tipo { width: 110px; flex: 0 0 110px; }
+.subcat-row .subcat-del {
+  flex: 0 0 32px; width: 32px; height: 32px;
+  color: var(--danger); border: 1px solid rgba(220,38,38,.35);
+}
+.subcat-row .subcat-del:hover { color: #fff; background: var(--danger); }
 
 /* ==================== CICLO DO DINHEIRO ==================== */
 .ciclo-container { max-width: 700px; }
@@ -442,6 +447,22 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .emo-config-sub-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
 .emo-config-inf-list { display: flex; flex-wrap: wrap; gap: 6px; margin-left: 8px; }
+.emo-modal-level-list { display: flex; flex-direction: column; gap: 10px; }
+.emo-modal-media {
+  padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: rgba(15,23,42,.28);
+}
+.emo-modal-media-row, .emo-modal-inf-row {
+  display: grid; grid-template-columns: minmax(0,1fr) 48px 32px;
+  align-items: center; gap: 8px;
+}
+.emo-modal-media-row input, .emo-modal-inf-row input { min-width: 0; }
+.emo-modal-media-row input[type="color"], .emo-modal-inf-row input[type="color"] {
+  width: 48px; height: 40px; padding: 3px; cursor: pointer;
+}
+.emo-modal-infs { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 8px 20px; }
+.emo-modal-inf-row { padding-left: 8px; border-left: 2px solid var(--border); }
+.emo-modal-add-inf { margin-left: 20px; }
 
 /* ==================== MODAL ==================== */
 .modal-overlay {

@@ -97,9 +97,10 @@ PCF.Pages = PCF.Pages || {};
       const addSubcatRow = (nome = '', tipo = '') => {
         const row = document.createElement('div');
         row.className = 'subcat-row';
-        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="Variável" ${tipo === 'Variável' ? 'selected' : ''}>Variável</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover"><i data-lucide="trash-2"></i></button>`;
+        row.innerHTML = `<input type="text" class="subcat-nome" value="${H.esc(nome)}" placeholder="Nome da subcategoria"><select class="subcat-tipo"><option value="">--</option><option value="Fixo" ${tipo === 'Fixo' ? 'selected' : ''}>Fixo</option><option value="Variável" ${tipo === 'Variável' ? 'selected' : ''}>Variável</option></select><button type="button" class="btn-icon btn-danger subcat-del" title="Remover subcategoria" aria-label="Remover subcategoria"><i data-lucide="trash-2"></i></button>`;
         row.querySelector('.subcat-del').onclick = () => row.remove();
         document.getElementById('subcat-list').appendChild(row);
+        if (window.lucide) lucide.createIcons();
       };
 
       (cat?.subcategorias || []).forEach(s => {
@@ -159,24 +160,17 @@ PCF.Pages = PCF.Pages || {};
                     <div>
                       <button class="btn-icon" data-edit-sup="${sup.id}" title="Editar"><i data-lucide="pencil"></i></button>
                       <button class="btn-icon btn-danger" data-del-sup="${sup.id}" title="Remover"><i data-lucide="trash-2"></i></button>
-                      <button class="btn btn-sm btn-secondary" data-add-med="${sup.id}">+ Média</button>
                     </div>
                   </div>
                   ${(sup.medias || []).map(med => `
                     <div class="emo-config-sub">
                       <div class="emo-config-sub-header">
                         <div><span class="emo-color-dot" style="background:${med.cor}"></span>${H.esc(med.nome)} <span class="text-muted">(Médio)</span></div>
-                        <div>
-                          <button class="btn-icon" data-edit-med="${sup.id}|${med.id}" title="Editar"><i data-lucide="pencil"></i></button>
-                          <button class="btn-icon btn-danger" data-del-med="${sup.id}|${med.id}" title="Remover"><i data-lucide="trash-2"></i></button>
-                          <button class="btn btn-sm btn-secondary" data-add-inf="${sup.id}|${med.id}">+ Inferior</button>
-                        </div>
                       </div>
                       <div class="emo-config-inf-list">
                         ${(med.inferiores || []).map(inf => `
                           <span class="chip-emo" style="background:${inf.cor};color:#fff">
                             ${H.esc(inf.nome)}
-                            <button class="chip-del" data-del-inf="${sup.id}|${med.id}|${inf.id}">×</button>
                           </span>
                         `).join('')}
                         ${(med.inferiores || []).length === 0 ? '<em class="text-muted">Nenhuma inferior</em>' : ''}
@@ -241,12 +235,18 @@ PCF.Pages = PCF.Pages || {};
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
-        <div class="modal">
+        <div class="modal ${level === 'sup' ? 'modal-lg' : ''}">
           <h3>${isEdit ? 'Editar' : 'Nova'} ${labels[level]}</h3>
           <form id="emo-modal-form">
             <div class="form-group"><label>Nome</label><input type="text" id="emo-m-nome" value="${H.esc(item?.nome || '')}" required></div>
             <div class="form-group"><label>Cor</label><input type="color" id="emo-m-cor" value="${item?.cor || (level === 'sup' ? '#6b7280' : level === 'med' ? '#9ca3af' : '#d1d5db')}"></div>
             ${level === 'sup' ? `<div class="form-group"><label>Ícone (emoji)</label><input type="text" id="emo-m-icon" value="${H.esc(item?.icon || '')}" placeholder="Ex: 😊" maxlength="4"></div>` : ''}
+            ${level === 'sup' ? `
+              <div class="form-group">
+                <label>Emoções Médias e Inferiores</label>
+                <div id="emo-medias-list" class="emo-modal-level-list"></div>
+                <button type="button" id="btn-add-emo-media" class="btn btn-secondary btn-block" style="margin-top:8px">+ Emoção Média</button>
+              </div>` : ''}
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="emo-m-cancel">Cancelar</button>
               <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
@@ -254,6 +254,47 @@ PCF.Pages = PCF.Pages || {};
           </form>
         </div>`;
       document.body.appendChild(overlay);
+
+      const addInferiorRow = (list, inferior = {}) => {
+        const row = document.createElement('div');
+        row.className = 'emo-modal-inf-row';
+        row.dataset.id = inferior.id || S._uid();
+        row.innerHTML = `
+          <input type="text" class="emo-modal-inf-nome" value="${H.esc(inferior.nome || '')}" placeholder="Nome da emoção inferior" required>
+          <input type="color" class="emo-modal-inf-cor" value="${inferior.cor || '#d1d5db'}" title="Cor da emoção inferior">
+          <button type="button" class="btn-icon btn-danger emo-modal-del" title="Remover emoção inferior" aria-label="Remover emoção inferior"><i data-lucide="trash-2"></i></button>`;
+        row.querySelector('.emo-modal-del').onclick = () => row.remove();
+        list.appendChild(row);
+        if (window.lucide) lucide.createIcons();
+      };
+
+      const addMediaRow = (media = {}) => {
+        const list = document.getElementById('emo-medias-list');
+        const corSuperior = document.getElementById('emo-m-cor')?.value || '#6b7280';
+        const block = document.createElement('div');
+        block.className = 'emo-modal-media';
+        block.dataset.id = media.id || S._uid();
+        block.innerHTML = `
+          <div class="emo-modal-media-row">
+            <input type="text" class="emo-modal-med-nome" value="${H.esc(media.nome || '')}" placeholder="Nome da emoção média" required>
+            <input type="color" class="emo-modal-med-cor" value="${media.cor || corSuperior}" title="Cor da emoção média">
+            <button type="button" class="btn-icon btn-danger emo-modal-del-media" title="Remover emoção média" aria-label="Remover emoção média"><i data-lucide="trash-2"></i></button>
+          </div>
+          <div class="emo-modal-infs"></div>
+          <button type="button" class="btn btn-sm btn-secondary emo-modal-add-inf">+ Emoção Inferior</button>`;
+        block.querySelector('.emo-modal-del-media').onclick = () => block.remove();
+        const infList = block.querySelector('.emo-modal-infs');
+        block.querySelector('.emo-modal-add-inf').onclick = () => addInferiorRow(infList);
+        (media.inferiores || []).forEach(inf => addInferiorRow(infList, inf));
+        list.appendChild(block);
+        if (window.lucide) lucide.createIcons();
+      };
+
+      if (level === 'sup') {
+        (item?.medias || []).forEach(addMediaRow);
+        document.getElementById('btn-add-emo-media').onclick = () => addMediaRow();
+      }
+
       document.getElementById('emo-m-cancel').onclick = () => overlay.remove();
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
@@ -266,8 +307,22 @@ PCF.Pages = PCF.Pages || {};
         const config = S.getEmocoesConfig();
 
         if (level === 'sup') {
-          if (isEdit) { const s = config.find(s => s.id === item.id); if (s) { s.nome = nome; s.cor = cor; s.icon = icon; } }
-          else { config.push({ id: S._uid(), nome, cor, icon, medias: [] }); }
+          const medias = [...document.querySelectorAll('#emo-medias-list .emo-modal-media')].map(block => ({
+            id: block.dataset.id,
+            nome: block.querySelector('.emo-modal-med-nome').value.trim(),
+            cor: block.querySelector('.emo-modal-med-cor').value,
+            inferiores: [...block.querySelectorAll('.emo-modal-inf-row')].map(row => ({
+              id: row.dataset.id,
+              nome: row.querySelector('.emo-modal-inf-nome').value.trim(),
+              cor: row.querySelector('.emo-modal-inf-cor').value,
+            })).filter(inf => inf.nome),
+          })).filter(med => med.nome);
+          if (isEdit) {
+            const s = config.find(s => s.id === item.id);
+            if (s) { s.nome = nome; s.cor = cor; s.icon = icon; s.medias = medias; }
+          } else {
+            config.push({ id: S._uid(), nome, cor, icon, medias });
+          }
         } else if (level === 'med') {
           const sup = config.find(s => s.id === parentSupId);
           if (sup) {

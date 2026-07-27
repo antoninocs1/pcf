@@ -54,6 +54,7 @@ service cloud.firestore {
       // Bootstrap: apenas autenticado, somente quando ainda não existe
       // Visits: qualquer visitante pode criar/incrementar APENAS o campo count
       allow create: if
+        isAdmin() ||
         (request.auth != null && docId == 'bootstrap' && !bootstrapExists()) ||
         (docId == 'visits' && request.resource.data.keys().hasOnly(['count']));
 

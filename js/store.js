@@ -58,6 +58,9 @@ PCF.Store = (() => {
   };
 
   const _uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const HABITOS_DEFAULT_ADMIN = 'Antonino Costa da Silva';
+  const HABITOS_DEFAULT_DOC = 'habitos_defaults';
+  const EMOCOES_DEFAULT_DOC = 'emocoes_defaults';
 
   /* ---------- USERS ---------- */
   const getUsers = () => _cache['pcf_users'] || [];
@@ -75,6 +78,16 @@ PCF.Store = (() => {
       profileSnap = await _db().collection('users').doc(uid).get();
     }
     const profile = profileSnap.exists ? profileSnap.data() : {};
+    const [habitosDefaultSnap, emocoesDefaultSnap] = await Promise.all([
+      _db().collection('meta').doc(HABITOS_DEFAULT_DOC).get(),
+      _db().collection('meta').doc(EMOCOES_DEFAULT_DOC).get(),
+    ]);
+    _cache['pcf_habitos_defaults'] = habitosDefaultSnap.exists
+      ? (habitosDefaultSnap.data().value || null)
+      : null;
+    _cache['pcf_emocoes_defaults'] = emocoesDefaultSnap.exists
+      ? (emocoesDefaultSnap.data().value || null)
+      : null;
     if (profile.isAdmin) {
       const snap = await _db().collection('users').get();
       const users = [];
@@ -90,6 +103,9 @@ PCF.Store = (() => {
       _cache[`pcf_${col}_${uid}`] = snaps[i].exists ? snaps[i].data().value : null;
     });
     _seedDefaults(uid);
+    // Publica também hábitos que já estavam cadastrados antes desta versão.
+    if (_currentUserControlsHabitosDefault()) _publishHabitosDefault(getHabitos());
+    if (_currentUserControlsEmocoesDefault()) _publishEmocoesDefault(getEmocoesConfig());
   };
 
   /* ---- loginWithGoogle: entrar ou cadastrar via conta Google ---- */
@@ -278,7 +294,40 @@ PCF.Store = (() => {
   /* ---------- EMOÇÕES CONFIG ---------- */
   const _ecU = () => `pcf_emocoes_config_${currentUserId()}`;
   const getEmocoesConfig = () => _get(_ecU()) || [];
-  const saveEmocoesConfig = (c) => _set(_ecU(), c);
+  const _currentUserControlsEmocoesDefault = () => {
+    const user = getUserById(currentUserId());
+    return !!user?.isAdmin && (user.nome || '').trim() === HABITOS_DEFAULT_ADMIN;
+  };
+  const _modeloEmocoesSemIds = (config) => (config || []).map(({ id, ...superior }) => ({
+    ...superior,
+    medias: (superior.medias || []).map(({ id: medId, ...media }) => ({
+      ...media,
+      inferiores: (media.inferiores || []).map(({ id: infId, ...inferior }) => ({ ...inferior })),
+    })),
+  }));
+  const _criarEmocoesDoModelo = (modelo) => (modelo || []).map(superior => ({
+    ...superior,
+    id: _uid(),
+    medias: (superior.medias || []).map(media => ({
+      ...media,
+      id: _uid(),
+      inferiores: (media.inferiores || []).map(inferior => ({ ...inferior, id: _uid() })),
+    })),
+  }));
+  const _publishEmocoesDefault = (config) => {
+    if (!_currentUserControlsEmocoesDefault()) return;
+    const modelo = _modeloEmocoesSemIds(config);
+    _cache['pcf_emocoes_defaults'] = modelo;
+    _db().collection('meta').doc(EMOCOES_DEFAULT_DOC).set({
+      value: modelo,
+      administrador: HABITOS_DEFAULT_ADMIN,
+      atualizadoEm: new Date().toISOString(),
+    }).catch(err => console.warn('[PCF] Firestore emoções padrão:', err.message));
+  };
+  const saveEmocoesConfig = (c) => {
+    _set(_ecU(), c);
+    _publishEmocoesDefault(c);
+  };
 
   /* ---------- IMC ---------- */
   const _imcU = () => `pcf_imc_${currentUserId()}`;
@@ -386,7 +435,12 @@ PCF.Store = (() => {
     { chavePadrao: 'violao', nome: 'Tocar Violão', descricao: 'Praticar violão por 20 minutos', categoria: 'Lazer', meta: 'Diário', icone: '🎸', cor: '#fcff40', ativo: true, tipoExecucao: 'duracao', metaDiaria: 1, duracaoMinutos: 20 },
   ];
 
-  const _criarHabitosDefault = () => HABITOS_DEFAULT.map(h => ({
+  const _modeloHabitosDefault = () => {
+    const publicado = _cache['pcf_habitos_defaults'];
+    return Array.isArray(publicado) ? publicado : HABITOS_DEFAULT;
+  };
+
+  const _criarHabitosDoModelo = () => _modeloHabitosDefault().map(({ id, dataCriacao, ...h }) => ({
     id: _uid(),
     dataCriacao: new Date().toISOString().split('T')[0],
     ...h,
@@ -540,9 +594,13 @@ PCF.Store = (() => {
         { id: _uid(), nome: 'Agressivo', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Provocado', cor: '#f87171' }, { id: _uid(), nome: 'Hostil', cor: '#fca5a5' }] },
       ]},
     ];
-    _seedIfEmpty(`pcf_emocoes_config_${userId}`, emoConfig);
+    const emocoesPublicadas = _cache['pcf_emocoes_defaults'];
+    _seedIfEmpty(
+      `pcf_emocoes_config_${userId}`,
+      Array.isArray(emocoesPublicadas) ? _criarEmocoesDoModelo(emocoesPublicadas) : emoConfig
+    );
 
-    _seedIfEmpty(`pcf_habitos_${userId}`, _criarHabitosDefault());
+    _seedIfEmpty(`pcf_habitos_${userId}`, _criarHabitosDoModelo());
 
     // Virtudes padrão (Tabela das Virtudes — Peterson & Seligman + virtudes cristãs/estoicas)
     const virtudes = [
@@ -1838,8 +1896,15 @@ PCF.Store = (() => {
 
   /* ---------- RESTAURAR PADRÕES (por tipo) ---------- */
   const restoreDefaultCategorias    = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_categorias_${uid}`]); };
-  const restoreDefaultEmocoesConfig = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_emocoes_config_${uid}`]); };
-  const restoreDefaultHabitos       = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_habitos_${uid}`]); };
+  const restoreDefaultEmocoesConfig = () => {
+    const publicadas = _cache['pcf_emocoes_defaults'];
+    if (Array.isArray(publicadas)) saveEmocoesConfig(_criarEmocoesDoModelo(publicadas));
+    else {
+      const uid = currentUserId();
+      _seedDefaults(uid, [`pcf_emocoes_config_${uid}`]);
+    }
+  };
+  const restoreDefaultHabitos       = () => saveHabitos(_criarHabitosDoModelo());
   const restoreDefaultFrases        = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_frases_${uid}`]); };
   const restoreDefaultVirtudes      = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_virtudes_config_${uid}`]); };
 
@@ -1869,7 +1934,26 @@ PCF.Store = (() => {
     if (mudou) _set(key, normalizados);
     return normalizados;
   };
-  const saveHabitos = (h) => _set(_hkU(), h);
+  const _currentUserControlsHabitosDefault = () => {
+    const user = getUserById(currentUserId());
+    return !!user?.isAdmin && (user.nome || '').trim() === HABITOS_DEFAULT_ADMIN;
+  };
+
+  const _publishHabitosDefault = (habitos) => {
+    if (!_currentUserControlsHabitosDefault()) return;
+    const modelo = habitos.map(({ id, dataCriacao, ...parametros }) => ({ ...parametros }));
+    _cache['pcf_habitos_defaults'] = modelo;
+    _db().collection('meta').doc(HABITOS_DEFAULT_DOC).set({
+      value: modelo,
+      administrador: HABITOS_DEFAULT_ADMIN,
+      atualizadoEm: new Date().toISOString(),
+    }).catch(err => console.warn('[PCF] Firestore hábitos padrão:', err.message));
+  };
+
+  const saveHabitos = (h) => {
+    _set(_hkU(), h);
+    _publishHabitosDefault(h);
+  };
   const addHabito = (h) => { const all = getHabitos(); all.push({ id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], ...h }); saveHabitos(all); return all; };
   const updateHabito = (id, data) => { const all = getHabitos(); const i = all.findIndex(h => h.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveHabitos(all); } return all; };
   const deleteHabito = (id) => { const all = getHabitos().filter(h => h.id !== id); saveHabitos(all); return all; };
