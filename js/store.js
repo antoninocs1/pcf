@@ -61,7 +61,7 @@ PCF.Store = (() => {
   const HABITOS_DEFAULT_ADMIN = 'Antonino Costa da Silva';
   const HABITOS_DEFAULT_DOC = 'habitos_defaults';
   const EMOCOES_DEFAULT_DOC = 'emocoes_defaults';
-  const EMOCOES_SYNC_VERSION = 1;
+  const EMOCOES_SYNC_VERSION = 2;
 
   /* ---------- USERS ---------- */
   const getUsers = () => _cache['pcf_users'] || [];
@@ -594,9 +594,10 @@ PCF.Store = (() => {
     const emoConfig = [
       { id: _uid(), nome: 'Feliz', cor: '#16a34a', icon: '😊', medias: [
         { id: _uid(), nome: 'Contente', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Livre', cor: '#4ade80' }, { id: _uid(), nome: 'Alegre', cor: '#4ade80' }] },
-        { id: _uid(), nome: 'Interessado', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Curioso', cor: '#4ade80' }, { id: _uid(), nome: 'Inquisitivo', cor: '#4ade80' }] },
-        { id: _uid(), nome: 'Orgulhoso', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Bem-sucedido', cor: '#4ade80' }, { id: _uid(), nome: 'Confiante', cor: '#4ade80' }] },
+        { id: _uid(), nome: 'Animado', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Curioso', cor: '#4ade80' }, { id: _uid(), nome: 'Entusiasmado', cor: '#4ade80' }, { id: _uid(), nome: 'Interessado', cor: '#4ade80' }] },
+        { id: _uid(), nome: 'Confiante', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Bem-sucedido', cor: '#4ade80' }, { id: _uid(), nome: 'Abençoado', cor: '#4ade80' }] },
         { id: _uid(), nome: 'Aceito', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Respeitado', cor: '#4ade80' }, { id: _uid(), nome: 'Valorizado', cor: '#4ade80' }] },
+        { id: _uid(), nome: 'Otimista', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Esperançoso', cor: '#4ade80' }, { id: _uid(), nome: 'Agradecido (Grato)', cor: '#4ade80' }] },
       ]},
       { id: _uid(), nome: 'Surpreso', cor: '#f59e0b', icon: '😲', medias: [
         { id: _uid(), nome: 'Assustado', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Chocado', cor: '#fcd34d' }, { id: _uid(), nome: 'Desanimado', cor: '#fcd34d' }] },
