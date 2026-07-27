@@ -500,6 +500,7 @@ PCF.Pages = PCF.Pages || {};
               <button id="exp-cats" class="btn btn-primary">Exportar Categorias (CSV)</button>
               <button id="exp-emocoes" class="btn btn-primary">Exportar Registros de Emoções (CSV)</button>
               <button id="exp-frases" class="btn btn-primary">Exportar Mensagens (CSV)</button>
+              <button id="exp-linha-tempo" class="btn btn-primary">Exportar Linha do Tempo (CSV)</button>
             </div>
           </div>
           <div class="ie-section">
@@ -519,6 +520,11 @@ PCF.Pages = PCF.Pages || {};
               <input type="file" id="imp-frases" accept=".csv" class="input-file">
               <p class="text-muted">Colunas: texto, autor, categoria, ativo (sim/nao)</p>
             </div>
+            <div class="ie-import-block">
+              <label>Importar Linha do Tempo (CSV)</label>
+              <input type="file" id="imp-linha-tempo" accept=".csv" class="input-file">
+              <p class="text-muted">Colunas: dataInicio, dataFim, titulo, descricao, categoria, local, destaque</p>
+            </div>
             <div id="ie-msg"></div>
           </div>
           <div class="ie-section">
@@ -535,6 +541,7 @@ PCF.Pages = PCF.Pages || {};
               <button id="clear-virtudes" class="btn btn-danger">Limpar Registros de Virtudes</button>
               <button id="clear-rodavida" class="btn btn-danger">Limpar Roda da Vida</button>
               <button id="clear-diario" class="btn btn-danger">Limpar Diário</button>
+              <button id="clear-linha-tempo" class="btn btn-danger">Limpar Linha do Tempo</button>
             </div>
           </div>
         </div>
@@ -578,6 +585,12 @@ PCF.Pages = PCF.Pages || {};
         ativo: f.ativo !== false ? 'sim' : 'nao',
       }));
       H.downloadCSV(H.toCSV(rows, ['texto', 'autor', 'categoria', 'ativo']), 'mensagens.csv');
+    };
+
+    document.getElementById('exp-linha-tempo').onclick = () => {
+      const headers = ['dataInicio','dataFim','titulo','descricao','categoria','local','destaque'];
+      const rows = S.getLinhaTempo().map(e => ({ ...e, destaque: e.destaque ? 'sim' : 'nao' }));
+      H.downloadCSV(H.toCSV(rows, headers), 'linha-do-tempo.csv');
     };
 
     const showMsg = (text, type) => {
@@ -667,6 +680,34 @@ PCF.Pages = PCF.Pages || {};
       inputEl.value = '';
     };
 
+    document.getElementById('imp-linha-tempo').onchange = function() {
+      const file = this.files[0];
+      if (!file) return;
+      const inputEl = this;
+      H.readFileAutoEncoding(file, (text) => {
+        try {
+          const rows = H.parseCSV(text);
+          const existing = S.getLinhaTempo();
+          let count = 0;
+          rows.forEach(r => {
+            if (!r.dataInicio || !r.titulo) return;
+            const normalizaData = d => !d ? '' : (/^\d{4}-\d{2}-\d{2}$/.test(d) ? d : H.parseDateBR(d));
+            existing.push({
+              id: S._uid(), dataInicio: normalizaData(r.dataInicio), dataFim: normalizaData(r.dataFim),
+              titulo: r.titulo.trim(), descricao: (r.descricao || '').trim(),
+              categoria: (r.categoria || 'Outro').trim(), local: (r.local || '').trim(),
+              destaque: ['sim', 'true', '1'].includes((r.destaque || '').toLowerCase()),
+              origem: 'importacao'
+            });
+            count++;
+          });
+          S.saveLinhaTempo(existing);
+          showMsg(`✅ ${count} marcos importados com sucesso!`, 'success');
+        } catch (err) { showMsg('❌ Erro ao importar: ' + err.message, 'error'); }
+      });
+      inputEl.value = '';
+    };
+
     // LIMPAR BASES
     const clearBase = (label, countFn, clearFn) => {
       const n = countFn();
@@ -678,6 +719,9 @@ PCF.Pages = PCF.Pages || {};
     const btnClearTrans = document.getElementById('clear-trans');
     if (btnClearTrans) btnClearTrans.onclick = () =>
       clearBase('Transações', () => S.getTransacoes().length, () => S.saveTransacoes([]));
+    const btnClearLinhaTempo = document.getElementById('clear-linha-tempo');
+    if (btnClearLinhaTempo) btnClearLinhaTempo.onclick = () =>
+      clearBase('Linha do Tempo', () => S.getLinhaTempo().length, () => S.saveLinhaTempo([]));
     const btnClearEmocoes = document.getElementById('clear-emocoes');
     if (btnClearEmocoes) btnClearEmocoes.onclick = () =>
       clearBase('Registros de Emoções', () => S.getEmocoes().length, () => S.saveEmocoes([]));

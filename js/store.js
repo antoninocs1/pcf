@@ -17,7 +17,7 @@ PCF.Store = (() => {
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
     'rodavida_reg', 'rodavida_config', 'plano_acao',
-    'virtudes_config', 'virtudes_reg'
+    'virtudes_config', 'virtudes_reg', 'linha_tempo'
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
@@ -200,9 +200,9 @@ PCF.Store = (() => {
       };
       await _db().collection('users').doc(cred.user.uid).set(profile);
       DATA_COLS.forEach(col => { _cache[`pcf_${col}_${cred.user.uid}`] = null; });
-      _seedDefaults(cred.user.uid);
       const user = { id: cred.user.uid, ...profile };
       _cache['pcf_users'] = [...getUsers(), user];
+      _seedDefaults(cred.user.uid);
       return { ok: true, user };
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') return { ok: false, msg: 'E-mail já cadastrado' };
@@ -256,6 +256,31 @@ PCF.Store = (() => {
     const uid = currentUserId();
     if (!uid) return false;
     return !!(getUserById(uid)?.isAdmin);
+  };
+
+  /* ---------- LINHA DO TEMPO ---------- */
+  const _ltkU = () => `pcf_linha_tempo_${currentUserId()}`;
+  const getLinhaTempo = () => _get(_ltkU()) || [];
+  const saveLinhaTempo = (eventos) => _set(_ltkU(), eventos);
+  const addEventoLinhaTempo = (evento) => {
+    const all = getLinhaTempo();
+    all.push({ id: _uid(), criadoEm: new Date().toISOString(), ...evento });
+    saveLinhaTempo(all);
+    return all;
+  };
+  const updateEventoLinhaTempo = (id, data) => {
+    const all = getLinhaTempo();
+    const i = all.findIndex(e => e.id === id);
+    if (i >= 0) {
+      all[i] = { ...all[i], ...data, atualizadoEm: new Date().toISOString() };
+      saveLinhaTempo(all);
+    }
+    return all;
+  };
+  const deleteEventoLinhaTempo = (id) => {
+    const all = getLinhaTempo().filter(e => e.id !== id);
+    saveLinhaTempo(all);
+    return all;
   };
 
   /* ---------- TRANSAÇÕES ---------- */
@@ -1939,6 +1964,55 @@ PCF.Store = (() => {
       },
     ];
     _seedIfEmpty(`pcf_rodavida_config_${userId}`, rodaVidaConfig);
+
+    // Linha do tempo: sempre começa na data de nascimento do perfil.
+    const perfil = getUserById(userId) || {};
+    const nascimento = perfil.dataNascimento || '';
+    const eventosBase = nascimento ? [{
+      id: _uid(), dataInicio: nascimento, dataFim: '', titulo: 'Meu nascimento',
+      descricao: `Início da história de vida de ${perfil.nome || 'usuário'}.`,
+      categoria: 'Família', local: '', destaque: true, origem: 'cadastro'
+    }] : [];
+    // Carga inicial transcrita do documento "Linha do Tempo - Antonino Costa da Silva - 2017".
+    if ((perfil.nome || '').trim().toLocaleLowerCase('pt-BR') === 'antonino costa da silva') {
+      if (eventosBase[0]) {
+        eventosBase[0].descricao = 'Filho de Leovigildo Ferreira da Silva e Alda Costa da Silva. Meus pais moravam no bairro da Calçada.';
+        eventosBase[0].local = 'Hospital Espanhol, Salvador - BA';
+      }
+      const marco = (dataInicio, dataFim, titulo, descricao, categoria, local = '') => ({
+        id: _uid(), dataInicio, dataFim, titulo, descricao, categoria, local,
+        destaque: false, origem: 'documento-2017'
+      });
+      eventosBase.push(
+        marco('1976-01-01', '1976-12-31', '1ª série do 1º Grau', 'Escola Municipal Instituto Francisco Souza.', 'Educação'),
+        marco('1977-01-01', '1979-12-31', '2ª à 4ª série do 1º Grau', 'Centro Integrado de Educação Anísio Teixeira.', 'Educação'),
+        marco('1980-01-01', '1983-12-31', '5ª à 8ª série do 1º Grau', 'Escola Técnica Estadual Newton Sucupira.', 'Educação'),
+        marco('1984-01-01', '1984-12-31', 'Curso técnico de Eletricidade', '1ª série do 2º Grau na Escola Técnica Estadual Newton Sucupira.', 'Educação'),
+        marco('1985-01-01', '1988-11-30', 'Técnico em Eletrotécnica', 'Formação na Escola Técnica Federal da Bahia, concluída em 30 de novembro de 1988.', 'Educação'),
+        marco('1988-03-04', '1988-07-19', 'Estágio na Refinaria Landulfo Alves', 'Manutenção de equipamentos elétricos em unidades de produção e subestações da RLAM/PETROBRAS.', 'Carreira'),
+        marco('1989-04-10', '', 'Início na Telebahia', 'Prestação de serviço na área de Comutação, com manutenção de centrais telefônicas.', 'Carreira', 'Salvador - BA'),
+        marco('1993-11-25', '', 'Efetivação na Telebahia', 'Passagem ao quadro efetivo, atuando em Comutação e no Centro de Gerência de Rede.', 'Carreira', 'Salvador - BA'),
+        marco('1996-01-01', '', 'Banda de rock Sentire', 'Início como guitarrista da banda Sentire.', 'Lazer'),
+        marco('1997-11-12', '', 'Primeiro casamento', '', 'Relacionamentos'),
+        marco('1998-05-31', '', 'Nascimento de Douglas', 'Nascimento do primeiro filho, Douglas Gâdelha Souza Silva.', 'Família'),
+        marco('1991-01-01', '1998-07-07', 'Curso Básico de Inglês', 'Conclusão na Associação Cultural Brasil-Estados Unidos (ACBEU).', 'Educação'),
+        marco('1999-11-12', '', 'Nascimento de Danilo', 'Nascimento do segundo filho, Danilo Gâdelha Souza Silva.', 'Família'),
+        marco('2002-01-01', '', 'Saída da banda Sentire', '', 'Lazer'),
+        marco('2003-10-23', '', 'Separação judicial', 'Processo na 12ª Vara de Família.', 'Relacionamentos'),
+        marco('2005-03-21', '', 'Nascimento de Ludmila', 'Nascimento da terceira filha, Ludmila Rodrigues Costa Silva.', 'Família'),
+        marco('2005-01-01', '2009-12-31', 'Bacharelado em Administração', 'Graduação na Faculdade Delta / IUNI Educacional / UNIME.', 'Educação'),
+        marco('2009-04-07', '', 'Falecimento de meu pai', 'Falecimento de Leovigildo Ferreira da Silva.', 'Família'),
+        marco('2010-04-12', '2010-06-13', 'PNL Practitioner — Fase 1', 'Curso Básico de Programação Neurolinguística com Kau Mascarenhas.', 'Desenvolvimento'),
+        marco('2010-07-05', '2010-09-26', 'PNL Practitioner — Fase 2', 'Curso de Programação Neurolinguística com Kau Mascarenhas.', 'Desenvolvimento'),
+        marco('2011-08-27', '2011-11-27', 'Master em PNL', 'Curso Master de Programação Neurolinguística com Kau Mascarenhas.', 'Desenvolvimento'),
+        marco('2013-04-01', '2015-12-31', 'MBA em Gestão da Manutenção', 'Pós-graduação no SENAI CIMATEC da Bahia.', 'Educação'),
+        marco('2015-01-01', '2015-06-30', 'Trainer em PNL', 'Curso Trainer de Programação Neurolinguística com Kau Mascarenhas.', 'Desenvolvimento'),
+        marco('2015-07-11', '2015-12-18', 'Formação em Coaching Ontológico', 'RAIZ — Desenvolvimento do Ser, com Priscila S. Recco.', 'Desenvolvimento'),
+        marco('2016-08-27', '2017-01-21', 'Imersão em Hipnose Clínica', 'Formação na Associação Brasileira de Odontologia — Seção Bahia, ministrada por Tiago Araújo de Lima.', 'Desenvolvimento'),
+        marco('1989-04-10', '2025-03-31', 'Carreira na Oi/Telemar', 'Especialista Telecom: programação e configuração de sistemas NGN/TDM, projetos operacionais, gestão de falhas, handover, contratos, indicadores, auditorias da ANATEL e janelas de manutenção.', 'Carreira', 'Salvador - BA')
+      );
+    }
+    _seedIfEmpty(`pcf_linha_tempo_${userId}`, eventosBase);
   };
 
   /* ---------- RESTAURAR PADRÕES (por tipo) ---------- */
@@ -2167,6 +2241,7 @@ PCF.Store = (() => {
       diario: _get(`pcf_diario_${uid}`) || [],
       diario_tabs: _get(`pcf_diario_tabs_${uid}`) || [],
       plano_acao: _get(`pcf_plano_acao_${uid}`) || [],
+      linha_tempo: _get(`pcf_linha_tempo_${uid}`) || [],
     };
   };
 
@@ -2177,6 +2252,7 @@ PCF.Store = (() => {
     loadAll, registerSelf, loginWithGoogle,
     getUsers, saveUsers, getUserById, getUserByLogin, createUser, updateUser, deleteUser,
     getSession, setSession, clearSession, currentUserId, currentUserIsAdmin,
+    getLinhaTempo, saveLinhaTempo, addEventoLinhaTempo, updateEventoLinhaTempo, deleteEventoLinhaTempo,
     getTransacoes, saveTransacoes, addTransacao, updateTransacao, deleteTransacao,
     getCategorias, saveCategorias, addCategoria, updateCategoria, deleteCategoria,
     getEmocoes, saveEmocoes, addEmocao, updateEmocao, deleteEmocao,

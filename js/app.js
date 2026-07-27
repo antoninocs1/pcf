@@ -516,6 +516,7 @@ PCF.App = (() => {
       { icon: 'brain',        label: 'Emoções',           hash: '#emocoes',   color: '#8b5cf6' },
       { icon: 'check-square', label: 'Hábitos',           hash: '#habitos',   color: '#f59e0b' },
       { icon: 'book-open',    label: 'Diário',            hash: '#diario',    color: '#3b82f6' },
+      { icon: 'milestone',    label: 'Linha do Tempo',     hash: '#linha-tempo', color: '#d97706' },
       { icon: 'list-todo',    label: 'Plano de Ação',     hash: '#plano-acao', color: '#0f766e' },
       { icon: 'calendar',     label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
       { icon: 'target',       label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
@@ -578,6 +579,7 @@ PCF.App = (() => {
   /* ==================== SIDEBAR ==================== */
   const navGroups = [
     { standalone: true, hash: '#home', icon: 'home', label: 'Início' },
+    { standalone: true, hash: '#linha-tempo', icon: 'milestone', label: 'Linha do Tempo' },
     {
       id: 'financeiro', label: 'Financeiro', icon: 'wallet',
       items: [
@@ -914,6 +916,7 @@ PCF.App = (() => {
       '#virtudes-base':      pages.virtudesBase,
       '#virtudes-config':    pages.virtudesConfig,
       '#diario': pages.diario,
+      '#linha-tempo': pages.linhaTempo,
       '#diario-config': pages.diarioConfig,
       '#usuarios': pages.usuarios,
       '#contatos': pages.contatos,

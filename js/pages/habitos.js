@@ -174,8 +174,8 @@ PCF.Pages = PCF.Pages || {};
             </div>` : `
             <div class="hab-list" id="hab-check-list">
               <div class="hab-list-head" aria-hidden="true">
-                <span>Hábito</span>
                 <span>Status</span>
+                <span>Hábito</span>
                 <span>Acompanhamento</span>
                 <span>Observação</span>
               </div>
@@ -212,6 +212,9 @@ PCF.Pages = PCF.Pages || {};
                   : `(${formatTempoHabito(decorrido)} de ${sliderMax} min)`;
                 return `
                 <div class="hab-item ${done ? 'done' : ''}" data-id="${h.id}">
+                  <button type="button" class="hab-check-btn ${done ? 'checked' : ''}" data-toggle="${h.id}" title="${done ? 'Desmarcar registro' : 'Registrar manualmente'}" aria-label="${done ? 'Desmarcar' : 'Marcar'} ${H.esc(h.nome)}">
+                    ${done ? '<i data-lucide="check"></i>' : ''}
+                  </button>
                   <div class="hab-item-identity">
                     <div class="hab-item-icon" style="background:${h.cor || '#3b82f6'}22;color:${h.cor || '#3b82f6'}">${h.icone || '⭐'}</div>
                     <div class="hab-item-info">
@@ -223,9 +226,6 @@ PCF.Pages = PCF.Pages || {};
                       </div>
                     </div>
                   </div>
-                  <button type="button" class="hab-check-btn ${done ? 'checked' : ''}" data-toggle="${h.id}" title="${done ? 'Desmarcar registro' : 'Registrar manualmente'}" aria-label="${done ? 'Desmarcar' : 'Marcar'} ${H.esc(h.nome)}">
-                    ${done ? '<i data-lucide="check"></i>' : ''}
-                  </button>
                   <div class="hab-item-extras${done ? '' : ' hab-extras-off'}">
                     <div class="hab-momento-control">
                       <span class="hab-extras-label" title="Momento do dia">📍 Momento</span>
