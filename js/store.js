@@ -61,6 +61,7 @@ PCF.Store = (() => {
   const HABITOS_DEFAULT_ADMIN = 'Antonino Costa da Silva';
   const HABITOS_DEFAULT_DOC = 'habitos_defaults';
   const EMOCOES_DEFAULT_DOC = 'emocoes_defaults';
+  const EMOCOES_SYNC_VERSION = 1;
 
   /* ---------- USERS ---------- */
   const getUsers = () => _cache['pcf_users'] || [];
@@ -105,7 +106,14 @@ PCF.Store = (() => {
     _seedDefaults(uid);
     // Publica também hábitos que já estavam cadastrados antes desta versão.
     if (_currentUserControlsHabitosDefault()) _publishHabitosDefault(getHabitos());
-    if (_currentUserControlsEmocoesDefault()) _publishEmocoesDefault(getEmocoesConfig());
+    if (_currentUserControlsEmocoesDefault()) {
+      const catalogoCodigo = _cache['pcf_emocoes_catalogo_codigo'];
+      const configPadrao = Array.isArray(catalogoCodigo)
+        ? _criarEmocoesDoModelo(catalogoCodigo)
+        : getEmocoesConfig();
+      const migrou = await _syncEmocoesDefaultForAllUsers(configPadrao);
+      _publishEmocoesDefault(migrou ? configPadrao : getEmocoesConfig());
+    }
   };
 
   /* ---- loginWithGoogle: entrar ou cadastrar via conta Google ---- */
@@ -323,6 +331,35 @@ PCF.Store = (() => {
       administrador: HABITOS_DEFAULT_ADMIN,
       atualizadoEm: new Date().toISOString(),
     }).catch(err => console.warn('[PCF] Firestore emoções padrão:', err.message));
+  };
+  const _syncEmocoesDefaultForAllUsers = async (config) => {
+    if (!_currentUserControlsEmocoesDefault()) return;
+    const adminId = currentUserId();
+    const markerRef = _db().collection('users').doc(adminId)
+      .collection('data').doc(`emocoes_sync_global_v${EMOCOES_SYNC_VERSION}`);
+    const marker = await markerRef.get();
+    if (marker.exists) return false;
+
+    const users = getUsers();
+    const tamanhoLote = 400;
+    for (let inicio = 0; inicio < users.length; inicio += tamanhoLote) {
+      const batch = _db().batch();
+      users.slice(inicio, inicio + tamanhoLote).forEach(user => {
+        const configUsuario = _criarEmocoesDoModelo(_modeloEmocoesSemIds(config));
+        const ref = _db().collection('users').doc(user.id).collection('data').doc('emocoes_config');
+        batch.set(ref, { value: configUsuario });
+        _cache[`pcf_emocoes_config_${user.id}`] = configUsuario;
+      });
+      await batch.commit();
+    }
+
+    await markerRef.set({
+      versao: EMOCOES_SYNC_VERSION,
+      usuariosAtualizados: users.length,
+      administrador: HABITOS_DEFAULT_ADMIN,
+      concluidoEm: new Date().toISOString(),
+    });
+    return true;
   };
   const saveEmocoesConfig = (c) => {
     _set(_ecU(), c);
@@ -556,44 +593,53 @@ PCF.Store = (() => {
     // Emoções config padrão
     const emoConfig = [
       { id: _uid(), nome: 'Feliz', cor: '#16a34a', icon: '😊', medias: [
-        { id: _uid(), nome: 'Brincalhão', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Excitado', cor: '#4ade80' }, { id: _uid(), nome: 'Atrevido', cor: '#86efac' }] },
-        { id: _uid(), nome: 'Contente', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Livre', cor: '#4ade80' }, { id: _uid(), nome: 'Alegre', cor: '#86efac' }] },
-        { id: _uid(), nome: 'Interessado', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Curioso', cor: '#4ade80' }, { id: _uid(), nome: 'Inquisitivo', cor: '#86efac' }] },
-        { id: _uid(), nome: 'Orgulhoso', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Bem-sucedido', cor: '#4ade80' }, { id: _uid(), nome: 'Confiante', cor: '#86efac' }] },
-        { id: _uid(), nome: 'Aceito', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Respeitado', cor: '#4ade80' }, { id: _uid(), nome: 'Valorizado', cor: '#86efac' }] },
+        { id: _uid(), nome: 'Contente', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Livre', cor: '#4ade80' }, { id: _uid(), nome: 'Alegre', cor: '#4ade80' }] },
+        { id: _uid(), nome: 'Interessado', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Curioso', cor: '#4ade80' }, { id: _uid(), nome: 'Inquisitivo', cor: '#4ade80' }] },
+        { id: _uid(), nome: 'Orgulhoso', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Bem-sucedido', cor: '#4ade80' }, { id: _uid(), nome: 'Confiante', cor: '#4ade80' }] },
+        { id: _uid(), nome: 'Aceito', cor: '#22c55e', inferiores: [{ id: _uid(), nome: 'Respeitado', cor: '#4ade80' }, { id: _uid(), nome: 'Valorizado', cor: '#4ade80' }] },
       ]},
       { id: _uid(), nome: 'Surpreso', cor: '#f59e0b', icon: '😲', medias: [
-        { id: _uid(), nome: 'Assustado', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Chocado', cor: '#fcd34d' }, { id: _uid(), nome: 'Desanimado', cor: '#fde68a' }] },
-        { id: _uid(), nome: 'Confuso', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Desiludido', cor: '#fcd34d' }, { id: _uid(), nome: 'Perplexo', cor: '#fde68a' }] },
-        { id: _uid(), nome: 'Maravilhado', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Atônito', cor: '#fcd34d' }, { id: _uid(), nome: 'Admirado', cor: '#fde68a' }] },
-        { id: _uid(), nome: 'Animado', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Entusiasmado', cor: '#fcd34d' }, { id: _uid(), nome: 'Energético', cor: '#fde68a' }] },
+        { id: _uid(), nome: 'Assustado', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Chocado', cor: '#fcd34d' }, { id: _uid(), nome: 'Desanimado', cor: '#fcd34d' }] },
+        { id: _uid(), nome: 'Confuso', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Desiludido', cor: '#fcd34d' }, { id: _uid(), nome: 'Perplexo', cor: '#fcd34d' }] },
+        { id: _uid(), nome: 'Maravilhado', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Atônito', cor: '#fcd34d' }, { id: _uid(), nome: 'Admirado', cor: '#fcd34d' }] },
+        { id: _uid(), nome: 'Animado', cor: '#fbbf24', inferiores: [{ id: _uid(), nome: 'Entusiasmado', cor: '#fcd34d' }, { id: _uid(), nome: 'Energético', cor: '#fcd34d' }] },
       ]},
       { id: _uid(), nome: 'Mal', cor: '#6b7280', icon: '😰', medias: [
-        { id: _uid(), nome: 'Entediado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Indiferente', cor: '#d1d5db' }, { id: _uid(), nome: 'Apático', cor: '#e5e7eb' }] },
-        { id: _uid(), nome: 'Ocupado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Pressionado', cor: '#d1d5db' }, { id: _uid(), nome: 'Apressado', cor: '#e5e7eb' }] },
-        { id: _uid(), nome: 'Estressado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Sobrecarregado', cor: '#d1d5db' }, { id: _uid(), nome: 'Fora de Controle', cor: '#e5e7eb' }] },
-        { id: _uid(), nome: 'Cansado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Com sono', cor: '#d1d5db' }, { id: _uid(), nome: 'Desconcentrado', cor: '#e5e7eb' }] },
+        { id: _uid(), nome: 'Entediado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Indiferente', cor: '#d1d5db' }, { id: _uid(), nome: 'Apático', cor: '#d1d5db' }] },
+        { id: _uid(), nome: 'Ocupado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Pressionado', cor: '#d1d5db' }, { id: _uid(), nome: 'Apressado', cor: '#d1d5db' }] },
+        { id: _uid(), nome: 'Estressado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Sobrecarregado', cor: '#d1d5db' }, { id: _uid(), nome: 'Fora de Controle', cor: '#d1d5db' }] },
+        { id: _uid(), nome: 'Cansado', cor: '#9ca3af', inferiores: [{ id: _uid(), nome: 'Com sono', cor: '#d1d5db' }, { id: _uid(), nome: 'Desconcentrado', cor: '#d1d5db' }] },
       ]},
-      { id: _uid(), nome: 'Triste', cor: '#3b82f6', icon: '😢', medias: [
-        { id: _uid(), nome: 'Solitário', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Isolado', cor: '#93c5fd' }, { id: _uid(), nome: 'Abandonado', cor: '#bfdbfe' }] },
-        { id: _uid(), nome: 'Vulnerável', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Frágil', cor: '#93c5fd' }, { id: _uid(), nome: 'Vitimizado', cor: '#bfdbfe' }] },
-        { id: _uid(), nome: 'Culpado', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Arrependido', cor: '#93c5fd' }, { id: _uid(), nome: 'Envergonhado', cor: '#bfdbfe' }] },
-        { id: _uid(), nome: 'Deprimido', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Vazio', cor: '#93c5fd' }, { id: _uid(), nome: 'Inferior', cor: '#bfdbfe' }] },
-        { id: _uid(), nome: 'Magoado', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Decepcionado', cor: '#93c5fd' }, { id: _uid(), nome: 'Traído', cor: '#bfdbfe' }] },
+      { id: _uid(), nome: 'Triste (Tristeza)', cor: '#3b82f6', icon: '😢', medias: [
+        { id: _uid(), nome: 'Entristecido', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Desanimado', cor: '#93c5fd' }, { id: _uid(), nome: 'Abatido', cor: '#93c5fd' }, { id: _uid(), nome: 'Desesperançoso', cor: '#93c5fd' }] },
+        { id: _uid(), nome: 'Solitário', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Isolado', cor: '#93c5fd' }, { id: _uid(), nome: 'Abandonado', cor: '#93c5fd' }] },
+        { id: _uid(), nome: 'Vulnerável', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Frágil', cor: '#93c5fd' }, { id: _uid(), nome: 'Vitimizado', cor: '#93c5fd' }] },
+        { id: _uid(), nome: 'Culpado', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Arrependido', cor: '#93c5fd' }, { id: _uid(), nome: 'Envergonhado', cor: '#93c5fd' }] },
+        { id: _uid(), nome: 'Deprimido', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Vazio', cor: '#93c5fd' }, { id: _uid(), nome: 'Inferior', cor: '#93c5fd' }] },
+        { id: _uid(), nome: 'Magoado', cor: '#60a5fa', inferiores: [{ id: _uid(), nome: 'Decepcionado', cor: '#93c5fd' }, { id: _uid(), nome: 'Traído', cor: '#93c5fd' }] },
       ]},
-      { id: _uid(), nome: 'Temeroso', cor: '#8b5cf6', icon: '😨', medias: [
-        { id: _uid(), nome: 'Assustado', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Apavorado', cor: '#c4b5fd' }, { id: _uid(), nome: 'Aterrorizado', cor: '#ddd6fe' }] },
-        { id: _uid(), nome: 'Ansioso', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Sobrecarregado', cor: '#c4b5fd' }, { id: _uid(), nome: 'Preocupado', cor: '#ddd6fe' }] },
-        { id: _uid(), nome: 'Inseguro', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Inadequado', cor: '#c4b5fd' }, { id: _uid(), nome: 'Inferiorizado', cor: '#ddd6fe' }] },
-        { id: _uid(), nome: 'Rejeitado', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Excluído', cor: '#c4b5fd' }, { id: _uid(), nome: 'Perseguido', cor: '#ddd6fe' }] },
+      { id: _uid(), nome: 'Temeroso (Medo)', cor: '#8b5cf6', icon: '😨', medias: [
+        { id: _uid(), nome: 'Assustado', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Apavorado', cor: '#c4b5fd' }, { id: _uid(), nome: 'Aterrorizado', cor: '#c4b5fd' }] },
+        { id: _uid(), nome: 'Ansioso', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Sobrecarregado', cor: '#c4b5fd' }, { id: _uid(), nome: 'Preocupado', cor: '#c4b5fd' }] },
+        { id: _uid(), nome: 'Inseguro', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Inadequado', cor: '#c4b5fd' }, { id: _uid(), nome: 'Inferiorizado', cor: '#c4b5fd' }] },
+        { id: _uid(), nome: 'Rejeitado', cor: '#a78bfa', inferiores: [{ id: _uid(), nome: 'Excluído', cor: '#c4b5fd' }, { id: _uid(), nome: 'Perseguido', cor: '#c4b5fd' }] },
       ]},
-      { id: _uid(), nome: 'Irritado', cor: '#dc2626', icon: '😠', medias: [
-        { id: _uid(), nome: 'Crítico', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Cético', cor: '#f87171' }, { id: _uid(), nome: 'Sarcástico', cor: '#fca5a5' }] },
-        { id: _uid(), nome: 'Frustrado', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Infurioso', cor: '#f87171' }, { id: _uid(), nome: 'Irritadiço', cor: '#fca5a5' }] },
-        { id: _uid(), nome: 'Distante', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Indiferente', cor: '#f87171' }, { id: _uid(), nome: 'Reservado', cor: '#fca5a5' }] },
-        { id: _uid(), nome: 'Agressivo', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Provocado', cor: '#f87171' }, { id: _uid(), nome: 'Hostil', cor: '#fca5a5' }] },
+      { id: _uid(), nome: 'Irritado (Raiva - Irritação)', cor: '#dc2626', icon: '😠', medias: [
+        { id: _uid(), nome: 'Crítico', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Cético', cor: '#f87171' }, { id: _uid(), nome: 'Sarcástico', cor: '#f87171' }] },
+        { id: _uid(), nome: 'Frustrado', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Infurioso', cor: '#f87171' }, { id: _uid(), nome: 'Irritadiço', cor: '#f87171' }] },
+        { id: _uid(), nome: 'Distante', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Indiferente', cor: '#f87171' }, { id: _uid(), nome: 'Reservado', cor: '#f87171' }] },
+        { id: _uid(), nome: 'Agressivo', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Provocado', cor: '#f87171' }, { id: _uid(), nome: 'Hostil', cor: '#f87171' }] },
+        { id: _uid(), nome: 'Desgostoso (Desgosto)', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Revoltado (Revolta)', cor: '#f87171' }, { id: _uid(), nome: 'Desesperado (Desespero)', cor: '#f87171' }] },
+        { id: _uid(), nome: 'Zangado (Irritação)', cor: '#ef4444', inferiores: [{ id: _uid(), nome: 'Chateado', cor: '#f87171' }, { id: _uid(), nome: 'Impaciente (Paciência)', cor: '#f87171' }] },
+      ]},
+      { id: _uid(), nome: 'Amoroso (Amor)', cor: '#d33ecb', icon: '🥰', medias: [
+        { id: _uid(), nome: 'Afetuoso (Afeto)', cor: '#ff00f2', inferiores: [{ id: _uid(), nome: 'Carinhoso (Carinho)', cor: '#f885f2' }, { id: _uid(), nome: 'Compaixão', cor: '#f885f2' }, { id: _uid(), nome: 'Cuidado', cor: '#f885f2' }] },
+        { id: _uid(), nome: 'Desejoso (Desejo)', cor: '#ff00f2', inferiores: [{ id: _uid(), nome: 'Apaixonado (Paixão)', cor: '#f885f2' }, { id: _uid(), nome: 'Fascínio', cor: '#f885f2' }] },
+        { id: _uid(), nome: 'Pacífico (Paz)', cor: '#ff00f2', inferiores: [{ id: _uid(), nome: 'Pleno (Plenitude)', cor: '#f885f2' }, { id: _uid(), nome: 'Livre (Liberdade)', cor: '#f885f2' }] },
+        { id: _uid(), nome: 'Admirado (Admiração)', cor: '#ff00f2', inferiores: [{ id: _uid(), nome: 'Inspirado (Inspiração)', cor: '#f885f2' }, { id: _uid(), nome: 'Romântico', cor: '#f885f2' }] },
       ]},
     ];
+    _cache['pcf_emocoes_catalogo_codigo'] = _modeloEmocoesSemIds(emoConfig);
     const emocoesPublicadas = _cache['pcf_emocoes_defaults'];
     _seedIfEmpty(
       `pcf_emocoes_config_${userId}`,
@@ -1861,7 +1907,7 @@ PCF.Store = (() => {
       {
         id: 'pessoal', label: 'Pessoal', cor: '#22c55e',
         categorias: [
-          { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',       icon: '❤️',  cor: '#86efac', integracaoFonte: 'imc'           },
+          { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',       icon: '❤️',  cor: '#4ade80', integracaoFonte: 'imc'           },
           { id: 'intelecto',   label: 'Intelecto – Conhecimento',           labelCurto: 'Intelecto',   icon: '🧠',  cor: '#22c55e', integracaoFonte: 'habitos_mente' },
           { id: 'emocoes_rv',  label: 'Emoções – Equilíbrio Emocional',     labelCurto: 'Emoções',     icon: '😊',  cor: '#166534', integracaoFonte: 'emocoes'       },
         ],
@@ -1898,11 +1944,19 @@ PCF.Store = (() => {
   const restoreDefaultCategorias    = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_categorias_${uid}`]); };
   const restoreDefaultEmocoesConfig = () => {
     const publicadas = _cache['pcf_emocoes_defaults'];
-    if (Array.isArray(publicadas)) saveEmocoesConfig(_criarEmocoesDoModelo(publicadas));
-    else {
-      const uid = currentUserId();
-      _seedDefaults(uid, [`pcf_emocoes_config_${uid}`]);
+    if (Array.isArray(publicadas)) {
+      saveEmocoesConfig(_criarEmocoesDoModelo(publicadas));
+      return;
     }
+    // O administrador responsável é a origem do padrão. Na ausência de um
+    // modelo global, preserva e publica a configuração dele em vez de aplicar
+    // o catálogo fixo antigo e apagar emoções recém-cadastradas.
+    if (_currentUserControlsEmocoesDefault()) {
+      _publishEmocoesDefault(getEmocoesConfig());
+      return;
+    }
+    const uid = currentUserId();
+    _seedDefaults(uid, [`pcf_emocoes_config_${uid}`]);
   };
   const restoreDefaultHabitos       = () => saveHabitos(_criarHabitosDoModelo());
   const restoreDefaultFrases        = () => { const uid = currentUserId(); _seedDefaults(uid, [`pcf_frases_${uid}`]); };
@@ -2028,7 +2082,7 @@ PCF.Store = (() => {
     {
       id: 'pessoal', label: 'Pessoal', cor: '#22c55e',
       categorias: [
-        { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',      icon: '❤️',  cor: '#86efac', integracaoFonte: 'imc'          },
+        { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',      icon: '❤️',  cor: '#4ade80', integracaoFonte: 'imc'          },
         { id: 'intelecto',   label: 'Intelecto – Conhecimento',           labelCurto: 'Intelecto',  icon: '🧠',  cor: '#22c55e', integracaoFonte: 'habitos_mente' },
         { id: 'emocoes_rv',  label: 'Emoções – Equilíbrio Emocional',     labelCurto: 'Emoções',    icon: '😊',  cor: '#166534', integracaoFonte: 'emocoes'       },
       ],
