@@ -16,7 +16,7 @@ PCF.Pages = PCF.Pages || {};
     container.innerHTML = `
       <div class="page">
         <div class="page-header">
-          <h2>Dashboard Financeiro</h2>
+          <h2>Painel financeiro</h2>
           <div class="filters">
             <select id="dash-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
             <select id="dash-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
@@ -188,7 +188,7 @@ PCF.Pages = PCF.Pages || {};
             <select id="base-cat"><option value="">Todas as Categorias</option>${categorias.map(c => `<option value="${H.esc(c)}">${H.esc(c)}</option>`).join('')}</select>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Data</th><th class="col-hide-mobile">Dia</th><th class="col-hide-mobile">Mês</th><th class="col-hide-mobile">Ano</th><th>Tipo</th><th>Categoria</th><th class="col-hide-mobile">Subcategoria</th><th class="col-hide-mobile">Item</th><th>Valor</th><th class="col-hide-mobile">Forma Pgto</th><th class="col-hide-mobile">Fixo/Var.</th><th style="width:80px">Ações</th></tr></thead>
+            <thead><tr><th>Data</th><th class="col-hide-mobile">Dia</th><th class="col-hide-mobile">Mês</th><th class="col-hide-mobile">Ano</th><th>Tipo</th><th>Categoria</th><th class="col-hide-mobile">Subcategoria</th><th class="col-hide-mobile">Item</th><th>Valor</th><th class="col-hide-mobile">Forma de pagamento</th><th class="col-hide-mobile">Fixo/variável</th><th style="width:80px">Ações</th></tr></thead>
             <tbody id="base-tbody"></tbody>
           </table></div>
         </div>`;

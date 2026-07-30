@@ -292,7 +292,7 @@ PCF.Pages = PCF.Pages || {};
                 ${_fmt(curDate)}${saved ? ' ✓' : ''}
               </span>
               <button id="rv-next" class="btn btn-sm"${!nextDate ? ' disabled' : ''}><i data-lucide="chevron-right"></i></button>
-              <button id="rv-nova" class="btn btn-primary btn-sm">+ Nova Avaliação</button>
+              <button id="rv-nova" class="btn btn-primary btn-sm">+ Nova avaliação</button>
             </div>
           </div>
 
@@ -421,11 +421,11 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <div>
-              <h2>⚙️ Config. Roda da Vida</h2><br>
+              <h2>⚙️ Configuração da Roda da Vida</h2><br>
               <p class="subtitle">Gerencie os quadrantes e categorias da Roda da Vida</p>
             </div>
             <div class="page-actions">
-              <button id="rvc-restaurar" class="btn btn-outline btn-sm"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
+              <button id="rvc-restaurar" class="btn btn-outline btn-sm"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
               <button id="rvc-add-quad" class="btn btn-primary btn-sm">+ Quadrante</button>
             </div>
           </div>
@@ -579,7 +579,7 @@ PCF.Pages = PCF.Pages || {};
     const _openQuadModal = (qi) => {
       _qmIdx = qi;
       const q = qi >= 0 ? config[qi] : null;
-      document.getElementById('rvc-qm-title').textContent = q ? 'Editar Quadrante' : 'Novo Quadrante';
+      document.getElementById('rvc-qm-title').textContent = q ? 'Editar quadrante' : 'Novo quadrante';
       document.getElementById('rvc-qm-nome').value = q ? q.label : '';
       document.getElementById('rvc-qm-cor').value  = q ? q.cor   : '#3b82f6';
       document.getElementById('rvc-quad-modal').style.display = 'flex';
@@ -589,7 +589,7 @@ PCF.Pages = PCF.Pages || {};
     const _openCatModal = (qi, ci) => {
       _cmQi = qi; _cmCi = ci;
       const cat = ci >= 0 ? config[qi].categorias[ci] : null;
-      document.getElementById('rvc-cm-title').textContent = cat ? 'Editar Categoria' : 'Nova Categoria';
+      document.getElementById('rvc-cm-title').textContent = cat ? 'Editar categoria' : 'Nova categoria';
       document.getElementById('rvc-cm-icon').value   = cat ? cat.icon          : '⭐';
       document.getElementById('rvc-cm-label').value  = cat ? cat.label         : '';
       document.getElementById('rvc-cm-lcurto').value = cat ? (cat.labelCurto || '') : '';

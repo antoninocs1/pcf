@@ -24,7 +24,7 @@ PCF.App = (() => {
   const _instagramSvgSm = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5zm8.93 1.35a1.07 1.07 0 1 1 0 2.14 1.07 1.07 0 0 1 0-2.14zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.8A3.2 3.2 0 1 0 12 15.2 3.2 3.2 0 0 0 12 8.8z"/></svg>`;
 
   const _featuresData = [
-    { icon: 'wallet',        title: 'Financeiro',    desc: 'Dashboard, controle de transações, relatórios, categorias e análise das 4 Forças do Dinheiro.' },
+    { icon: 'wallet',        title: 'Financeiro',    desc: 'Painel, controle de transações, relatórios, categorias e análise das 4 Forças do Dinheiro.' },
     { icon: 'brain',         title: 'Emoções',        desc: 'Registro diário de emoções com relatórios gráficos e configurações personalizadas.' },
     { icon: 'check-square',  title: 'Hábitos',        desc: 'Acompanhe hábitos diários, visualização mensal e relatórios de consistência.' },
     { icon: 'list-todo',     title: 'Plano de Ação',  desc: 'Organize ações em 5W2H, acompanhe status, vincule contatos e gere lembretes na agenda.' },
@@ -85,13 +85,13 @@ PCF.App = (() => {
             </div>
             <div class="pcf-carousel-slide pcf-slide-3">
               <div class="pcf-slide-body">
-                <h2 class="pcf-slide-title">Relatórios e Análises</h2>
+                <h2 class="pcf-slide-title">Relatórios e análises</h2>
                 <p class="pcf-slide-sub">Visualize sua evolução com gráficos e relatórios detalhados</p>
                 <div class="pcf-reports-grid">
-                  <div class="pcf-report-card"><span>📊</span><span>Dashboard Financeiro</span></div>
+                  <div class="pcf-report-card"><span>📊</span><span>Painel financeiro</span></div>
                   <div class="pcf-report-card"><span>📈</span><span>Evolução de Hábitos</span></div>
                   <div class="pcf-report-card"><span>🧠</span><span>Análise de Emoções</span></div>
-                  <div class="pcf-report-card"><span>💎</span><span>Streak de Virtudes</span></div>
+                  <div class="pcf-report-card"><span>💎</span><span>Sequência de virtudes</span></div>
                   <div class="pcf-report-card"><span>🎯</span><span>Histórico Roda da Vida</span></div>
                   <div class="pcf-report-card"><span>💸</span><span>4 Forças do Dinheiro</span></div>
                 </div>
@@ -99,7 +99,7 @@ PCF.App = (() => {
             </div>
             <div class="pcf-carousel-slide pcf-slide-4">
               <div class="pcf-slide-body">
-                <h2 class="pcf-slide-title">Integração entre Módulos</h2>
+                <h2 class="pcf-slide-title">Integração entre módulos</h2>
                 <p class="pcf-slide-sub">Os módulos se comunicam para enriquecer sua autoavaliação</p>
                 <div class="pcf-int-diagram">
                   <div class="pcf-int-row">
@@ -463,12 +463,12 @@ PCF.App = (() => {
     document.getElementById('auth-content').innerHTML = `
       <form id="register-form" class="auth-form">
         <div class="form-row">
-          <div class="form-group"><label>Nome Completo</label><input type="text" id="reg-nome" required></div>
+          <div class="form-group"><label>Nome completo</label><input type="text" id="reg-nome" required></div>
           <div class="form-group"><label>CPF</label><input type="text" id="reg-cpf" placeholder="000.000.000-00" disabled></div> 
         </div>
         <div class="form-row">
           <div class="form-group"><label>Telefone</label><input type="text" id="reg-tel" placeholder="(00) 00000-0000"></div>
-          <div class="form-group"><label>Data de Nascimento</label><input type="date" id="reg-nasc"></div>
+          <div class="form-group"><label>Data de nascimento</label><input type="date" id="reg-nasc"></div>
         </div>
         <div class="form-group">
           <label>E-mail</label><input type="email" id="reg-email" required autocomplete="email">
@@ -583,53 +583,53 @@ PCF.App = (() => {
     {
       id: 'financeiro', label: 'Financeiro', icon: 'wallet',
       items: [
-        { hash: '#dashboard',  icon: 'layout-dashboard', label: 'Dashboard Financeiro' },
+        { hash: '#dashboard',  icon: 'layout-dashboard', label: 'Painel financeiro' },
         { hash: '#inserir',    icon: 'plus-circle',       label: 'Inserir Transação Financeira' },
         { hash: '#base',       icon: 'database',          label: 'Base de Dados Financeira' },
-        { hash: '#relatorios', icon: 'trending-up',       label: 'Relatório Financeiro' },
+        { hash: '#relatorios', icon: 'trending-up',       label: 'Relatório financeiro' },
         { hash: '#ciclo',      icon: 'refresh-cw',        label: '4 Forças do Dinheiro' },
-        { hash: '#categorias', icon: 'folder',            label: 'Config. Categorias' },
+        { hash: '#categorias', icon: 'folder',            label: 'Configuração de categorias' },
       ]
     },
     {
       id: 'emocoes', label: 'Emoções', icon: 'brain',
       items: [
         { hash: '#emocoes',            icon: 'brain',         label: 'Emoções' },
-        { hash: '#emocoes-relatorios', icon: 'trending-down', label: 'Relatório Emoções' },
-        { hash: '#emocoes-config',     icon: 'palette',       label: 'Config. Emoções' },
+        { hash: '#emocoes-relatorios', icon: 'trending-down', label: 'Relatório de emoções' },
+        { hash: '#emocoes-config',     icon: 'palette',       label: 'Configuração de emoções' },
       ]
     },
     {
       id: 'habitos', label: 'Hábitos', icon: 'sprout',
       items: [
-        { hash: '#habitos',           icon: 'check-square',  label: 'Hábitos Diários' },
-        { hash: '#habitos-mensal',    icon: 'calendar',      label: 'Visão Mensal Hábitos' },
-        { hash: '#habitos-relatorio', icon: 'bar-chart-2',   label: 'Relatório Hábitos' },
+        { hash: '#habitos',           icon: 'check-square',  label: 'Hábitos diários' },
+        { hash: '#habitos-mensal',    icon: 'calendar',      label: 'Visão mensal dos hábitos' },
+        { hash: '#habitos-relatorio', icon: 'bar-chart-2',   label: 'Relatório de hábitos' },
         { hash: '#frases',            icon: 'message-square',label: 'Base de Mensagens' },
-        { hash: '#habitos-config',    icon: 'settings',      label: 'Config. Hábitos' },
+        { hash: '#habitos-config',    icon: 'settings',      label: 'Configuração de hábitos' },
       ]
     },
     {
       id: 'virtudes', label: 'Virtudes', icon: 'gem',
       items: [
         { hash: '#virtudes',           icon: 'gem',        label: 'Virtudes Diárias' },
-        { hash: '#virtudes-relatorio', icon: 'bar-chart-2',label: 'Relatório Virtudes' },
+        { hash: '#virtudes-relatorio', icon: 'bar-chart-2',label: 'Relatório de virtudes' },
         { hash: '#virtudes-base',      icon: 'database',   label: 'Base de Virtudes' },
-        { hash: '#virtudes-config',    icon: 'settings',   label: 'Config. Virtudes' },
+        { hash: '#virtudes-config',    icon: 'settings',   label: 'Configuração de virtudes' },
       ]
     },
     {
       id: 'rodavida', label: 'Roda da Vida', icon: 'target',
       items: [
         { hash: '#roda-vida',        icon: 'target',   label: 'Roda da Vida' },
-        { hash: '#roda-vida-config', icon: 'settings', label: 'Config. Roda da Vida' },
+        { hash: '#roda-vida-config', icon: 'settings', label: 'Configuração da Roda da Vida' },
       ]
     },
     {
       id: 'diario', label: 'Diário', icon: 'book-open',
       items: [
         { hash: '#diario',        icon: 'book-open', label: 'Diário' },
-        { hash: '#diario-config', icon: 'settings',  label: 'Config. Diário' },
+        { hash: '#diario-config', icon: 'settings',  label: 'Configuração do diário' },
       ]
     },
     {
@@ -641,7 +641,7 @@ PCF.App = (() => {
     { standalone: true, hash: '#agenda',       icon: 'calendar',  label: 'Agenda' },
     { standalone: true, hash: '#imc',          icon: 'heart',     label: 'IMC' },
     { standalone: true, hash: '#contatos',     icon: 'user',      label: 'Contatos Pessoais' },
-    { standalone: true, adminOnly: true, hash: '#usuarios',       icon: 'users',    label: 'Conf. Usuários' },
+    { standalone: true, adminOnly: true, hash: '#usuarios',       icon: 'users',    label: 'Configuração de usuários' },
     { standalone: true, adminOnly: true, hash: '#gerenciar-bases', icon: 'database', label: 'Gerenciar Bases de Dados' },
     { standalone: true, adminOnly: true, hash: '#importexport',    icon: 'upload',   label: 'Importar / Exportar' },
   ];
@@ -711,9 +711,9 @@ PCF.App = (() => {
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="modal modal-lg">
-        <h3><i data-lucide="settings"></i> Meu Perfil</h3>
+        <h3><i data-lucide="settings"></i> Meu perfil</h3>
         <div class="form-row">
-          <div class="form-group"><label>Nome Completo</label><input type="text" id="mp-nome" value="${H.esc(user.nome || '')}"></div>
+          <div class="form-group"><label>Nome completo</label><input type="text" id="mp-nome" value="${H.esc(user.nome || '')}"></div>
           <div class="form-group"><label>CPF</label><input type="text" id="mp-cpf" value="${H.esc(user.cpf || '')}" disabled></div>
         </div>
         <div class="form-row">
@@ -721,7 +721,7 @@ PCF.App = (() => {
           <div class="form-group"><label>Telefone</label><input type="text" id="mp-tel" value="${H.esc(user.telefone || '')}"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Data de Nascimento</label><input type="date" id="mp-nasc" value="${H.esc(user.dataNascimento || '')}"></div>
+          <div class="form-group"><label>Data de nascimento</label><input type="date" id="mp-nasc" value="${H.esc(user.dataNascimento || '')}"></div>
         </div>
         <hr style="margin:14px 0">
         <p style="font-size:.85rem;color:var(--text-muted)">Alterar senha — deixe em branco para não alterar</p>

@@ -74,7 +74,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="page timeline-page">
           <div class="page-header">
             <div>
-              <h2><i data-lucide="milestone"></i> Minha Linha do Tempo (História de Vida e Memórias)</h2>
+              <h2><i data-lucide="milestone"></i> Minha Linha do Tempo (História de vida e memórias)</h2>
               <p class="subtitle">A história de ${H.esc(user.nome || 'vida')}, organizada desde o nascimento.</p>
             </div>
             <button id="lt-add" class="btn btn-primary"><i data-lucide="plus"></i> Novo marco</button>

@@ -1,5 +1,5 @@
 ﻿/* ========================================================
-   PCF - pages/saude.js â€” IMC e EmoÃ§Ãµes (registro)
+   PCF - pages/saude.js — IMC e Emoções (registro)
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
@@ -40,11 +40,11 @@ PCF.Pages = PCF.Pages || {};
       const idx = H.IMC_CLASS.indexOf(cl);
       const cor = imc < 18.5 ? '#f59e0b' : imc < 25 ? '#16a34a' : imc < 30 ? '#f59e0b' : '#dc2626';
       let msg = '';
-      if (imc < 18.5) msg = 'VocÃª estÃ¡ abaixo do peso ideal. Consulte um nutricionista.';
-      else if (imc < 25) msg = 'ParabÃ©ns! VocÃª estÃ¡ no seu peso ideal! ðŸŽ‰';
-      else if (imc < 30) msg = 'VocÃª estÃ¡ acima do peso. Considere ajustar sua alimentaÃ§Ã£o.';
-      else if (imc < 40) msg = 'AtenÃ§Ã£o! Procure orientaÃ§Ã£o mÃ©dica.';
-      else msg = 'Obesidade grave! Procure ajuda mÃ©dica urgente.';
+      if (imc < 18.5) msg = 'Você está abaixo do peso ideal. Consulte um nutricionista.';
+      else if (imc < 25) msg = 'Parabéns! Você está no seu peso ideal! 🎉';
+      else if (imc < 30) msg = 'Você está acima do peso. Considere ajustar sua alimentação.';
+      else if (imc < 40) msg = 'Atenção! Procure orientação médica.';
+      else msg = 'Obesidade grave! Procure ajuda médica urgente.';
 
       document.getElementById('imc-result').innerHTML = `
         <div class="imc-result-card" style="border-color:${cor}">
@@ -90,7 +90,7 @@ PCF.Pages = PCF.Pages || {};
           <p class="subtitle">Escolha a emoção que melhor descreve como você está se sentindo agora.</p>
           <div class="emocoes-layout">
             <form id="form-emocao" class="form emocoes-form">
-              <h3 id="emo-form-title">Novo Registro</h3>
+              <h3 id="emo-form-title">Novo registro</h3>
               <div class="form-row">
                 <div class="form-group"><label>Data</label><input type="date" id="emo-data" value="${H.hoje()}" required></div>
                 <div class="form-group"><label>Hora</label><input type="time" id="emo-hora" value="${H.horaAtual()}"></div>
@@ -168,7 +168,7 @@ PCF.Pages = PCF.Pages || {};
 
       document.getElementById('emo-cancel-edit').onclick = () => {
         editingId = null;
-        document.getElementById('emo-form-title').textContent = 'Novo Registro';
+      document.getElementById('emo-form-title').textContent = 'Novo registro';
         document.getElementById('emo-submit-btn').textContent = 'Registrar Emoção';
         document.getElementById('emo-cancel-edit').style.display = 'none';
         document.getElementById('emo-data').value = H.hoje();

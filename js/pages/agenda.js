@@ -344,7 +344,7 @@ const checkAndShowAlerts = () => {};
           </div>` : ''}
 
           <div class="card">
-            <h3>Novo Compromisso</h3>
+          <h3>Novo compromisso</h3>
             <form id="agenda-form" class="form-grid-agenda">
               <div class="form-group">
                 <label>Compromisso</label>

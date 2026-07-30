@@ -99,7 +99,7 @@ PCF.Pages = PCF.Pages || {};
             <h2><i data-lucide="gem"></i> Virtudes</h2>
             <div class="page-header-actions">
               <a href="#virtudes-relatorio" class="btn btn-secondary btn-sm"><i data-lucide="bar-chart-2"></i> Relatório</a>
-              <a href="#virtudes-config" class="btn btn-secondary btn-sm"><i data-lucide="settings"></i> Config.</a>
+              <a href="#virtudes-config" class="btn btn-secondary btn-sm"><i data-lucide="settings"></i> Configurar</a>
             </div>
           </div>
 
@@ -245,7 +245,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="vrel-table-wrap">
             <table class="data-table">
               <thead><tr>
-                <th>Virtude</th><th>Categoria</th><th>Práticas</th><th>% do período</th><th>Streak</th>
+                <th>Virtude</th><th>Categoria</th><th>Práticas</th><th>% do período</th><th>Sequência</th>
               </tr></thead>
               <tbody>
                 ${filtradas.length === 0
@@ -298,8 +298,8 @@ PCF.Pages = PCF.Pages || {};
             <h2><i data-lucide="settings"></i> Configurar Virtudes</h2>
             <div class="page-header-actions">
               <a href="#virtudes" class="btn btn-secondary btn-sm"><i data-lucide="gem"></i> Check-in</a>
-              <button id="btn-restaurar-virtudes" class="btn btn-outline btn-sm"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
-              <button id="btn-nova-virtude" class="btn btn-primary btn-sm"><i data-lucide="plus"></i> Nova Virtude</button>
+              <button id="btn-restaurar-virtudes" class="btn btn-outline btn-sm"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+              <button id="btn-nova-virtude" class="btn btn-primary btn-sm"><i data-lucide="plus"></i> Nova virtude</button>
             </div>
           </div>
 

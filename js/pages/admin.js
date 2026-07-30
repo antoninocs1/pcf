@@ -18,10 +18,10 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>Config. Categorias</h2>
+            <h2>Configuração de categorias</h2>
             <div style="display:flex;gap:8px;align-items:center">
-              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
-              <button id="btn-add-cat" class="btn btn-primary">+ Nova Categoria</button>
+              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+              <button id="btn-add-cat" class="btn btn-primary">+ Nova categoria</button>
             </div>
           </div>
           <div class="filters">
@@ -33,7 +33,7 @@ PCF.Pages = PCF.Pages || {};
             </select>
           </div>
           <div class="table-container"><table class="table">
-            <thead><tr><th>Tipo Operação</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
+            <thead><tr><th>Tipo de operação</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
             <tbody>${filtered.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma categoria</td></tr>' :
               filtered.map(c => `<tr>
                 <td><span class="tipo-badge ${c.tipoOperacao.toLowerCase()}">${c.tipoOperacao}</span></td>
@@ -80,7 +80,7 @@ PCF.Pages = PCF.Pages || {};
                 <option value="INVESTIMENTO" ${cat?.tipoOperacao === 'INVESTIMENTO' ? 'selected' : ''}>INVESTIMENTO</option>
               </select>
             </div>
-            <div class="form-group"><label>Nome da Categoria</label><input type="text" id="cat-m-nome" value="${H.esc(cat?.categoria || '')}" required></div>
+            <div class="form-group"><label>Nome da categoria</label><input type="text" id="cat-m-nome" value="${H.esc(cat?.categoria || '')}" required></div>
             <div class="form-group">
               <label>Subcategorias</label>
               <div id="subcat-list" class="subcat-list"></div>
@@ -139,10 +139,10 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>Configuração de Emoções</h2>
+            <h2>Configuração de emoções</h2>
             <div style="display:flex;gap:8px;align-items:center">
-              <button id="btn-restaurar-emocoes" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
-              <button id="btn-add-emo-sup" class="btn btn-primary">+ Nova Emoção Superior</button>
+              <button id="btn-restaurar-emocoes" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+              <button id="btn-add-emo-sup" class="btn btn-primary">+ Nova emoção superior</button>
             </div>
           </div>
           <p class="subtitle">Gerencie as emoções em 3 níveis: Superior → Médio → Inferior. Defina cores para cada nível.</p>
@@ -367,7 +367,7 @@ PCF.Pages = PCF.Pages || {};
               <button id="btn-usuarios-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-usuarios-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
-            <button id="btn-add-user" class="btn btn-primary">+ Novo Usuário</button>
+            <button id="btn-add-user" class="btn btn-primary">+ Novo usuário</button>
           </div>
           <div class="table-container"><table class="table">
             <thead><tr><th>Nome</th><th class="col-hide-mobile">CPF</th><th>E-mail</th><th class="col-hide-mobile">Telefone</th><th class="col-hide-mobile">Nascimento</th><th class="col-hide-mobile">Cadastro</th><th>Perfil</th><th style="width:100px">Ações</th></tr></thead>
@@ -412,15 +412,15 @@ PCF.Pages = PCF.Pages || {};
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal modal-lg">
-          <h3>${isEdit ? 'Editar' : 'Novo'} Usuário</h3>
+          <h3>${isEdit ? 'Editar' : 'Novo'} usuário</h3>
           <form id="user-modal-form">
             <div class="form-row">
-              <div class="form-group"><label>Nome Completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
+              <div class="form-group"><label>Nome completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
               <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00"></div>
             </div>
             <div class="form-row">
               <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
-              <div class="form-group"><label>Data de Nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
+              <div class="form-group"><label>Data de nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
             </div>
             <div class="form-group">
               <label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required>
@@ -825,7 +825,7 @@ PCF.Pages = PCF.Pages || {};
               <button id="btn-contatos-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
               ${_searchTerm ? `<button id="btn-contatos-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
             </div>
-            <button id="btn-add-contato" class="btn btn-primary">+ Novo Contato</button>
+            <button id="btn-add-contato" class="btn btn-primary">+ Novo contato</button>
           </div>
           ${_birthdayPanel()}
           <div class="table-container"><table class="table">
@@ -866,10 +866,10 @@ PCF.Pages = PCF.Pages || {};
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal modal-lg">
-          <h3>${isEdit ? 'Editar' : 'Novo'} Contato</h3>
+          <h3>${isEdit ? 'Editar' : 'Novo'} contato</h3>
           <form id="contato-modal-form">
             <div class="form-row">
-              <div class="form-group"><label>Nome Completo</label><input type="text" id="cm-nome" value="${H.esc(contato?.nome || '')}" required></div>
+              <div class="form-group"><label>Nome completo</label><input type="text" id="cm-nome" value="${H.esc(contato?.nome || '')}" required></div>
               <div class="form-group"><label>CPF</label><input type="text" id="cm-cpf" value="${H.esc(contato?.cpf || '')}" placeholder="000.000.000-00"></div>
             </div>
             <div class="form-row">
@@ -877,7 +877,7 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group"><label>Telefone</label><input type="text" id="cm-tel" value="${H.esc(contato?.telefone || '')}" placeholder="(00) 00000-0000"></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>Data de Nascimento</label><input type="date" id="cm-nasc" value="${contato?.dataNascimento || ''}"></div>
+              <div class="form-group"><label>Data de nascimento</label><input type="date" id="cm-nasc" value="${contato?.dataNascimento || ''}"></div>
             </div>
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="cm-cancel">Cancelar</button>
@@ -932,7 +932,7 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2><i data-lucide="book-open"></i> Meu Diario</h2>
+            <h2><i data-lucide="book-open"></i> Meu Diário</h2>
             <div class="diario-header-controls">
               <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
               <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
@@ -960,17 +960,17 @@ PCF.Pages = PCF.Pages || {};
             <div class="diario-today-actions">
               <button id="diario-salvar" class="btn btn-primary"><i data-lucide="save"></i> Salvar</button>
               ${entry ? `<button id="diario-apagar" class="btn btn-danger"><i data-lucide="trash-2"></i> Apagar</button>` : ''}
-              <span id="diario-ok" class="diario-saved-msg" style="display:none">âœ“ Salvo!</span>
+              <span id="diario-ok" class="diario-saved-msg" style="display:none">✓ Salvo!</span>
             </div>
           </div>
 
           ${sorted.length > 0 ? `
-          <h3 style="margin:24px 0 10px">ðŸ“š Dias com Registro <span class="badge badge-neutral">${sorted.length}</span></h3>
+          <h3 style="margin:24px 0 10px">📚 Dias com registro <span class="badge badge-neutral">${sorted.length}</span></h3>
           <div class="diario-index">
             ${sorted.map(e => `
               <div class="diario-index-item ${e.data === selectedDate ? 'active' : ''}" data-goto="${e.data}">
                 <span class="diario-index-date">${fmtDate(e.data)}${e.data === today ? ' <small>(hoje)</small>' : ''}</span>
-                <span class="diario-index-preview">${H.esc((e.texto || '').slice(0, 90))}${(e.texto || '').length > 90 ? 'â€¦' : ''}</span>
+                <span class="diario-index-preview">${H.esc((e.texto || '').slice(0, 90))}${(e.texto || '').length > 90 ? '…' : ''}</span>
               </div>`).join('')}
           </div>` : ''}
         </div>`;
@@ -1032,12 +1032,12 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2><i data-lucide="settings"></i> Config. Diário</h2>
-            <button id="btn-add-dtab" class="btn btn-primary">+ Nova Aba</button>
+            <h2><i data-lucide="settings"></i> Configuração do diário</h2>
+            <button id="btn-add-dtab" class="btn btn-primary">+ Nova aba</button>
           </div>
           <p class="subtitle">Configure as abas e perguntas de reflexão exibidas no banner do Diário.</p>
           <div class="table-container"><table class="table">
-            <thead><tr><th style="width:60px">Ícone</th><th>Nome da Aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
+            <thead><tr><th style="width:60px">Ícone</th><th>Nome da aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
             <tbody>${tabs.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma aba configurada</td></tr>' :
               tabs.map((t, idx) => `<tr>
                 <td style="font-size:1.4rem;text-align:center">${H.esc(t.icon || '')}</td>
@@ -1086,11 +1086,11 @@ PCF.Pages = PCF.Pages || {};
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal">
-          <h3>${isEdit ? 'Editar' : 'Nova'} Aba de ReflexÃ£o</h3>
+          <h3>${isEdit ? 'Editar' : 'Nova'} aba de reflexão</h3>
           <form id="dtab-form">
             <div class="form-row">
-              <div class="form-group" style="flex:0 0 100px"><label>Ãcone</label><input type="text" id="dtab-icon" value="${H.esc(tab?.icon || '')}" placeholder="ðŸ’¡" maxlength="4"></div>
-              <div class="form-group"><label>Nome da Aba</label><input type="text" id="dtab-label" value="${H.esc(tab?.label || '')}" required placeholder="Ex: Relacionamentos"></div>
+              <div class="form-group" style="flex:0 0 100px"><label>Ícone</label><input type="text" id="dtab-icon" value="${H.esc(tab?.icon || '')}" placeholder="💡" maxlength="4"></div>
+              <div class="form-group"><label>Nome da aba</label><input type="text" id="dtab-label" value="${H.esc(tab?.label || '')}" required placeholder="Ex.: Relacionamentos"></div>
             </div>
             <div class="form-group">
               <label>Perguntas</label>
@@ -1265,7 +1265,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="gb-section-header">
             <h3>🎯 Avaliações da Roda da Vida <span class="badge badge-neutral">${registros.length}</span></h3>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <a href="#roda-vida" class="btn btn-secondary btn-sm">+ Nova Avaliação</a>
+              <a href="#roda-vida" class="btn btn-secondary btn-sm">+ Nova avaliação</a>
               <button id="gb-clear-rv" class="btn btn-danger btn-sm"${registros.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
             </div>
           </div>
@@ -1391,7 +1391,7 @@ PCF.Pages = PCF.Pages || {};
               <thead><tr><th>Ícone</th><th>Nome</th><th>Categoria</th><th>Ativo</th></tr></thead>
               <tbody>
                 ${virtudes.map(v => `<tr>
-                  <td style="text-align:center;font-size:1.2rem">${H.esc(v.icone || 'âœ¦')}</td>
+                  <td style="text-align:center;font-size:1.2rem">${H.esc(v.icone || '✦')}</td>
                   <td><strong>${H.esc(v.nome)}</strong></td>
                   <td><span class="chip-small">${H.esc(v.categoria || '—')}</span></td>
                   <td><span class="tipo-badge ${v.ativo !== false ? 'receita' : 'despesa'}">${v.ativo !== false ? 'Ativo' : 'Inativo'}</span></td>
@@ -1413,7 +1413,7 @@ PCF.Pages = PCF.Pages || {};
                   const v = virtMap[r.virtudeId] || { nome: 'Removida', icone: '?', cor: '#64748b', categoria: '' };
                   return `<tr>
                     <td>${_fmtDate(r.data)}</td>
-                    <td>${H.esc(v.icone || 'âœ¦')} ${H.esc(v.nome)}</td>
+                    <td>${H.esc(v.icone || '✦')} ${H.esc(v.nome)}</td>
                     <td><span class="chip-small">${H.esc(v.categoria || '—')}</span></td>
                     <td><button class="btn-icon btn-danger" data-gb-del-vr="${r.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
                   </tr>`;
@@ -1661,14 +1661,14 @@ PCF.Pages = PCF.Pages || {};
     /* ---- Modal: Agenda ---- */
     const showAgendaModal = (comp) => {
       const isEdit = !!comp;
-      const STATUS_OPTS = ['Pendente', 'ConcluÃ­do', 'Cancelado'];
+      const STATUS_OPTS = ['Pendente', 'Concluído', 'Cancelado'];
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal">
-          <h3>${isEdit ? 'Editar' : 'Novo'} Compromisso</h3>
+          <h3>${isEdit ? 'Editar' : 'Novo'} compromisso</h3>
           <form id="gb-ag-form">
-            <div class="form-group"><label>Compromisso</label><input type="text" id="gb-ag-desc" value="${H.esc(comp?.compromisso || '')}" required placeholder="DescriÃ§Ã£o do compromisso"></div>
+            <div class="form-group"><label>Compromisso</label><input type="text" id="gb-ag-desc" value="${H.esc(comp?.compromisso || '')}" required placeholder="Descrição do compromisso"></div>
             <div class="form-row">
               <div class="form-group"><label>Data</label><input type="date" id="gb-ag-data" value="${comp?.data || H.hoje()}" required></div>
               <div class="form-group"><label>Hora</label><input type="time" id="gb-ag-hora" value="${comp?.hora || ''}"></div>
@@ -1694,7 +1694,7 @@ PCF.Pages = PCF.Pages || {};
           status: document.getElementById('gb-ag-status').value,
         };
         if (isCompromissoAtrasado(data.data, data.hora)) {
-          alert('Data/horÃ¡rio atrasado!');
+          alert('Data/horário atrasado!');
           return;
         }
         if (isEdit) S.updateCompromisso(comp.id, data);
@@ -1710,7 +1710,7 @@ PCF.Pages = PCF.Pages || {};
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal modal-lg">
-          <h3>ðŸ“– Editar DiÃ¡rio â€” ${_fmtDate(date)}</h3>
+          <h3>📖 Editar Diário — ${_fmtDate(date)}</h3>
           <form id="gb-diario-form">
             <div class="form-group">
               <label>Texto</label>

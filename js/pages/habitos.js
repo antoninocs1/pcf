@@ -835,8 +835,8 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>⚙️ Meus Hábitos</h2>
             <div style="display:flex;gap:8px;align-items:center">
-              <button id="btn-restaurar-habitos" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
-              <button id="btn-add-hab" class="btn btn-primary">+ Novo Hábito</button>
+              <button id="btn-restaurar-habitos" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+              <button id="btn-add-hab" class="btn btn-primary">+ Novo hábito</button>
             </div>
           </div>
           <div class="table-container">
@@ -921,7 +921,7 @@ PCF.Pages = PCF.Pages || {};
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Nome do Hábito *</label>
+              <label>Nome do hábito *</label>
               <input type="text" id="hab-nome" value="${H.esc(hab?.nome || '')}" required placeholder="Ex: Beber 2L de água">
             </div>
             <div class="form-group">
@@ -1045,8 +1045,8 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>💬 Base de Mensagens</h2>
             <div style="display:flex;gap:8px;align-items:center">
-              <button id="btn-restaurar-frases" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar Padrões</button>
-              <button id="btn-add-frase" class="btn btn-primary">+ Nova Mensagem</button>
+              <button id="btn-restaurar-frases" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+              <button id="btn-add-frase" class="btn btn-primary">+ Nova mensagem</button>
             </div>
           </div>
 
