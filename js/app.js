@@ -477,11 +477,39 @@ PCF.App = (() => {
 
   const _googleSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>`;
 
+  const bindPasswordToggles = (root = document) => {
+    root.querySelectorAll('.auth-password-toggle').forEach(btn => {
+      btn.onclick = () => {
+        const input = root.querySelector(`#${btn.dataset.target}`);
+        if (!input) return;
+        const showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        btn.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
+        btn.setAttribute('title', showing ? 'Mostrar senha' : 'Ocultar senha');
+        btn.innerHTML = `<i data-lucide="${showing ? 'eye' : 'eye-off'}"></i>`;
+        if (window.lucide) lucide.createIcons();
+      };
+    });
+  };
+
   const renderLoginForm = () => {
     document.getElementById('auth-content').innerHTML = `
       <form id="login-form" class="auth-form">
-        <div class="form-group"><label>E-mail</label><input type="email" id="login-email" required autocomplete="email"></div>
-        <div class="form-group"><label>Senha</label><input type="password" id="login-pass" required autocomplete="current-password"></div>
+        <div class="form-group auth-input-group">
+          <label class="sr-only" for="login-email">E-mail</label>
+          <div class="auth-input-wrap">
+            <i class="auth-field-icon" data-lucide="mail" aria-hidden="true"></i>
+            <input type="email" id="login-email" required autocomplete="email" placeholder="Digite seu e-mail">
+          </div>
+        </div>
+        <div class="form-group auth-input-group">
+          <label class="sr-only" for="login-pass">Senha</label>
+          <div class="auth-input-wrap">
+            <i class="auth-field-icon" data-lucide="key-round" aria-hidden="true"></i>
+            <input type="password" id="login-pass" required autocomplete="current-password" placeholder="Digite sua senha">
+            <button type="button" class="auth-password-toggle" data-target="login-pass" aria-label="Mostrar senha" title="Mostrar senha"><i data-lucide="eye"></i></button>
+          </div>
+        </div>
         <div id="login-error" class="alert alert-error" style="display:none"></div>
         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
       </form>
@@ -490,12 +518,15 @@ PCF.App = (() => {
         ${_googleSvg} Entrar com Google
       </button>
       <p class="auth-privacy">Ao acessar, você declara estar ciente da nossa <a href="#politica-privacidade" data-open-privacy>Política de Privacidade</a>.</p>`;
+    if (window.lucide) lucide.createIcons();
+    bindPasswordToggles();
     document.getElementById('login-form').onsubmit = async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
       const pass  = document.getElementById('login-pass').value;
       try {
-        await PCF.Firebase.auth.signInWithEmailAndPassword(email, pass);
+        const cred = await PCF.Firebase.auth.signInWithEmailAndPassword(email, pass);
+        await S.registrarAtividade?.(cred.user.uid, 'login');
         // onAuthStateChanged cuida do loadAll + initApp
       } catch (err) {
         const el = document.getElementById('login-error');
@@ -564,14 +595,16 @@ PCF.App = (() => {
           <label>E-mail</label><input type="email" id="reg-email" required autocomplete="email">
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Senha</label><input type="password" id="reg-pass" required minlength="4" autocomplete="new-password"></div>
-          <div class="form-group"><label>Confirmar Senha</label><input type="password" id="reg-pass2" required autocomplete="new-password"></div>
+          <div class="form-group"><label>Senha</label><div class="auth-input-wrap auth-input-wrap-plain"><input type="password" id="reg-pass" required minlength="4" autocomplete="new-password"><button type="button" class="auth-password-toggle" data-target="reg-pass" aria-label="Mostrar senha" title="Mostrar senha"><i data-lucide="eye"></i></button></div></div>
+          <div class="form-group"><label>Confirmar Senha</label><div class="auth-input-wrap auth-input-wrap-plain"><input type="password" id="reg-pass2" required autocomplete="new-password"><button type="button" class="auth-password-toggle" data-target="reg-pass2" aria-label="Mostrar senha" title="Mostrar senha"><i data-lucide="eye"></i></button></div></div>
         </div>
         <div id="reg-error" class="alert alert-error" style="display:none"></div>
         <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
         <p class="auth-privacy">Ao se cadastrar, você declara estar ciente da nossa <a href="#politica-privacidade" data-open-privacy>Política de Privacidade</a>.</p>
       </form>`;
 
+    if (window.lucide) lucide.createIcons();
+    bindPasswordToggles();
     document.getElementById('reg-cpf').oninput = function() { this.value = H.formatarCPF(this.value); };
     document.getElementById('reg-tel').oninput = function() { this.value = H.formatarTelefone(this.value); };
 
@@ -829,6 +862,51 @@ PCF.App = (() => {
   };
 
   /* ==================== MEU PERFIL (não-admin) ==================== */
+  const formatTempoRelativo = (iso) => {
+    if (!iso) return '-';
+    const diff = Date.now() - new Date(iso).getTime();
+    if (!Number.isFinite(diff)) return H.formatarData(iso);
+    const min = Math.max(0, Math.floor(diff / 60000));
+    if (min < 1) return 'agora';
+    if (min < 60) return `há ${min} minuto${min === 1 ? '' : 's'}`;
+    const horas = Math.floor(min / 60);
+    if (horas < 24) return `há cerca de ${horas} hora${horas === 1 ? '' : 's'}`;
+    const dias = Math.floor(horas / 24);
+    if (dias < 30) return `há ${dias} dia${dias === 1 ? '' : 's'}`;
+    return H.formatarData(iso);
+  };
+
+  const labelAtividade = (atividade, user) => {
+    const nome = user?.nome || user?.email || 'Usuário';
+    const labels = {
+      login: 'fez login',
+      logout: 'fez logout',
+      conta_criada: 'criou a conta',
+      perfil_atualizado: 'atualizou os dados do usuário',
+    };
+    return `${nome} ${labels[atividade.tipo] || 'realizou uma atividade'}`;
+  };
+
+  const renderMinhasAtividades = async (user, target) => {
+    if (!target || !user) return;
+    target.innerHTML = '<p class="empty-text">Carregando atividades...</p>';
+    const atividades = await S.getAtividadesUsuario(user.id);
+    target.innerHTML = `
+      <div class="table-container user-activity-table">
+        <table class="table">
+          <thead><tr><th style="width:54px"></th><th>Evento</th><th>Data</th></tr></thead>
+          <tbody>${atividades.length ? atividades.map(a => `
+            <tr>
+              <td class="user-activity-icon"><i data-lucide="user"></i></td>
+              <td>${H.esc(labelAtividade(a, user))}</td>
+              <td class="text-muted">${formatTempoRelativo(a.data)}</td>
+            </tr>`).join('') : `<tr><td colspan="3" class="empty-text">Nenhuma atividade registrada.</td></tr>`}
+          </tbody>
+        </table>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+  };
+
   const openMeuPerfil = () => {
     const session = S.getSession();
     const user = S.getUserById(session.userId);
@@ -838,6 +916,11 @@ PCF.App = (() => {
     overlay.innerHTML = `
       <div class="modal modal-lg">
         <h3><i data-lucide="settings"></i> Meu perfil</h3>
+        <div class="user-modal-tabs">
+          <button type="button" class="user-modal-tab active" data-profile-tab="dados">Dados</button>
+          <button type="button" class="user-modal-tab" data-profile-tab="atividades">Atividades</button>
+        </div>
+        <div class="user-modal-panel active" data-profile-panel="dados">
         <div class="form-row">
           <div class="form-group"><label>Nome completo</label><input type="text" id="mp-nome" value="${H.esc(user.nome || '')}"></div>
           <div class="form-group"><label>CPF</label><input type="text" id="mp-cpf" value="${H.esc(user.cpf || '')}" disabled></div>
@@ -861,8 +944,26 @@ PCF.App = (() => {
           <button id="mp-cancel" class="btn btn-secondary">Cancelar</button>
           <button id="mp-save" class="btn btn-primary">Salvar</button>
         </div>
+        </div>
+        <div class="user-modal-panel" data-profile-panel="atividades">
+          <div id="mp-atividades"></div>
+        </div>
       </div>`;
     document.body.appendChild(overlay);
+    let atividadesCarregadas = false;
+    overlay.querySelectorAll('.user-modal-tab').forEach(tab => {
+      tab.onclick = () => {
+        const name = tab.dataset.profileTab;
+        overlay.querySelectorAll('.user-modal-tab').forEach(t => t.classList.toggle('active', t === tab));
+        overlay.querySelectorAll('.user-modal-panel').forEach(panel => {
+          panel.classList.toggle('active', panel.dataset.profilePanel === name);
+        });
+        if (name === 'atividades' && !atividadesCarregadas) {
+          atividadesCarregadas = true;
+          renderMinhasAtividades(user, overlay.querySelector('#mp-atividades'));
+        }
+      };
+    });
     document.getElementById('mp-tel').oninput = function () { this.value = H.formatarTelefone(this.value); };
     const close = () => overlay.remove();
     overlay.onclick = e => { if (e.target === overlay) close(); };
@@ -920,7 +1021,7 @@ PCF.App = (() => {
             </div>
             <div class="user-info">
               <span class="user-name">${H.esc(user?.nome || session.login)}</span>
-              ${!isAdmin ? '<button id="btn-meu-perfil" class="btn-link btn-gear" title="Editar meu perfil"><i data-lucide="settings"></i></button>' : ''}
+              <button id="btn-meu-perfil" class="btn-link btn-gear" title="Editar meu perfil"><i data-lucide="settings"></i></button>
               <button id="btn-logout" class="btn-link" title="Sair"><i data-lucide="log-out"></i> Sair</button>
             </div>
           </div>

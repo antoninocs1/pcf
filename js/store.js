@@ -17,7 +17,7 @@ PCF.Store = (() => {
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
     'rodavida_reg', 'rodavida_config', 'plano_acao',
-    'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades'
+    'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades'
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
@@ -135,11 +135,13 @@ PCF.Store = (() => {
           dataCadastro: new Date().toISOString().split('T')[0],
         };
         await _db().collection('users').doc(fbUser.uid).set(profile);
+        await registrarAtividade(fbUser.uid, 'conta_criada');
         if (isFirst) {
           await _db().collection('meta').doc('bootstrap')
             .set({ createdAt: new Date().toISOString() }).catch(() => {});
         }
       }
+      await registrarAtividade(result.user.uid, 'login');
       return { ok: true };
     } catch (err) {
       if (['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(err.code))
@@ -166,6 +168,7 @@ PCF.Store = (() => {
       };
       // O create é permitido pela regra request.auth.uid == userId (usuário recém autenticado)
       await _db().collection('users').doc(cred.user.uid).set(profile);
+      await registrarAtividade(cred.user.uid, 'conta_criada');
       // Marca que já existe pelo menos um usuário
       if (isFirst) {
         await _db().collection('meta').doc('bootstrap').set({ createdAt: new Date().toISOString() }).catch(() => {});
@@ -199,6 +202,7 @@ PCF.Store = (() => {
         dataCadastro: new Date().toISOString().split('T')[0],
       };
       await _db().collection('users').doc(cred.user.uid).set(profile);
+      await registrarAtividade(cred.user.uid, 'conta_criada');
       DATA_COLS.forEach(col => { _cache[`pcf_${col}_${cred.user.uid}`] = null; });
       _seedDefaults(cred.user.uid);
       const user = { id: cred.user.uid, ...profile };
@@ -223,6 +227,7 @@ PCF.Store = (() => {
     users[idx] = { ...users[idx], ...profileData };
     _cache['pcf_users'] = users;
     await _db().collection('users').doc(id).update(profileData);
+    await registrarAtividade(id, 'perfil_atualizado');
     if (newPassword && id === currentUserId()) {
       try { await _auth().currentUser.updatePassword(newPassword); }
       catch (e) { console.warn('[PCF] Falha ao alterar senha:', e.message); }
@@ -248,6 +253,8 @@ PCF.Store = (() => {
   };
   const setSession = () => {}; // noop — Firebase Auth gerencia a sessão
   const clearSession = () => {
+    const uid = currentUserId();
+    if (uid) registrarAtividade(uid, 'logout');
     Object.keys(_cache).forEach(k => delete _cache[k]);
     return _auth().signOut();
   };
@@ -256,6 +263,37 @@ PCF.Store = (() => {
     const uid = currentUserId();
     if (!uid) return false;
     return !!(getUserById(uid)?.isAdmin);
+  };
+
+  const getAtividadesUsuario = async (userId) => {
+    if (!userId || (!currentUserIsAdmin() && userId !== currentUserId())) return [];
+    const key = `pcf_atividades_${userId}`;
+    let atividades = _cache[key];
+    if (!Array.isArray(atividades)) {
+      const snap = await _db().collection('users').doc(userId).collection('data').doc('atividades').get();
+      atividades = snap.exists ? (snap.data().value || []) : [];
+      _cache[key] = atividades;
+    }
+    return [...atividades].sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+  };
+
+  const registrarAtividade = async (userId, tipo, detalhes = {}) => {
+    if (!userId) return;
+    const key = `pcf_atividades_${userId}`;
+    let atividades = _cache[key];
+    if (!Array.isArray(atividades)) {
+      try {
+        const snap = await _db().collection('users').doc(userId).collection('data').doc('atividades').get();
+        atividades = snap.exists ? (snap.data().value || []) : [];
+      } catch {
+        atividades = [];
+      }
+    }
+    const nova = [{ id: _uid(), tipo, data: new Date().toISOString(), ...detalhes }, ...atividades].slice(0, 200);
+    _cache[key] = nova;
+    await _db().collection('users').doc(userId).collection('data').doc('atividades')
+      .set({ value: nova })
+      .catch(err => console.warn('[PCF] Firestore atividade:', err.message));
   };
 
   /* ---------- USO DE FUNCIONALIDADES ---------- */
@@ -318,16 +356,29 @@ PCF.Store = (() => {
 
   /* ---------- TRANSAÇÕES ---------- */
   const _tkU = () => `pcf_transacoes_${currentUserId()}`;
-  const getTransacoes = () => _get(_tkU()) || [];
-  const saveTransacoes = (t) => _set(_tkU(), t);
-  const addTransacao = (t) => { const all = getTransacoes(); all.push({ id: _uid(), ...t }); saveTransacoes(all); return all; };
+  const _normalizarCategoriaFinanceira = (categoria) => categoria === 'Sonhos' ? 'Propósitos' : categoria;
+  const _normalizarTransacaoFinanceira = (t) => ({ ...t, categoria: _normalizarCategoriaFinanceira(t?.categoria) });
+  const getTransacoes = () => {
+    const raw = _get(_tkU()) || [];
+    const normalizadas = raw.map(_normalizarTransacaoFinanceira);
+    if (JSON.stringify(raw) !== JSON.stringify(normalizadas)) _set(_tkU(), normalizadas);
+    return normalizadas;
+  };
+  const saveTransacoes = (t) => _set(_tkU(), (t || []).map(_normalizarTransacaoFinanceira));
+  const addTransacao = (t) => { const all = getTransacoes(); all.push({ id: _uid(), ..._normalizarTransacaoFinanceira(t) }); saveTransacoes(all); return all; };
   const updateTransacao = (id, data) => { const all = getTransacoes(); const i = all.findIndex(t => t.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveTransacoes(all); } return all; };
   const deleteTransacao = (id) => { const all = getTransacoes().filter(t => t.id !== id); saveTransacoes(all); return all; };
 
   /* ---------- CATEGORIAS ---------- */
   const _ckU = () => `pcf_categorias_${currentUserId()}`;
-  const getCategorias = () => _get(_ckU()) || [];
-  const saveCategorias = (c) => _set(_ckU(), c);
+  const _normalizarCategoriaConfig = (c) => ({ ...c, categoria: _normalizarCategoriaFinanceira(c?.categoria) });
+  const getCategorias = () => {
+    const raw = _get(_ckU()) || [];
+    const normalizadas = raw.map(_normalizarCategoriaConfig);
+    if (JSON.stringify(raw) !== JSON.stringify(normalizadas)) _set(_ckU(), normalizadas);
+    return normalizadas;
+  };
+  const saveCategorias = (c) => _set(_ckU(), (c || []).map(_normalizarCategoriaConfig));
   const addCategoria = (c) => { const all = getCategorias(); all.push({ id: _uid(), ...c }); saveCategorias(all); return all; };
   const updateCategoria = (id, data) => { const all = getCategorias(); const i = all.findIndex(c => c.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveCategorias(all); } return all; };
   const deleteCategoria = (id) => { const all = getCategorias().filter(c => c.id !== id); saveCategorias(all); return all; };
@@ -603,7 +654,7 @@ PCF.Store = (() => {
         { nome: 'Poupança', tipo: 'Variável' },
         { nome: 'Outros', tipo: 'Variável' },
       ] },
-      { id: _uid(), tipoOperacao: 'INVESTIMENTO', categoria: 'Sonhos', subcategorias: [
+      { id: _uid(), tipoOperacao: 'INVESTIMENTO', categoria: 'Propósitos', subcategorias: [
         { nome: 'Colchão Financeiro', tipo: 'Variável' },
         { nome: 'Outros', tipo: 'Variável' },
       ] },
@@ -2479,6 +2530,7 @@ PCF.Store = (() => {
       plano_acao: _get(`pcf_plano_acao_${uid}`) || [],
       linha_tempo: _get(`pcf_linha_tempo_${uid}`) || [],
       uso_funcionalidades: _get(`pcf_uso_funcionalidades_${uid}`) || [],
+      atividades: _get(`pcf_atividades_${uid}`) || [],
     };
   };
 
@@ -2495,6 +2547,7 @@ PCF.Store = (() => {
     getEmocoes, saveEmocoes, addEmocao, updateEmocao, deleteEmocao,
     getEmocoesConfig, saveEmocoesConfig,
     getIMC, saveIMC,
+    getAtividadesUsuario, registrarAtividade,
     getUsoFuncionalidades, saveUsoFuncionalidades, registrarUsoFuncionalidade, getRelatorioUsoFuncionalidades,
     getAgendaConfig, saveAgendaConfig,
     getCompromissos, saveCompromissos, addCompromisso, updateCompromisso, deleteCompromisso,

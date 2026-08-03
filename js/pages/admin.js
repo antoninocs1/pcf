@@ -406,6 +406,51 @@ PCF.Pages = PCF.Pages || {};
       };
     };
 
+    const formatTempoRelativo = (iso) => {
+      if (!iso) return '-';
+      const diff = Date.now() - new Date(iso).getTime();
+      if (!Number.isFinite(diff)) return H.formatarData(iso);
+      const min = Math.max(0, Math.floor(diff / 60000));
+      if (min < 1) return 'agora';
+      if (min < 60) return `há ${min} minuto${min === 1 ? '' : 's'}`;
+      const horas = Math.floor(min / 60);
+      if (horas < 24) return `há cerca de ${horas} hora${horas === 1 ? '' : 's'}`;
+      const dias = Math.floor(horas / 24);
+      if (dias < 30) return `há ${dias} dia${dias === 1 ? '' : 's'}`;
+      return H.formatarData(iso);
+    };
+
+    const labelAtividade = (atividade, user) => {
+      const nome = user?.nome || user?.email || 'Usuário';
+      const labels = {
+        login: 'fez login',
+        logout: 'fez logout',
+        conta_criada: 'criou a conta',
+        perfil_atualizado: 'atualizou os dados do usuário',
+      };
+      return `${nome} ${labels[atividade.tipo] || 'realizou uma atividade'}`;
+    };
+
+    const renderAtividadesUsuario = async (user, target) => {
+      if (!target || !user) return;
+      target.innerHTML = '<p class="empty-text">Carregando atividades...</p>';
+      const atividades = await S.getAtividadesUsuario(user.id);
+      target.innerHTML = `
+        <div class="table-container user-activity-table">
+          <table class="table">
+            <thead><tr><th style="width:54px"></th><th>Evento</th><th>Data</th></tr></thead>
+            <tbody>${atividades.length ? atividades.map(a => `
+              <tr>
+                <td class="user-activity-icon"><i data-lucide="user"></i></td>
+                <td>${H.esc(labelAtividade(a, user))}</td>
+                <td class="text-muted">${formatTempoRelativo(a.data)}</td>
+              </tr>`).join('') : `<tr><td colspan="3" class="empty-text">Nenhuma atividade registrada.</td></tr>`}
+            </tbody>
+          </table>
+        </div>`;
+      if (window.lucide) lucide.createIcons();
+    };
+
     const showUserModal = (user) => {
       const isEdit = !!user;
       const overlay = document.createElement('div');
@@ -413,37 +458,61 @@ PCF.Pages = PCF.Pages || {};
       overlay.innerHTML = `
         <div class="modal modal-lg">
           <h3>${isEdit ? 'Editar' : 'Novo'} usuário</h3>
+          <div class="user-modal-tabs">
+            <button type="button" class="user-modal-tab active" data-user-tab="dados">Dados</button>
+            <button type="button" class="user-modal-tab" data-user-tab="atividades" ${isEdit ? '' : 'disabled'}>Atividades</button>
+          </div>
           <form id="user-modal-form">
-            <div class="form-row">
-              <div class="form-group"><label>Nome completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
-              <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00"></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
-              <div class="form-group"><label>Data de nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
-            </div>
-            <div class="form-group">
-              <label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label>${isEdit ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}</label><input type="password" id="um-pass" ${isEdit ? '' : 'required'} minlength="4"></div>
-              <div class="form-group"><label>Confirmar Senha</label><input type="password" id="um-pass2" ${isEdit ? '' : 'required'}></div>
-            </div>
-            ${S.currentUserIsAdmin() ? `
-            <div class="form-row">
-              <div class="form-group">
-                <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> Administrador</label>
-                <small class="text-muted">Somente administradores podem criar outros administradores.</small>
+            <div class="user-modal-panel active" data-user-panel="dados">
+              <div class="form-row">
+                <div class="form-group"><label>Nome completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
+                <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00"></div>
               </div>
-            </div>` : ''}
-            <div id="um-error" class="alert alert-error" style="display:none"></div>
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" id="um-cancel">Cancelar</button>
-              <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
+              <div class="form-row">
+                <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
+                <div class="form-group"><label>Data de nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
+              </div>
+              <div class="form-group">
+                <label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>${isEdit ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}</label><input type="password" id="um-pass" ${isEdit ? '' : 'required'} minlength="4"></div>
+                <div class="form-group"><label>Confirmar Senha</label><input type="password" id="um-pass2" ${isEdit ? '' : 'required'}></div>
+              </div>
+              ${S.currentUserIsAdmin() ? `
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> Administrador</label>
+                  <small class="text-muted">Somente administradores podem criar outros administradores.</small>
+                </div>
+              </div>` : ''}
+              <div id="um-error" class="alert alert-error" style="display:none"></div>
+              <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="um-cancel">Cancelar</button>
+                <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
+              </div>
+            </div>
+            <div class="user-modal-panel" data-user-panel="atividades">
+              <div id="um-atividades"></div>
             </div>
           </form>
         </div>`;
       document.body.appendChild(overlay);
+      let atividadesCarregadas = false;
+      overlay.querySelectorAll('.user-modal-tab').forEach(tab => {
+        tab.onclick = () => {
+          if (tab.disabled) return;
+          const name = tab.dataset.userTab;
+          overlay.querySelectorAll('.user-modal-tab').forEach(t => t.classList.toggle('active', t === tab));
+          overlay.querySelectorAll('.user-modal-panel').forEach(panel => {
+            panel.classList.toggle('active', panel.dataset.userPanel === name);
+          });
+          if (name === 'atividades' && isEdit && !atividadesCarregadas) {
+            atividadesCarregadas = true;
+            renderAtividadesUsuario(user, overlay.querySelector('#um-atividades'));
+          }
+        };
+      });
       document.getElementById('um-cpf').oninput = function() { this.value = H.formatarCPF(this.value); };
       document.getElementById('um-tel').oninput = function() { this.value = H.formatarTelefone(this.value); };
       document.getElementById('um-cancel').onclick = () => overlay.remove();
