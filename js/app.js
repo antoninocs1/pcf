@@ -156,6 +156,7 @@ PCF.App = (() => {
               <a href="#apresentacao-section"    class="landing-nav-link" data-section="apresentacao-section">Apresentação</a>
               <a href="#funcionalidades-section" class="landing-nav-link" data-section="funcionalidades-section">Funcionalidades</a>
               <a href="#sobre-section"           class="landing-nav-link" data-section="sobre-section">Sobre</a>
+              <a href="#apoie"                   class="landing-nav-link landing-support-link"><i data-lucide="heart"></i> Nos apoie</a>
               <span class="landing-nav-divider"></span>
               <a href="mailto:antoninocs@yahoo.com.br" class="landing-nav-contact" title="Enviar e-mail para antoninocs@yahoo.com.br">
                 <i data-lucide="mail"></i>
@@ -250,6 +251,7 @@ PCF.App = (() => {
         <footer class="landing-footer">
           <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
           <a href="#politica-privacidade" class="privacy-link" data-open-privacy>Política de Privacidade</a>
+          <a href="#apoie" class="landing-footer-link"><i data-lucide="heart"></i> Nos apoie</a>
           <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
         </footer>
 
@@ -700,6 +702,61 @@ PCF.App = (() => {
     };
   };
 
+  const renderApoie = (mc) => {
+    mc.innerHTML = `
+      <div class="page support-page">
+        <div class="support-kicker"><i data-lucide="heart"></i> Nos apoie</div>
+        <h2>Apoie o PCF</h2>
+        <p class="support-subtitle">Ajude-nos a manter a ferramenta gratuita e em constante evolução.</p>
+
+        <div class="support-actions">
+          <div class="support-pix-card">
+            <div class="support-pix-brand">
+              <span class="support-pix-mark">PIX</span>
+              <span>Doação via PIX</span>
+            </div>
+            <div class="support-pix-info">
+              <span>Chave PIX</span>
+              <strong id="support-pix-key">71988177989</strong>
+            </div>
+            <div class="support-pix-info">
+              <span>Beneficiário</span>
+              <strong>Antonino Costa da Silva</strong>
+            </div>
+            <button type="button" class="btn btn-primary support-copy-btn" id="support-copy-pix">
+              <i data-lucide="copy"></i> Copiar chave PIX
+            </button>
+          </div>
+        </div>
+
+        <p class="support-thanks" id="support-copy-feedback">Obrigado pelo seu apoio!</p>
+
+        <section class="support-why">
+          <h3>Por que doar?</h3>
+          <ul>
+            <li>Manter a plataforma gratuita para todos</li>
+            <li>Financiar novos recursos e melhorias</li>
+            <li>Sustentar os custos de infraestrutura e hospedagem</li>
+            <li>Ajudar a dedicar mais tempo ao desenvolvimento</li>
+          </ul>
+        </section>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+    const btn = document.getElementById('support-copy-pix');
+    if (btn) {
+      btn.onclick = async () => {
+        const key = '71988177989';
+        const feedback = document.getElementById('support-copy-feedback');
+        try {
+          await navigator.clipboard.writeText(key);
+          if (feedback) feedback.textContent = 'Chave PIX copiada. Obrigado pelo seu apoio!';
+        } catch {
+          if (feedback) feedback.textContent = `Chave PIX: ${key}`;
+        }
+      };
+    }
+  };
+
   /* ==================== SIDEBAR ==================== */
   const navGroups = [
     { standalone: true, hash: '#home', icon: 'home', label: 'Início' },
@@ -779,6 +836,7 @@ PCF.App = (() => {
 
   const ROUTE_USAGE_INFO = {
     '#home': { label: 'Início', grupo: 'Geral' },
+    '#apoie': { label: 'Nos apoie', grupo: 'Geral' },
     '#dashboard': { label: 'Painel financeiro', grupo: 'Financeiro' },
     '#inserir': { label: 'Inserir Transação Financeira', grupo: 'Financeiro' },
     '#base': { label: 'Base de Dados Financeira', grupo: 'Financeiro' },
@@ -1119,6 +1177,7 @@ PCF.App = (() => {
     const pages = PCF.Pages;
     const map = {
       '#home': (mc) => renderHome(mc),
+      '#apoie': (mc) => renderApoie(mc),
       '#dashboard': pages.dashboard,
       '#inserir': pages.inserir,
       '#base': pages.base,
