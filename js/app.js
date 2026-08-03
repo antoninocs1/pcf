@@ -305,6 +305,8 @@ PCF.App = (() => {
       </div>`;
 
     /* Política de Privacidade — disponível antes da autenticação */
+    window.onhashchange = route;
+
     const privacyModal = document.getElementById('privacy-modal');
     const privacyDialog = privacyModal?.querySelector('.privacy-dialog');
     let privacyTrigger = null;
@@ -445,6 +447,10 @@ PCF.App = (() => {
     /* Smooth scroll */
     document.querySelectorAll('.landing-nav-link').forEach(a => {
       a.onclick = (e) => {
+        if (!a.dataset.section) {
+          document.getElementById('landing-nav').classList.remove('open');
+          return;
+        }
         e.preventDefault();
         const target = document.getElementById(a.dataset.section);
         if (target) target.scrollIntoView({ behavior: 'smooth' });
@@ -1162,7 +1168,16 @@ PCF.App = (() => {
 
   /* ==================== ROUTER ==================== */
   const route = () => {
-    if (!S.getSession()) { renderLogin(); return; }
+    if (!S.getSession()) {
+      if ((location.hash || '').split('?')[0] === '#apoie') {
+        destroyCharts();
+        document.getElementById('app').innerHTML = `<main class="public-support-shell" id="main-content"></main>`;
+        renderApoie(document.getElementById('main-content'));
+        return;
+      }
+      renderLogin();
+      return;
+    }
     destroyCharts();
     const hash = location.hash.split('?')[0] || '#dashboard';
     // Guarda rotas exclusivas de administrador
@@ -1593,7 +1608,7 @@ PCF.App = (() => {
         }
       } else {
         stopGlobalAlertSystem();
-        renderLogin();
+        route();
       }
     });
   };

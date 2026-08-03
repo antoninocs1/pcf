@@ -2148,6 +2148,12 @@ body.privacy-modal-open { overflow: hidden; }
 [data-theme="light"] .home-clock { text-shadow: none; }
 
 /* ==================== APOIE ==================== */
+.public-support-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 32px;
+  background: var(--bg);
+}
 .support-page {
   max-width: 920px;
   margin: 0 auto;
