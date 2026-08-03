@@ -443,7 +443,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .emocao-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .emocao-situacao { font-size: .86rem; color: var(--text-muted); margin-bottom: 4px; }
 .emocao-descricao { font-size: .86rem; color: var(--text); }
-.emo-vida-feliz-banner { margin-bottom: 20px; }
+.vida-feliz-banner { margin-bottom: 20px; }
 
 /* ==================== CONFIG EMOÇÕES ==================== */
 .emo-config-list { display: flex; flex-direction: column; gap: 16px; }

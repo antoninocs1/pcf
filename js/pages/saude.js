@@ -155,51 +155,16 @@ PCF.Pages = PCF.Pages || {};
 
   const getSituacaoDescricao = (em) => (em?.situacaoDescricao || '').trim();
 
-  const getVidaFelizHoje = () => {
-    const frases = S.getFrases().filter(f => f.ativo !== false && f.categoria === 'Vida Feliz');
-    if (!frases.length) return null;
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const dayOfYear = Math.floor((now - start) / 86400000);
-    return frases[dayOfYear % frases.length];
-  };
-
-  const sortearVidaFeliz = (fraseAtual) => {
-    const frases = S.getFrases().filter(f => f.ativo !== false && f.categoria === 'Vida Feliz');
-    if (frases.length <= 1) return fraseAtual || frases[0] || null;
-    let candidata;
-    do {
-      candidata = frases[Math.floor(Math.random() * frases.length)];
-    } while (candidata.id === fraseAtual?.id);
-    return candidata;
-  };
-
-  const htmlVidaFelizBanner = (frase) => {
-    if (!frase) return '';
-    return `
-      <div class="hab-frase-dia emo-vida-feliz-banner">
-        <div class="hab-frase-icon">💬</div>
-        <div class="hab-frase-content">
-          <div class="hab-frase-label">VIDA FELIZ</div>
-          <div class="hab-frase-texto" id="vida-feliz-texto">"${H.esc(frase.texto)}"</div>
-          <div class="hab-frase-autor" id="vida-feliz-autor"${frase.autor ? '' : ' style="display:none"'}>${frase.autor ? '— ' + H.esc(frase.autor) : ''}</div>
-        </div>
-        <button type="button" id="btn-outra-vida-feliz" class="home-msg-refresh" title="Exibir outra mensagem aleatória"><i data-lucide="refresh-cw"></i></button>
-      </div>`;
-  };
-
   PCF.Pages.emocoes = (container) => {
     let editingId = null;
 
     const render = () => {
       const config = S.getEmocoesConfig();
       const emocoes = S.getEmocoes();
-      const vidaFeliz = getVidaFelizHoje();
       container.innerHTML = `
         <div class="page">
           <h2>Análise das Emoções</h2><br>
           <p class="subtitle">Escolha a emoção que melhor descreve como você está se sentindo agora.</p>
-          ${htmlVidaFelizBanner(vidaFeliz)}
           <div class="emocoes-layout">
             <form id="form-emocao" class="form emocoes-form">
               <h3 id="emo-form-title">Novo registro</h3>
@@ -251,20 +216,6 @@ PCF.Pages = PCF.Pages || {};
 
       let selSup = null;
       document.getElementById('emo-intensidade').oninput = function() { document.getElementById('emo-int-val').textContent = this.value; };
-      const btnOutraVidaFeliz = document.getElementById('btn-outra-vida-feliz');
-      if (btnOutraVidaFeliz) {
-        let vidaFelizAtual = vidaFeliz;
-        btnOutraVidaFeliz.onclick = () => {
-          vidaFelizAtual = sortearVidaFeliz(vidaFelizAtual);
-          const textoEl = document.getElementById('vida-feliz-texto');
-          const autorEl = document.getElementById('vida-feliz-autor');
-          if (textoEl && vidaFelizAtual) textoEl.textContent = `"${vidaFelizAtual.texto}"`;
-          if (autorEl) {
-            autorEl.textContent = vidaFelizAtual?.autor ? `— ${vidaFelizAtual.autor}` : '';
-            autorEl.style.display = vidaFelizAtual?.autor ? '' : 'none';
-          }
-        };
-      }
 
       const selectSup = (id) => {
         document.querySelectorAll('#emo-sup-chips .chip').forEach(b => { b.classList.remove('selected'); b.style.background = ''; b.style.color = ''; });

@@ -22,6 +22,39 @@ PCF.Pages = PCF.Pages || {};
 
   const getCatColor = (cat) => CATEGORIAS_VIRTUDES.find(c => c.id === cat)?.cor || '#64748b';
 
+  const getVidaFelizHoje = () => {
+    const frases = S.getFrases().filter(f => f.ativo !== false && f.categoria === 'Vida Feliz');
+    if (!frases.length) return null;
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now - start) / 86400000);
+    return frases[dayOfYear % frases.length];
+  };
+
+  const sortearVidaFeliz = (fraseAtual) => {
+    const frases = S.getFrases().filter(f => f.ativo !== false && f.categoria === 'Vida Feliz');
+    if (frases.length <= 1) return fraseAtual || frases[0] || null;
+    let candidata;
+    do {
+      candidata = frases[Math.floor(Math.random() * frases.length)];
+    } while (candidata.id === fraseAtual?.id);
+    return candidata;
+  };
+
+  const htmlVidaFelizBanner = (frase) => {
+    if (!frase) return '';
+    return `
+      <div class="hab-frase-dia vida-feliz-banner">
+        <div class="hab-frase-icon">💬</div>
+        <div class="hab-frase-content">
+          <div class="hab-frase-label">VIDA FELIZ</div>
+          <div class="hab-frase-texto" id="vida-feliz-texto">"${H.esc(frase.texto)}"</div>
+          <div class="hab-frase-autor" id="vida-feliz-autor"${frase.autor ? '' : ' style="display:none"'}>${frase.autor ? '— ' + H.esc(frase.autor) : ''}</div>
+        </div>
+        <button type="button" id="btn-outra-vida-feliz" class="home-msg-refresh" title="Exibir outra mensagem aleatória"><i data-lucide="refresh-cw"></i></button>
+      </div>`;
+  };
+
   /* ── Verificar se virtude foi praticada num dia ── */
   const isPraticada = (virtudeId, data) => {
     return S.getVirtudesReg().some(r => r.virtudeId === virtudeId && r.data === data);
@@ -52,6 +85,7 @@ PCF.Pages = PCF.Pages || {};
     const render = () => {
       const virtudes = S.getVirtudesConfig().filter(v => v.ativo !== false);
       const hoje = H.hoje();
+      const vidaFeliz = getVidaFelizHoje();
 
       // Agrupar por categoria
       const grupos = {};
@@ -103,6 +137,8 @@ PCF.Pages = PCF.Pages || {};
             </div>
           </div>
 
+          ${htmlVidaFelizBanner(vidaFeliz)}
+
           <div class="virtudes-date-bar">
             <button id="virt-prev-day" class="btn btn-ghost btn-sm" title="Dia anterior"><i data-lucide="chevron-left"></i></button>
             <input type="date" id="virt-date" class="form-control-inline" value="${selectedDate}" max="${hoje}">
@@ -140,6 +176,21 @@ PCF.Pages = PCF.Pages || {};
         const hoje = H.hoje();
         if (d.toISOString().split('T')[0] <= hoje) { selectedDate = d.toISOString().split('T')[0]; render(); }
       });
+
+      const btnOutraVidaFeliz = container.querySelector('#btn-outra-vida-feliz');
+      if (btnOutraVidaFeliz) {
+        let vidaFelizAtual = getVidaFelizHoje();
+        btnOutraVidaFeliz.onclick = () => {
+          vidaFelizAtual = sortearVidaFeliz(vidaFelizAtual);
+          const textoEl = container.querySelector('#vida-feliz-texto');
+          const autorEl = container.querySelector('#vida-feliz-autor');
+          if (textoEl && vidaFelizAtual) textoEl.textContent = `"${vidaFelizAtual.texto}"`;
+          if (autorEl) {
+            autorEl.textContent = vidaFelizAtual?.autor ? `— ${vidaFelizAtual.autor}` : '';
+            autorEl.style.display = vidaFelizAtual?.autor ? '' : 'none';
+          }
+        };
+      }
 
       container.querySelectorAll('.virtude-btn').forEach(btn => {
         btn.addEventListener('click', () => {
