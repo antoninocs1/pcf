@@ -2159,6 +2159,29 @@ body.privacy-modal-open { overflow: hidden; }
   margin: 0 auto;
   padding-top: 14px;
 }
+.support-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  padding: 9px 13px;
+  font: inherit;
+  font-size: .9rem;
+  cursor: pointer;
+}
+.support-back-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: rgba(59,130,246,.08);
+}
+.support-back-btn svg {
+  width: 16px;
+  height: 16px;
+}
 .support-kicker {
   display: inline-flex;
   align-items: center;

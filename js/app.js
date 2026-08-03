@@ -711,6 +711,9 @@ PCF.App = (() => {
   const renderApoie = (mc) => {
     mc.innerHTML = `
       <div class="page support-page">
+        <button type="button" class="support-back-btn" id="support-back-home">
+          <i data-lucide="arrow-left"></i> Voltar para a tela principal
+        </button>
         <div class="support-kicker"><i data-lucide="heart"></i> Nos apoie</div>
         <h2>Apoie o PCF</h2>
         <p class="support-subtitle">Ajude-nos a manter a ferramenta gratuita e em constante evolução.</p>
@@ -748,6 +751,16 @@ PCF.App = (() => {
         </section>
       </div>`;
     if (window.lucide) lucide.createIcons();
+    const backBtn = document.getElementById('support-back-home');
+    if (backBtn) {
+      backBtn.onclick = () => {
+        if (S.getSession()) location.hash = '#home';
+        else {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+          renderLogin();
+        }
+      };
+    }
     const btn = document.getElementById('support-copy-pix');
     if (btn) {
       btn.onclick = async () => {
