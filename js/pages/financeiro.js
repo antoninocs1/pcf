@@ -179,7 +179,12 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>Base de Dados Financeira</h2>
-            <span class="badge" id="base-subtotal"></span>
+            <div class="page-actions">
+              <span class="badge" id="base-subtotal"></span>
+              <button type="button" class="btn btn-primary" id="base-nova-transacao">
+                <i data-lucide="plus"></i> Nova transação financeira
+              </button>
+            </div>
           </div>
           <div class="filters">
             <select id="base-tipo"><option value="">Todos os Tipos</option><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option><option value="INVESTIMENTO">Investimento</option></select>
@@ -217,6 +222,7 @@ PCF.Pages = PCF.Pages || {};
       };
 
       ['base-tipo', 'base-mes', 'base-ano', 'base-cat'].forEach(id => document.getElementById(id).onchange = filterAndRender);
+      document.getElementById('base-nova-transacao').onclick = () => { location.hash = '#inserir'; };
       container.onclick = (e) => {
         const editBtn = e.target.closest('[data-edit]');
         if (editBtn) { const t = trans.find(t => t.id === editBtn.dataset.edit); if (t) showEditTransModal(t, render); return; }

@@ -34,6 +34,7 @@ PCF.App = (() => {
     { icon: 'calendar',      title: 'Agenda',          desc: 'Gerencie compromissos e eventos de forma prática em uma agenda interativa.' },
     { icon: 'heart',         title: 'Saúde / IMC',    desc: 'Cálculo de IMC e acompanhamento de métricas de saúde e bem-estar pessoal.' },
     { icon: 'user',          title: 'Contatos',        desc: 'Organize seus contatos pessoais com informações de acesso rápido e fácil consulta.' },
+    { icon: 'milestone',     title: 'Linha do Tempo',  desc: 'Registre marcos, memórias e conquistas para visualizar sua história de vida em ordem cronológica.' },
   ];
 
   let _loginScreenRendered = false;
@@ -68,7 +69,7 @@ PCF.App = (() => {
             <div class="pcf-carousel-slide pcf-slide-2">
               <div class="pcf-slide-body">
                 <h2 class="pcf-slide-title">Funções Existentes</h2>
-                <p class="pcf-slide-sub">10 módulos integrados para cobrir planejamento, rotina e desenvolvimento pessoal</p>
+                <p class="pcf-slide-sub">11 módulos integrados para cobrir planejamento, rotina e desenvolvimento pessoal</p>
                 <div class="pcf-modules-grid">
                   <span class="pcf-module-chip">💰 Financeiro</span>
                   <span class="pcf-module-chip">🧠 Emoções</span>
@@ -80,6 +81,7 @@ PCF.App = (() => {
                   <span class="pcf-module-chip">📅 Agenda</span>
                   <span class="pcf-module-chip">❤️ Saúde / IMC</span>
                   <span class="pcf-module-chip">👤 Contatos</span>
+                  <span class="pcf-module-chip">📍 Linha do Tempo</span>
                 </div>
               </div>
             </div>
@@ -117,8 +119,12 @@ PCF.App = (() => {
                     <div class="pcf-int-line">───</div>
                     <div class="pcf-int-node">💰 Finanças</div>
                   </div>
+                  <div class="pcf-int-arrows">↕</div>
+                  <div class="pcf-int-row">
+                    <div class="pcf-int-center-node">📍 Linha do Tempo</div>
+                  </div>
                 </div>
-                <p class="pcf-int-note">Sugestões automáticas preenchem a Roda da Vida com base nas suas atividades diárias</p>
+                <p class="pcf-int-note">A Linha do Tempo organiza os marcos da sua história, enquanto sugestões automáticas preenchem a Roda da Vida com base nas atividades diárias</p>
               </div>
             </div>
           </div>
@@ -226,7 +232,7 @@ PCF.App = (() => {
             </div>
             <div class="landing-about-stats">
               <div class="landing-stat">
-                <span class="landing-stat-number">10+</span>
+                <span class="landing-stat-number">11+</span>
                 <span class="landing-stat-label">Módulos</span>
               </div>
               <div class="landing-stat">
@@ -243,10 +249,93 @@ PCF.App = (() => {
 
         <footer class="landing-footer">
           <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
+          <a href="#politica-privacidade" class="privacy-link" data-open-privacy>Política de Privacidade</a>
           <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
         </footer>
 
+        <div class="privacy-modal" id="privacy-modal" aria-hidden="true">
+          <div class="privacy-modal-backdrop" data-close-privacy></div>
+          <section class="privacy-dialog" role="dialog" aria-modal="true" aria-labelledby="privacy-title" tabindex="-1">
+            <header class="privacy-dialog-header">
+              <div>
+                <span class="landing-badge">Privacidade e LGPD</span>
+                <h2 id="privacy-title">Política de Privacidade do PCF</h2>
+                <p>Última atualização: 2 de agosto de 2026</p>
+              </div>
+              <button type="button" class="privacy-close" data-close-privacy aria-label="Fechar Política de Privacidade">
+                <i data-lucide="x"></i>
+              </button>
+            </header>
+            <div class="privacy-dialog-content">
+              <p>Esta Política explica como o <strong>PCF — Controle Financeiro Pessoal</strong> trata seus dados pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD).</p>
+
+              <h3>1. Dados pessoais tratados</h3>
+              <p>Para criar e manter sua conta, podemos tratar <strong>nome completo, CPF, e-mail e data de nascimento</strong>. O telefone, quando informado, é opcional. Também são armazenados os conteúdos que você registra nos módulos do PCF e dados técnicos essenciais para autenticação e funcionamento da aplicação.</p>
+
+              <h3>2. Como usamos os dados</h3>
+              <p>Os dados são utilizados para identificar e autenticar o usuário, criar e administrar a conta, personalizar funcionalidades, manter a segurança, prestar suporte e permitir o uso dos recursos de planejamento financeiro e pessoal.</p>
+
+              <h3>3. Bases legais</h3>
+              <p>O tratamento ocorre principalmente para executar os serviços solicitados pelo usuário e cumprir obrigações legais ou regulatórias. Quando aplicável, poderá se basear no legítimo interesse, respeitados os direitos e as expectativas do titular, ou em seu consentimento.</p>
+
+              <h3>4. Armazenamento, segurança e compartilhamento</h3>
+              <p>Os dados da conta e da aplicação são armazenados em serviços do Firebase, fornecidos pelo Google. Se você escolher “Entrar com Google”, os dados necessários à autenticação também serão tratados pelo Google. O PCF não comercializa dados pessoais. O compartilhamento fica limitado a fornecedores essenciais ao funcionamento e segurança da aplicação ou a hipóteses exigidas por lei.</p>
+              <p>São adotadas medidas técnicas e administrativas razoáveis para proteger os dados contra acesso, alteração, divulgação ou destruição não autorizados. Nenhum sistema, entretanto, é totalmente isento de riscos.</p>
+
+              <h3>5. Retenção e exclusão</h3>
+              <p>Os dados são mantidos enquanto a conta estiver ativa e pelo período necessário para cumprir as finalidades desta Política e eventuais obrigações legais. Após uma solicitação de exclusão, os dados serão eliminados ou anonimizados, salvo quando sua conservação for permitida ou exigida por lei.</p>
+
+              <h3>6. Direitos do titular</h3>
+              <p>Nos termos da LGPD, você pode solicitar confirmação e acesso ao tratamento, correção de dados, anonimização, bloqueio ou eliminação, portabilidade, informação sobre compartilhamentos, revogação do consentimento e revisão de decisões automatizadas, quando aplicáveis.</p>
+
+              <h3>7. Contato</h3>
+              <p>Para exercer seus direitos, esclarecer dúvidas ou fazer solicitações sobre privacidade, entre em contato pelo e-mail <a href="mailto:antoninocs@yahoo.com.br">antoninocs@yahoo.com.br</a>. Poderemos solicitar informações adicionais para confirmar sua identidade e proteger sua conta.</p>
+
+              <h3>8. Alterações desta Política</h3>
+              <p>Esta Política poderá ser atualizada para refletir mudanças legais ou no funcionamento do PCF. A versão vigente e sua data de atualização permanecerão disponíveis nesta tela.</p>
+            </div>
+            <footer class="privacy-dialog-footer">
+              <button type="button" class="btn btn-primary" data-close-privacy>Entendi</button>
+            </footer>
+          </section>
+        </div>
+
       </div>`;
+
+    /* Política de Privacidade — disponível antes da autenticação */
+    const privacyModal = document.getElementById('privacy-modal');
+    const privacyDialog = privacyModal?.querySelector('.privacy-dialog');
+    let privacyTrigger = null;
+    const openPrivacy = (trigger) => {
+      if (!privacyModal) return;
+      privacyTrigger = trigger || document.activeElement;
+      privacyModal.classList.add('open');
+      privacyModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('privacy-modal-open');
+      requestAnimationFrame(() => privacyDialog?.focus());
+    };
+    const closePrivacy = () => {
+      if (!privacyModal) return;
+      privacyModal.classList.remove('open');
+      privacyModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('privacy-modal-open');
+      if (window.location.hash === '#politica-privacidade') history.replaceState(null, '', window.location.pathname + window.location.search);
+      privacyTrigger?.focus?.();
+    };
+    document.querySelector('.landing-page').addEventListener('click', (e) => {
+      const opener = e.target.closest('[data-open-privacy]');
+      if (opener) {
+        e.preventDefault();
+        history.replaceState(null, '', '#politica-privacidade');
+        openPrivacy(opener);
+        return;
+      }
+      if (e.target.closest('[data-close-privacy]')) closePrivacy();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && privacyModal?.classList.contains('open')) closePrivacy();
+    });
+    if (window.location.hash === '#politica-privacidade') openPrivacy();
 
     /* Contador de acessos globais via Firestore */
     (async () => {
@@ -399,7 +488,8 @@ PCF.App = (() => {
       <div class="auth-divider"><span>ou</span></div>
       <button type="button" id="btn-google-login" class="btn btn-google btn-block">
         ${_googleSvg} Entrar com Google
-      </button>`;
+      </button>
+      <p class="auth-privacy">Ao acessar, você declara estar ciente da nossa <a href="#politica-privacidade" data-open-privacy>Política de Privacidade</a>.</p>`;
     document.getElementById('login-form').onsubmit = async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
@@ -464,7 +554,7 @@ PCF.App = (() => {
       <form id="register-form" class="auth-form">
         <div class="form-row">
           <div class="form-group"><label>Nome completo</label><input type="text" id="reg-nome" required></div>
-          <div class="form-group"><label>CPF</label><input type="text" id="reg-cpf" placeholder="000.000.000-00" disabled></div> 
+          <div class="form-group"><label>CPF</label><input type="text" id="reg-cpf" placeholder="Campo desabilitado" disabled aria-disabled="true" title="O CPF não pode ser informado no cadastro pessoal"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Telefone</label><input type="text" id="reg-tel" placeholder="(00) 00000-0000"></div>
@@ -479,6 +569,7 @@ PCF.App = (() => {
         </div>
         <div id="reg-error" class="alert alert-error" style="display:none"></div>
         <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+        <p class="auth-privacy">Ao se cadastrar, você declara estar ciente da nossa <a href="#politica-privacidade" data-open-privacy>Política de Privacidade</a>.</p>
       </form>`;
 
     document.getElementById('reg-cpf').oninput = function() { this.value = H.formatarCPF(this.value); };

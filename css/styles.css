@@ -73,6 +73,11 @@ a:hover { text-decoration: underline; }
 }
 .btn-google:hover:not(:disabled) { background: #f8f9fa; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
 .btn-google:disabled { opacity: .6; cursor: not-allowed; }
+.auth-privacy {
+  margin-top: 14px; color: var(--text-dim); font-size: .75rem;
+  line-height: 1.5; text-align: center;
+}
+.auth-privacy a { font-weight: 500; }
 
 /* ==================== LAYOUT ==================== */
 .app-layout { display: flex; min-height: 100vh; min-height: 100dvh; min-width: 0; }
@@ -256,6 +261,9 @@ select { cursor: pointer; }
 .btn-icon svg { width: 15px; height: 15px; display: block; }
 .btn-icon:hover { background: rgba(255,255,255,.1); }
 .btn-icon.btn-danger:hover { background: rgba(220,38,38,.2); }
+/* Cores semânticas dos ícones de ação, com contraste nos dois temas. */
+[data-lucide="trash-2"], svg.lucide-trash-2 { color: #ef4444 !important; }
+[data-lucide="pencil"], svg.lucide-pencil { color: #3b82f6 !important; }
 .btn-link {
   background: none; border: none; color: var(--text-muted);
   cursor: pointer; font-size: .8rem; padding: 4px 8px; transition: .2s;
@@ -1689,6 +1697,43 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   font-size: .78rem; color: var(--text-dim);
 }
 .landing-visit-counter svg { width: 13px; height: 13px; opacity: .7; }
+.privacy-link { color: var(--text-muted); font-weight: 500; }
+
+/* ---- Política de Privacidade ---- */
+body.privacy-modal-open { overflow: hidden; }
+.privacy-modal {
+  position: fixed; inset: 0; z-index: 3000; display: none;
+  align-items: center; justify-content: center; padding: 24px;
+}
+.privacy-modal.open { display: flex; }
+.privacy-modal-backdrop { position: absolute; inset: 0; background: rgba(2,6,23,.78); backdrop-filter: blur(4px); }
+.privacy-dialog {
+  position: relative; width: min(760px, 100%); max-height: min(820px, calc(100dvh - 48px));
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: 0 24px 80px rgba(0,0,0,.42); outline: none;
+}
+.privacy-dialog-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
+  padding: 26px 28px 20px; border-bottom: 1px solid var(--border);
+}
+.privacy-dialog-header .landing-badge { margin-bottom: 10px; }
+.privacy-dialog-header h2 { font-size: 1.45rem; color: var(--text); }
+.privacy-dialog-header p { margin-top: 5px; color: var(--text-dim); font-size: .78rem; }
+.privacy-close {
+  flex: 0 0 auto; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent;
+  color: var(--text-muted); cursor: pointer;
+}
+.privacy-close:hover { color: var(--text); border-color: var(--accent); }
+.privacy-close svg { width: 19px; height: 19px; }
+.privacy-dialog-content { padding: 24px 28px; overflow-y: auto; color: var(--text-muted); }
+.privacy-dialog-content h3 { margin: 22px 0 8px; color: var(--text); font-size: 1rem; }
+.privacy-dialog-content h3:first-of-type { margin-top: 20px; }
+.privacy-dialog-content p { font-size: .88rem; line-height: 1.72; }
+.privacy-dialog-content p + p { margin-top: 10px; }
+.privacy-dialog-content strong { color: var(--text); }
+.privacy-dialog-footer { padding: 16px 28px; border-top: 1px solid var(--border); text-align: right; }
 
 /* ---- Mobile ---- */
 @media (max-width: 768px) {
@@ -1708,6 +1753,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .landing-stat-number { font-size: 1.5rem; }
   .landing-section-title { font-size: 1.5rem; }
   .landing-section { padding: 56px 20px; }
+  .privacy-modal { padding: 12px; }
+  .privacy-dialog { max-height: calc(100dvh - 24px); }
+  .privacy-dialog-header { padding: 20px 18px 16px; }
+  .privacy-dialog-header h2 { font-size: 1.2rem; }
+  .privacy-dialog-content { padding: 18px; }
+  .privacy-dialog-footer { padding: 14px 18px; }
 }
 .rv-del-btn { color: var(--danger) !important; }
 

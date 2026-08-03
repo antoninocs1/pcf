@@ -1151,6 +1151,7 @@ PCF.Pages = PCF.Pages || {};
       { id: 'agenda',    icon: '📅', label: 'Agenda'       },
       { id: 'planoacao', icon: '🗂', label: 'Plano de Ação' },
       { id: 'diario',    icon: '📖', label: 'Diário'       },
+      { id: 'linhatempo', icon: '📍', label: 'Linha do Tempo' },
     ];
 
     const _fmtDate = (d) => H.formatarData ? H.formatarData(d) : (d || '—');
@@ -1462,7 +1463,38 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
     };
 
-    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, agenda: renderAgenda, planoacao: renderPlanoAcao, diario: renderDiario };
+    /* ---- Seção: Linha do Tempo ---- */
+    const renderLinhaTempo = () => {
+      const eventos = [...S.getLinhaTempo()].sort((a, b) =>
+        (a.dataInicio || '').localeCompare(b.dataInicio || '') || (a.titulo || '').localeCompare(b.titulo || '')
+      );
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>📍 Marcos da Linha do Tempo <span class="badge badge-neutral">${eventos.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="gb-add-lt" class="btn btn-primary btn-sm">+ Novo</button>
+              <a href="#linha-tempo" class="btn btn-secondary btn-sm">📍 Visualizar</a>
+              <button id="gb-clear-lt" class="btn btn-danger btn-sm"${eventos.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${eventos.length === 0 ? '<p class="empty-text">Nenhum marco cadastrado</p>' : `
+          <div class="table-wrapper"><table class="table">
+            <thead><tr><th>Período</th><th>Título</th><th>Categoria</th><th class="col-hide-mobile">Local</th><th class="col-hide-mobile">Descrição</th><th style="width:90px">Ações</th></tr></thead>
+            <tbody>${eventos.map(e => `<tr>
+              <td>${_fmtDate(e.dataInicio)}${e.dataFim ? '<br><small class="text-muted">até ' + _fmtDate(e.dataFim) + '</small>' : ''}</td>
+              <td><strong>${H.esc(e.titulo || '—')}</strong>${e.destaque ? '<br><small>⭐ Destaque</small>' : ''}</td>
+              <td><span class="chip-small">${H.esc(e.categoria || 'Outro')}</span></td>
+              <td class="col-hide-mobile">${H.esc(e.local || '—')}</td>
+              <td class="col-hide-mobile">${H.esc((e.descricao || '').slice(0, 80))}${(e.descricao || '').length > 80 ? '…' : ''}</td>
+              <td><button class="btn-icon" data-gb-edit-lt="${e.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                <button class="btn-icon btn-danger" data-gb-del-lt="${e.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
+            </tr>`).join('')}</tbody>
+          </table></div>`}
+        </div>`;
+    };
+
+    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, agenda: renderAgenda, planoacao: renderPlanoAcao, diario: renderDiario, linhatempo: renderLinhaTempo };
 
     /* ---- Render principal ---- */
     const render = () => {
@@ -1519,6 +1551,10 @@ PCF.Pages = PCF.Pages || {};
       if (q('gb-clear-planoacao')) q('gb-clear-planoacao').onclick = () =>
         confirmClear('Plano de Ação', () => (S.getPlanoAcoes ? S.getPlanoAcoes().length : 0), () => S.getPlanoAcoes && S.savePlanoAcoes && S.savePlanoAcoes([]));
 
+      if (q('gb-add-lt')) q('gb-add-lt').onclick = () => showLinhaTempoModal(null);
+      if (q('gb-clear-lt')) q('gb-clear-lt').onclick = () =>
+        confirmClear('Linha do Tempo', () => S.getLinhaTempo().length, () => S.saveLinhaTempo([]));
+
       /* ---- Delegação de eventos nas linhas da tabela ---- */
       container.onclick = (e) => {
         /* Troca de aba */
@@ -1565,6 +1601,63 @@ PCF.Pages = PCF.Pages || {};
         /* Plano de Ação */
         const delPa = e.target.closest('[data-gb-del-pa]');
         if (delPa && confirm('Remover esta ação do plano?')) { S.deletePlanoAcao && S.deletePlanoAcao(delPa.dataset.gbDelPa); render(); return; }
+
+        /* Linha do Tempo */
+        const editLt = e.target.closest('[data-gb-edit-lt]');
+        if (editLt) { const evento = S.getLinhaTempo().find(x => x.id === editLt.dataset.gbEditLt); if (evento) showLinhaTempoModal(evento); return; }
+        const delLt = e.target.closest('[data-gb-del-lt]');
+        if (delLt && confirm('Remover este marco da linha do tempo?')) { S.deleteEventoLinhaTempo(delLt.dataset.gbDelLt); render(); return; }
+      };
+    };
+
+    /* ---- Modal: Linha do Tempo ---- */
+    const showLinhaTempoModal = (evento) => {
+      const isEdit = !!evento;
+      const categorias = ['Família', 'Educação', 'Carreira', 'Relacionamentos', 'Saúde', 'Desenvolvimento', 'Lazer', 'Conquista', 'Outro'];
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal modal-lg">
+          <h3>${isEdit ? 'Editar' : 'Novo'} Marco da Linha do Tempo</h3>
+          <form id="gb-lt-form">
+            <div class="form-group"><label>Título</label><input id="gb-lt-title" required maxlength="120" value="${H.esc(evento?.titulo || '')}"></div>
+            <div class="form-row">
+              <div class="form-group"><label>Data inicial</label><input type="date" id="gb-lt-start" required value="${evento?.dataInicio || ''}"></div>
+              <div class="form-group"><label>Data final (opcional)</label><input type="date" id="gb-lt-end" value="${evento?.dataFim || ''}"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Categoria</label><select id="gb-lt-category">${categorias.map(c => `<option value="${c}"${(evento?.categoria || 'Outro') === c ? ' selected' : ''}>${c}</option>`).join('')}</select></div>
+              <div class="form-group"><label>Local (opcional)</label><input id="gb-lt-local" maxlength="120" value="${H.esc(evento?.local || '')}"></div>
+            </div>
+            <div class="form-group"><label>Descrição</label><textarea id="gb-lt-description" rows="5" maxlength="2000">${H.esc(evento?.descricao || '')}</textarea></div>
+            <label class="check-label"><input type="checkbox" id="gb-lt-featured"${evento?.destaque ? ' checked' : ''}> Destacar este marco</label>
+            <div id="gb-lt-error" class="alert alert-error" style="display:none"></div>
+            <div class="modal-actions"><button type="button" class="btn btn-secondary" id="gb-lt-cancel">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+      document.getElementById('gb-lt-cancel').onclick = () => overlay.remove();
+      overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+      document.getElementById('gb-lt-form').onsubmit = e => {
+        e.preventDefault();
+        const dataInicio = document.getElementById('gb-lt-start').value;
+        const dataFim = document.getElementById('gb-lt-end').value;
+        if (dataFim && dataFim < dataInicio) {
+          const error = document.getElementById('gb-lt-error');
+          error.textContent = 'A data final não pode ser anterior à data inicial.';
+          error.style.display = 'block';
+          return;
+        }
+        const data = {
+          titulo: document.getElementById('gb-lt-title').value.trim(), dataInicio, dataFim,
+          categoria: document.getElementById('gb-lt-category').value,
+          local: document.getElementById('gb-lt-local').value.trim(),
+          descricao: document.getElementById('gb-lt-description').value.trim(),
+          destaque: document.getElementById('gb-lt-featured').checked
+        };
+        if (isEdit) S.updateEventoLinhaTempo(evento.id, data); else S.addEventoLinhaTempo(data);
+        overlay.remove();
+        render();
       };
     };
 
