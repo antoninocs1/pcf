@@ -484,6 +484,117 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
+  /* ==================== RELATÓRIO DE USO ==================== */
+  PCF.Pages.relatorioUso = async (container) => {
+    container.innerHTML = `
+      <div class="page">
+        <div class="page-header"><h2>Relatório de Uso das Funcionalidades</h2></div>
+        <p class="empty-text">Carregando dados de uso...</p>
+      </div>`;
+
+    const rows = await S.getRelatorioUsoFuncionalidades();
+    const all = rows.flatMap(row => (row.usos || []).map(uso => ({ ...uso, user: row.user })));
+    const byFeature = new Map();
+    const byUserFeature = new Map();
+    const byGroup = new Map();
+
+    all.forEach(uso => {
+      const label = uso.label || uso.hash || 'Funcionalidade';
+      const grupo = uso.grupo || 'Geral';
+      byFeature.set(label, (byFeature.get(label) || 0) + 1);
+      byGroup.set(grupo, (byGroup.get(grupo) || 0) + 1);
+      const uid = uso.user?.id || 'sem-usuario';
+      const key = `${uid}|${label}`;
+      const current = byUserFeature.get(key);
+      byUserFeature.set(key, {
+        user: uso.user,
+        label,
+        grupo,
+        total: (current?.total || 0) + 1,
+        ultimoAcesso: !current?.ultimoAcesso || uso.data > current.ultimoAcesso ? uso.data : current.ultimoAcesso,
+      });
+    });
+
+    const sortedFeatures = [...byFeature.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    const sortedGroups = [...byGroup.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    const sortedUserFeatures = [...byUserFeature.values()].sort((a, b) =>
+      (a.user?.nome || '').localeCompare(b.user?.nome || '') || b.total - a.total
+    );
+    const usuariosComUso = rows.filter(r => (r.usos || []).length > 0);
+    const dataMaisRecente = all.map(u => u.data).filter(Boolean).sort().pop();
+
+    const fmtDateTime = (iso) => {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '-';
+      return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    };
+
+    const renderRanking = (items) => items.length ? items.map(([label, total], i) => `
+      <tr><td>${i + 1}</td><td>${H.esc(label)}</td><td><strong>${total}</strong></td></tr>
+    `).join('') : '<tr><td colspan="3" class="empty-text">Nenhum uso registrado ainda</td></tr>';
+
+    container.innerHTML = `
+      <div class="page">
+        <div class="page-header">
+          <h2>Relatório de Uso das Funcionalidades</h2>
+          <div class="page-actions">
+            <select id="uso-user-filter">
+              <option value="">Todos os usuários</option>
+              ${rows.map(r => `<option value="${r.user.id}">${H.esc(r.user.nome || r.user.email || r.user.login || r.user.id)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="cards-grid">
+          <div class="card"><div class="card-icon">📊</div><div class="card-info"><span class="card-label">Acessos registrados</span><span class="card-value">${all.length}</span></div></div>
+          <div class="card"><div class="card-icon">🧩</div><div class="card-info"><span class="card-label">Funcionalidades usadas</span><span class="card-value">${byFeature.size}</span></div></div>
+          <div class="card"><div class="card-icon">👤</div><div class="card-info"><span class="card-label">Usuários com uso</span><span class="card-value">${usuariosComUso.length}</span></div></div>
+          <div class="card"><div class="card-icon">🕒</div><div class="card-info"><span class="card-label">Último acesso</span><span class="card-value">${fmtDateTime(dataMaisRecente)}</span></div></div>
+        </div>
+
+        <div class="charts-grid uso-report-grid">
+          <div class="chart-container">
+            <h3>Funcionalidades mais utilizadas - Geral</h3>
+            <div class="table-container"><table class="table">
+              <thead><tr><th>#</th><th>Funcionalidade</th><th>Acessos</th></tr></thead>
+              <tbody>${renderRanking(sortedFeatures)}</tbody>
+            </table></div>
+          </div>
+          <div class="chart-container">
+            <h3>Uso por grupo</h3>
+            <div class="table-container"><table class="table">
+              <thead><tr><th>#</th><th>Grupo</th><th>Acessos</th></tr></thead>
+              <tbody>${renderRanking(sortedGroups)}</tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="chart-container uso-user-table">
+          <h3>Funcionalidades mais utilizadas por usuário</h3>
+          <div class="table-container"><table class="table">
+            <thead><tr><th>Usuário</th><th>Grupo</th><th>Funcionalidade</th><th>Acessos</th><th>Último acesso</th></tr></thead>
+            <tbody id="uso-user-rows"></tbody>
+          </table></div>
+        </div>
+      </div>`;
+
+    const renderUserRows = () => {
+      const selected = document.getElementById('uso-user-filter').value;
+      const filtered = selected ? sortedUserFeatures.filter(r => r.user?.id === selected) : sortedUserFeatures;
+      document.getElementById('uso-user-rows').innerHTML = filtered.length ? filtered.map(r => `
+        <tr>
+          <td>${H.esc(r.user?.nome || r.user?.email || r.user?.login || '-')}</td>
+          <td>${H.esc(r.grupo)}</td>
+          <td>${H.esc(r.label)}</td>
+          <td><strong>${r.total}</strong></td>
+          <td>${fmtDateTime(r.ultimoAcesso)}</td>
+        </tr>
+      `).join('') : '<tr><td colspan="5" class="empty-text">Nenhum uso registrado para este filtro</td></tr>';
+    };
+    document.getElementById('uso-user-filter').onchange = renderUserRows;
+    renderUserRows();
+  };
+
   /* ==================== IMPORTAR / EXPORTAR CSV ==================== */
   PCF.Pages.importExport = (container) => {
     container.innerHTML = `

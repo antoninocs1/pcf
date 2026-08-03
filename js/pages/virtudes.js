@@ -452,7 +452,9 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2><i data-lucide="database"></i> Base de Dados — Virtudes</h2>
-            <a href="#virtudes" class="btn btn-secondary btn-sm"><i data-lucide="gem"></i> Check-in</a>
+            <div class="page-header-actions">
+              <a href="#virtudes" class="btn btn-secondary btn-sm"><i data-lucide="gem"></i> Check-in</a>
+            </div>
           </div>
           <div class="filtros-bar">
             <div class="form-group-inline">
@@ -468,8 +470,8 @@ PCF.Pages = PCF.Pages || {};
             </div>
             <button id="vbase-clear" class="btn btn-ghost btn-sm">Limpar filtros</button>
           </div>
-          <p class="text-muted text-sm" style="margin:0 0 8px 0">${regs.length} registro${regs.length !== 1 ? 's' : ''}</p>
-          <div class="table-wrap">
+          <p class="vbase-count">${regs.length} registro${regs.length !== 1 ? 's' : ''}</p>
+          <div class="table-wrap vbase-table-wrap">
             <table class="data-table">
               <thead><tr>
                 <th>Data</th><th>Dia</th><th>Virtude</th><th>Categoria</th><th>Ações</th>
@@ -486,7 +488,7 @@ PCF.Pages = PCF.Pages || {};
                         <td class="text-muted text-sm">${weekday}</td>
                         <td><span style="color:${H.esc(v.cor)};margin-right:4px">${H.esc(v.icone || '✦')}</span>${H.esc(v.nome)}</td>
                         <td><span class="badge" style="background:${getCatColor(v.categoria)}22;color:${getCatColor(v.categoria)}">${H.esc(v.categoria || '')}</span></td>
-                        <td><button class="btn btn-icon btn-danger btn-del-vreg" data-id="${H.esc(r.id)}" title="Excluir registro"><i data-lucide="trash-2"></i></button></td>
+                        <td class="actions-cell"><button class="btn btn-icon btn-danger btn-del-vreg" data-id="${H.esc(r.id)}" title="Excluir registro"><i data-lucide="trash-2"></i></button></td>
                       </tr>`;
                   }).join('')}
               </tbody>

@@ -734,6 +734,7 @@ PCF.App = (() => {
     { standalone: true, hash: '#contatos',     icon: 'user',      label: 'Contatos Pessoais' },
     { standalone: true, adminOnly: true, hash: '#usuarios',       icon: 'users',    label: 'Configuração de usuários' },
     { standalone: true, adminOnly: true, hash: '#gerenciar-bases', icon: 'database', label: 'Gerenciar Bases de Dados' },
+    { standalone: true, adminOnly: true, hash: '#relatorio-uso',   icon: 'bar-chart-2', label: 'Relatório de Uso' },
     { standalone: true, adminOnly: true, hash: '#importexport',    icon: 'upload',   label: 'Importar / Exportar' },
   ];
 
@@ -741,7 +742,41 @@ PCF.App = (() => {
   const _navSaveExpanded = (obj) => { try { localStorage.setItem('pcf_nav_expanded', JSON.stringify(obj)); } catch {} };
 
   /* Rotas que exigem perfil Administrador */
-  const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios', '#diario-config', '#roda-vida-config', '#gerenciar-bases']);
+  const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios', '#diario-config', '#roda-vida-config', '#gerenciar-bases', '#relatorio-uso']);
+
+  const ROUTE_USAGE_INFO = {
+    '#home': { label: 'Início', grupo: 'Geral' },
+    '#dashboard': { label: 'Painel financeiro', grupo: 'Financeiro' },
+    '#inserir': { label: 'Inserir Transação Financeira', grupo: 'Financeiro' },
+    '#base': { label: 'Base de Dados Financeira', grupo: 'Financeiro' },
+    '#relatorios': { label: 'Relatório financeiro', grupo: 'Financeiro' },
+    '#ciclo': { label: '4 Forças do Dinheiro', grupo: 'Financeiro' },
+    '#categorias': { label: 'Configuração de categorias', grupo: 'Financeiro' },
+    '#emocoes': { label: 'Emoções', grupo: 'Emoções' },
+    '#emocoes-relatorios': { label: 'Relatório de emoções', grupo: 'Emoções' },
+    '#emocoes-config': { label: 'Configuração de emoções', grupo: 'Emoções' },
+    '#habitos': { label: 'Hábitos diários', grupo: 'Hábitos' },
+    '#habitos-mensal': { label: 'Visão mensal dos hábitos', grupo: 'Hábitos' },
+    '#habitos-relatorio': { label: 'Relatório de hábitos', grupo: 'Hábitos' },
+    '#habitos-config': { label: 'Configuração de hábitos', grupo: 'Hábitos' },
+    '#frases': { label: 'Base de Mensagens', grupo: 'Hábitos' },
+    '#virtudes': { label: 'Virtudes Diárias', grupo: 'Virtudes' },
+    '#virtudes-relatorio': { label: 'Relatório de virtudes', grupo: 'Virtudes' },
+    '#virtudes-base': { label: 'Base de Virtudes', grupo: 'Virtudes' },
+    '#virtudes-config': { label: 'Configuração de virtudes', grupo: 'Virtudes' },
+    '#roda-vida': { label: 'Roda da Vida', grupo: 'Roda da Vida' },
+    '#roda-vida-config': { label: 'Configuração da Roda da Vida', grupo: 'Roda da Vida' },
+    '#diario': { label: 'Diário', grupo: 'Diário' },
+    '#diario-config': { label: 'Configuração do diário', grupo: 'Diário' },
+    '#plano-acao': { label: 'Plano de Ação 5W2H', grupo: 'Plano de Ação' },
+    '#agenda': { label: 'Agenda', grupo: 'Agenda' },
+    '#imc': { label: 'IMC', grupo: 'Saúde' },
+    '#contatos': { label: 'Contatos Pessoais', grupo: 'Contatos' },
+    '#linha-tempo': { label: 'Linha do Tempo', grupo: 'Linha do Tempo' },
+    '#usuarios': { label: 'Configuração de usuários', grupo: 'Administração' },
+    '#gerenciar-bases': { label: 'Gerenciar Bases de Dados', grupo: 'Administração' },
+    '#importexport': { label: 'Importar / Exportar', grupo: 'Administração' },
+  };
 
   const renderNav = () => {
     const isAdmin = S.currentUserIsAdmin();
@@ -1013,11 +1048,26 @@ PCF.App = (() => {
       '#contatos': pages.contatos,
       '#importexport': pages.importExport,
       '#gerenciar-bases': pages.gerenciarBases,
+      '#relatorio-uso': pages.relatorioUso,
     };
     const renderFn = map[hash] || ((mc) => renderHome(mc));
     if (renderFn) {
       try {
-        renderFn(mc);
+        const renderResult = renderFn(mc);
+        if (renderResult && typeof renderResult.catch === 'function') {
+          renderResult.catch(err => {
+            console.error('[PCF] Erro ao renderizar página', hash, err);
+            mc.innerHTML = `<div class="page"><div class="alert alert-error">
+              <strong>Erro ao carregar esta página.</strong><br>
+              ${err && err.message ? err.message : err}<br>
+              <small>Verifique o console para detalhes. Tente recarregar com Ctrl+F5.</small>
+            </div></div>`;
+          });
+        }
+        if (hash !== '#relatorio-uso') {
+          const usageInfo = ROUTE_USAGE_INFO[hash] || { label: hash.replace('#', ''), grupo: 'Geral' };
+          S.registrarUsoFuncionalidade({ hash, ...usageInfo });
+        }
         window.scrollTo(0, 0);
         requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, 0)));
       }

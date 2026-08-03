@@ -192,6 +192,8 @@ a:hover { text-decoration: underline; }
 .chart-table-row.total { font-weight: 700; border-top: 2px solid var(--border); color: var(--accent); }
 .chart-table-row span:first-child { flex: 1; }
 .chart-table-row span { min-width: 90px; text-align: right; }
+.uso-report-grid { margin-bottom: 20px; }
+.uso-user-table { margin-top: 20px; }
 
 /* ==================== FORM ==================== */
 .form-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; margin-bottom: 14px; }
@@ -412,6 +414,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .imc-form { background: var(--bg-card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
 .imc-table-container { background: var(--bg-card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
 .imc-table-container h3 { margin-bottom: 12px; }
+.imc-history { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr); gap: 24px; margin-top: 24px; }
+.imc-chart-container { min-height: 360px; }
+.imc-chart-container canvas { min-height: 285px; }
 .imc-result-card {
   margin-top: 16px; padding: 16px; border-radius: var(--radius-sm);
   background: var(--bg); border-left: 4px solid; text-align: center;
@@ -438,6 +443,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .emocao-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .emocao-situacao { font-size: .86rem; color: var(--text-muted); margin-bottom: 4px; }
 .emocao-descricao { font-size: .86rem; color: var(--text); }
+.emo-vida-feliz-banner { margin-bottom: 20px; }
 
 /* ==================== CONFIG EMOÇÕES ==================== */
 .emo-config-list { display: flex; flex-direction: column; gap: 16px; }
@@ -528,6 +534,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   input[type="text"], input[type="email"], input[type="password"],
   input[type="number"], input[type="date"], input[type="time"], select, textarea { font-size: 16px; }
   .imc-layout { grid-template-columns: 1fr; }
+  .imc-history { grid-template-columns: 1fr; }
   .emocoes-layout { grid-template-columns: 1fr; }
   .cards-grid { grid-template-columns: 1fr 1fr; }
   .ciclo-middle { flex-direction: column; }
@@ -2102,20 +2109,145 @@ body.privacy-modal-open { overflow: hidden; }
    VIRTUDES — Controle de Virtudes
    ===================================================== */
 
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+.btn-ghost:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.form-control,
+.form-control-sm,
+.form-control-inline {
+  font-family: inherit;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+}
+.form-control:focus,
+.form-control-sm:focus,
+.form-control-inline:focus { border-color: var(--accent); }
+.form-control-sm {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: .86rem;
+}
+.form-control-inline {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: .86rem;
+}
+.filtros-bar {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.form-group-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group-inline label {
+  font-size: .85rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  min-width: 0;
+}
+.stat-value {
+  color: var(--text);
+  font-size: 1.25rem;
+  line-height: 1.25;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.stat-label {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.data-table thead { background: rgba(255,255,255,.04); }
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: .88rem;
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover { background: rgba(255,255,255,.03); }
+.table-wrap,
+.vrel-table-wrap,
+.vconfig-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.text-center { text-align: center; }
+.text-sm { font-size: .85rem; }
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* ── Date bar ── */
 .virtudes-date-bar {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 14px;
-}
-.form-control-inline {
-  padding: 5px 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-size: .875rem;
 }
 
 /* ── Progress bar ── */
@@ -2302,6 +2434,14 @@ body.privacy-modal-open { overflow: hidden; }
 .vconfig-table-wrap { overflow-x: auto; }
 .row-inactive { opacity: .5; }
 .row-inactive td:first-child::after { content: ' (inativo)'; font-size: .7rem; color: var(--text-muted); }
+
+/* ── Base ── */
+.vbase-count {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: .85rem;
+}
+.vbase-table-wrap { border-radius: var(--radius); }
 
 /* ── Info box ── */
 .info-box {

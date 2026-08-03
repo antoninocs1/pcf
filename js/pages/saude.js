@@ -10,7 +10,11 @@ PCF.Pages = PCF.Pages || {};
 
   /* ==================== IMC ==================== */
   PCF.Pages.imc = (container) => {
+    PCF.App.destroyCharts();
     const saved = S.getIMC();
+    const registros = saved.registros || [];
+    const ultimo = registros[registros.length - 1] || {};
+    const alturaSalva = saved.altura || ultimo.altura || '';
     container.innerHTML = `
       <div class="page">
         <h2>Cálculo do IMC</h2><br>
@@ -18,15 +22,39 @@ PCF.Pages = PCF.Pages || {};
         <p class="subtitle">O índice é calculado da seguinte maneira: IMC = Peso ÷ (Altura × Altura)</p>
         <div class="imc-layout">
           <div class="imc-form">
-            <div class="form-group"><label>Peso (Kg)</label><input type="number" id="imc-peso" step="0.1" min="0" placeholder="Ex: 65" value="${saved.peso || ''}"></div>
-            <div class="form-group"><label>Altura (m)</label><input type="number" id="imc-altura" step="0.01" min="0" placeholder="Ex: 1.70" value="${saved.altura || ''}"></div>
-            <button id="imc-salvar" class="btn btn-primary">Salvar e Calcular</button>
+            <div class="form-group"><label>Data do registro</label><input type="date" id="imc-data" value="${H.hoje()}"></div>
+            <div class="form-group"><label>Peso (Kg)</label><input type="number" id="imc-peso" step="0.1" min="0" placeholder="Ex: 65" value="${ultimo.peso || ''}"></div>
+            <div class="form-group">
+              <label>Altura (m)</label>
+              <input type="number" id="imc-altura" step="0.01" min="0" placeholder="Ex: 1.70" value="${alturaSalva || ''}">
+              ${alturaSalva ? '<small class="form-hint">Altura preenchida automaticamente a partir do primeiro registro. Edite apenas se precisar corrigir.</small>' : '<small class="form-hint">Informe sua altura no primeiro registro. Depois ela ficará gravada para os próximos pesos.</small>'}
+            </div>
+            <button id="imc-salvar" class="btn btn-primary">Salvar Registro</button>
             <div id="imc-result"></div>
           </div>
           <div class="imc-table-container">
             <h3>Tabela de Referência</h3>
             <table class="table"><thead><tr><th>IMC</th><th>Classificação</th><th>Grau</th></tr></thead>
             <tbody>${H.IMC_CLASS.map((c, i) => `<tr id="imc-row-${i}"><td>${c.max === Infinity ? 'Maior que ' + c.min : i === 0 ? 'Menor que ' + c.max : 'Entre ' + c.min + ' e ' + c.max}</td><td>${c.nome}</td><td>${c.grau}</td></tr>`).join('')}</tbody></table>
+          </div>
+        </div>
+        <div class="imc-history">
+          <div class="chart-container imc-chart-container">
+            <h3>Variação de Peso e IMC</h3>
+            ${registros.length ? '<canvas id="imc-chart"></canvas>' : '<p class="empty-text">Salve seu primeiro registro para visualizar o gráfico.</p>'}
+          </div>
+          <div class="imc-table-container">
+            <h3>Registros efetuados</h3>
+            ${registros.length ? `
+              <div class="table-container"><table class="table">
+                <thead><tr><th>Data</th><th>Peso</th><th>Altura</th><th>IMC</th></tr></thead>
+                <tbody>${[...registros].reverse().map(r => `<tr>
+                  <td>${H.formatarData(r.data)}</td>
+                  <td>${Number(r.peso).toFixed(1)} kg</td>
+                  <td>${Number(r.altura).toFixed(2)} m</td>
+                  <td>${Number(r.imc || H.calcularIMC(r.peso, r.altura)).toFixed(2)}</td>
+                </tr>`).join('')}</tbody>
+              </table></div>` : '<p class="empty-text">Nenhum registro de IMC salvo ainda.</p>'}
           </div>
         </div>
       </div>`;
@@ -58,12 +86,61 @@ PCF.Pages = PCF.Pages || {};
     };
 
     document.getElementById('imc-salvar').onclick = () => {
+      const data = document.getElementById('imc-data').value || H.hoje();
       const peso = parseFloat(document.getElementById('imc-peso').value) || 0;
-      const altura = parseFloat(document.getElementById('imc-altura').value) || 0;
-      S.saveIMC({ peso, altura });
-      calcular();
+      const altura = parseFloat(document.getElementById('imc-altura').value) || saved.altura || 0;
+      if (peso <= 0 || altura <= 0) { alert('Informe peso e altura válidos para salvar o registro.'); return; }
+      const imc = H.calcularIMC(peso, altura);
+      const novosRegistros = [...registros.filter(r => r.data !== data), { id: Date.now().toString(36), data, peso, altura, imc }]
+        .sort((a, b) => a.data.localeCompare(b.data));
+      S.saveIMC({ altura, peso, registros: novosRegistros });
+      PCF.Pages.imc(container);
     };
     calcular();
+
+    if (registros.length && window.Chart) {
+      const labels = registros.map(r => H.formatarData(r.data));
+      PCF.App.registerChart(new Chart(document.getElementById('imc-chart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Peso (kg)',
+              data: registros.map(r => Number(r.peso)),
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59,130,246,.16)',
+              yAxisID: 'yPeso',
+              tension: .32,
+              pointRadius: 4,
+            },
+            {
+              label: 'IMC',
+              data: registros.map(r => Number((r.imc || H.calcularIMC(r.peso, r.altura)).toFixed(2))),
+              borderColor: '#16a34a',
+              backgroundColor: 'rgba(22,163,74,.16)',
+              yAxisID: 'yImc',
+              tension: .32,
+              pointRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            yPeso: { type: 'linear', position: 'left', title: { display: true, text: 'Peso (kg)', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,.15)' } },
+            yImc: { type: 'linear', position: 'right', title: { display: true, text: 'IMC', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { drawOnChartArea: false } },
+            x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,.1)' } },
+          },
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#94a3b8' } },
+            datalabels: { display: false },
+          },
+        },
+      }));
+    }
   };
 
   /* ==================== EMOÇÕES (REGISTRO) ==================== */
@@ -78,16 +155,51 @@ PCF.Pages = PCF.Pages || {};
 
   const getSituacaoDescricao = (em) => (em?.situacaoDescricao || '').trim();
 
+  const getVidaFelizHoje = () => {
+    const frases = S.getFrases().filter(f => f.ativo !== false && f.categoria === 'Vida Feliz');
+    if (!frases.length) return null;
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now - start) / 86400000);
+    return frases[dayOfYear % frases.length];
+  };
+
+  const sortearVidaFeliz = (fraseAtual) => {
+    const frases = S.getFrases().filter(f => f.ativo !== false && f.categoria === 'Vida Feliz');
+    if (frases.length <= 1) return fraseAtual || frases[0] || null;
+    let candidata;
+    do {
+      candidata = frases[Math.floor(Math.random() * frases.length)];
+    } while (candidata.id === fraseAtual?.id);
+    return candidata;
+  };
+
+  const htmlVidaFelizBanner = (frase) => {
+    if (!frase) return '';
+    return `
+      <div class="hab-frase-dia emo-vida-feliz-banner">
+        <div class="hab-frase-icon">💬</div>
+        <div class="hab-frase-content">
+          <div class="hab-frase-label">VIDA FELIZ</div>
+          <div class="hab-frase-texto" id="vida-feliz-texto">"${H.esc(frase.texto)}"</div>
+          <div class="hab-frase-autor" id="vida-feliz-autor"${frase.autor ? '' : ' style="display:none"'}>${frase.autor ? '— ' + H.esc(frase.autor) : ''}</div>
+        </div>
+        <button type="button" id="btn-outra-vida-feliz" class="home-msg-refresh" title="Exibir outra mensagem aleatória"><i data-lucide="refresh-cw"></i></button>
+      </div>`;
+  };
+
   PCF.Pages.emocoes = (container) => {
     let editingId = null;
 
     const render = () => {
       const config = S.getEmocoesConfig();
       const emocoes = S.getEmocoes();
+      const vidaFeliz = getVidaFelizHoje();
       container.innerHTML = `
         <div class="page">
           <h2>Análise das Emoções</h2><br>
           <p class="subtitle">Escolha a emoção que melhor descreve como você está se sentindo agora.</p>
+          ${htmlVidaFelizBanner(vidaFeliz)}
           <div class="emocoes-layout">
             <form id="form-emocao" class="form emocoes-form">
               <h3 id="emo-form-title">Novo registro</h3>
@@ -139,6 +251,20 @@ PCF.Pages = PCF.Pages || {};
 
       let selSup = null;
       document.getElementById('emo-intensidade').oninput = function() { document.getElementById('emo-int-val').textContent = this.value; };
+      const btnOutraVidaFeliz = document.getElementById('btn-outra-vida-feliz');
+      if (btnOutraVidaFeliz) {
+        let vidaFelizAtual = vidaFeliz;
+        btnOutraVidaFeliz.onclick = () => {
+          vidaFelizAtual = sortearVidaFeliz(vidaFelizAtual);
+          const textoEl = document.getElementById('vida-feliz-texto');
+          const autorEl = document.getElementById('vida-feliz-autor');
+          if (textoEl && vidaFelizAtual) textoEl.textContent = `"${vidaFelizAtual.texto}"`;
+          if (autorEl) {
+            autorEl.textContent = vidaFelizAtual?.autor ? `— ${vidaFelizAtual.autor}` : '';
+            autorEl.style.display = vidaFelizAtual?.autor ? '' : 'none';
+          }
+        };
+      }
 
       const selectSup = (id) => {
         document.querySelectorAll('#emo-sup-chips .chip').forEach(b => { b.classList.remove('selected'); b.style.background = ''; b.style.color = ''; });

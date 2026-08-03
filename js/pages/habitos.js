@@ -1034,7 +1034,7 @@ PCF.Pages = PCF.Pages || {};
      5. BASE DE MENSAGENS / FRASES DO DIA — CRUD
      ====================================================== */
   PCF.Pages.frases = (container) => {
-    const CATEGORIAS_FRASE = ['Motivação', 'Saúde', 'Finanças', 'Produtividade', 'Espiritualidade', 'Relacionamentos', 'Geral'];
+    const CATEGORIAS_FRASE = ['Motivação', 'Saúde', 'Finanças', 'Produtividade', 'Espiritualidade', 'Relacionamentos', 'Vida Feliz', 'Geral'];
 
     const render = () => {
       const frases = S.getFrases();
