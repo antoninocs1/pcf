@@ -3,6 +3,7 @@
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
+PCF.APP_VERSION = '1.001';
 
 PCF.App = (() => {
   const S = PCF.Store;
@@ -250,8 +251,11 @@ PCF.App = (() => {
 
         <footer class="landing-footer">
           <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
-          <a href="#politica-privacidade" class="privacy-link" data-open-privacy>Política de Privacidade</a>
-          <a href="#apoie" class="landing-footer-link"><i data-lucide="heart"></i> Nos apoie</a>
+          <div class="landing-footer-links">
+            <span class="app-version">Versão ${PCF.APP_VERSION}</span>
+            <a href="#politica-privacidade" class="privacy-link" data-open-privacy>Política de Privacidade</a>
+            <a href="#apoie" class="landing-footer-link"><i data-lucide="heart"></i> Nos apoie</a>
+          </div>
           <p class="landing-visit-counter"><i data-lucide="eye"></i> <span id="visit-count-label"></span></p>
         </footer>
 
@@ -1105,6 +1109,9 @@ PCF.App = (() => {
           <nav class="sidebar-nav" id="sidebar-nav">
             ${renderNav()}
           </nav>
+          <div class="sidebar-footer">
+            <span class="app-version">Versão ${PCF.APP_VERSION}</span>
+          </div>
         </aside>
         <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="Fechar menu" tabindex="-1"></button>
         <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false"><i data-lucide="menu"></i></button>
