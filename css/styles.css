@@ -782,6 +782,15 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .farol-icon { font-size: 2rem; }
 .farol-msg { font-size: 1.05rem; font-weight: 600; }
+.farol-success {
+  background: rgba(22,163,74,.14);
+  border-left-color: var(--success);
+  color: #86efac;
+}
+.inserted-highlight {
+  outline: 2px solid rgba(22,163,74,.55);
+  outline-offset: -2px;
+}
 
 /* ==================== AGENDA ==================== */
 .form-grid-agenda {

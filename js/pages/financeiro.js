@@ -8,6 +8,36 @@ PCF.Pages = PCF.Pages || {};
   const S = PCF.Store;
   const H = PCF.Helpers;
   const reg = PCF.App.registerChart;
+  const FIN_SUCCESS_KEY = 'pcf_financeiro_success';
+
+  const setFieldError = (targetId, message) => {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    el.innerHTML = message ? `<div class="alert alert-error">${H.esc(message)}</div>` : '';
+  };
+
+  const validateTransacaoForm = ({ data, valor, categoria, tipoOperacao }) => {
+    if (!tipoOperacao) return 'Selecione o tipo de operacao.';
+    if (!data || Number.isNaN(new Date(data + 'T12:00:00').getTime())) return 'Informe uma data valida.';
+    if (!categoria) return 'Selecione uma categoria.';
+    if (!Number.isFinite(valor) || valor <= 0) return 'Informe um valor maior que zero.';
+    return '';
+  };
+
+  const saveFinanceSuccess = (transactionId) => {
+    sessionStorage.setItem(FIN_SUCCESS_KEY, JSON.stringify({
+      message: 'Transação registrada com sucesso',
+      transactionId,
+    }));
+  };
+
+  const consumeFinanceSuccess = () => {
+    const raw = sessionStorage.getItem(FIN_SUCCESS_KEY);
+    if (!raw) return null;
+    sessionStorage.removeItem(FIN_SUCCESS_KEY);
+    try { return JSON.parse(raw); }
+    catch (_) { return null; }
+  };
 
   /* ==================== DASHBOARD ==================== */
   PCF.Pages.dashboard = (container) => {
@@ -84,7 +114,7 @@ PCF.Pages = PCF.Pages || {};
       <div class="page">
         <h2>Inserir Transação Financeira</h2><br>
         <div id="inserir-msg"></div>
-        <form id="form-inserir" class="form">
+        <form id="form-inserir" class="form" novalidate>
           <div class="form-group"><label>Tipo de Operação</label>
             <div class="radio-group">
               <label class="radio-label selected"><input type="radio" name="tipoOp" value="DESPESA" checked>DESPESA</label>
@@ -150,27 +180,48 @@ PCF.Pages = PCF.Pages || {};
 
     document.getElementById('form-inserir').onsubmit = (e) => {
       e.preventDefault();
+      setFieldError('inserir-msg', '');
       const data = document.getElementById('ins-data').value;
+      const tipoOperacao = document.querySelector('input[name="tipoOp"]:checked')?.value || '';
+      const categoria = document.getElementById('ins-cat').value;
+      const valor = parseFloat(document.getElementById('ins-valor').value);
+      const validationError = validateTransacaoForm({ data, valor, categoria, tipoOperacao });
+      if (validationError) {
+        setFieldError('inserir-msg', validationError);
+        return;
+      }
       const info = H.extrairInfoData(data);
-      S.addTransacao({
-        data, dia: info.dia, mes: info.mes, ano: info.ano,
-        tipoOperacao: document.querySelector('input[name="tipoOp"]:checked').value,
-        categoria: document.getElementById('ins-cat').value,
-        subcategoria: document.getElementById('ins-subcat').value,
-        item: document.getElementById('ins-item').value.trim(),
-        valor: parseFloat(document.getElementById('ins-valor').value) || 0,
-        formaPagamento: document.getElementById('ins-pgto').value,
-        tipo: document.getElementById('ins-tipo').value,
-      });
-      document.getElementById('ins-valor').value = '';
-      document.getElementById('ins-item').value = '';
-      document.getElementById('inserir-msg').innerHTML = '<div class="alert alert-success">✅ Transação registrada com sucesso!</div>';
-      setTimeout(() => { const m = document.getElementById('inserir-msg'); if (m) m.innerHTML = ''; }, 3000);
+      try {
+        const beforeIds = new Set(S.getTransacoes().map(t => t.id));
+        const all = S.addTransacao({
+          data, dia: info.dia, mes: info.mes, ano: info.ano,
+          tipoOperacao,
+          categoria,
+          subcategoria: document.getElementById('ins-subcat').value,
+          item: document.getElementById('ins-item').value.trim(),
+          valor,
+          formaPagamento: document.getElementById('ins-pgto').value,
+          tipo: document.getElementById('ins-tipo').value,
+        });
+        const inserted = [...all].reverse().find(t => !beforeIds.has(t.id));
+        e.target.reset();
+        document.querySelector('input[name="tipoOp"][value="DESPESA"]').checked = true;
+        document.querySelectorAll('.radio-label').forEach(l => l.classList.remove('selected'));
+        document.querySelector('input[name="tipoOp"][value="DESPESA"]').parentElement.classList.add('selected');
+        document.getElementById('ins-data').value = H.hoje();
+        updateCats();
+        saveFinanceSuccess(inserted?.id || '');
+        location.hash = '#base';
+      } catch (err) {
+        console.error('[PCF] Erro ao registrar transacao:', err);
+        setFieldError('inserir-msg', err?.message || 'Erro ao registrar transacao. Verifique os campos e tente novamente.');
+      }
     };
   };
 
   /* ==================== BASE DE DADOS ==================== */
   PCF.Pages.base = (container) => {
+    const success = consumeFinanceSuccess();
     const render = () => {
       const trans = S.getTransacoes();
       const categorias = [...new Set(trans.map(t => t.categoria))].sort();
@@ -186,6 +237,7 @@ PCF.Pages = PCF.Pages || {};
               </button>
             </div>
           </div>
+          <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
           <div class="filters">
             <select id="base-tipo"><option value="">Todos os Tipos</option><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option><option value="INVESTIMENTO">Investimento</option></select>
             <select id="base-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
@@ -209,10 +261,21 @@ PCF.Pages = PCF.Pages || {};
         if (ano) f = f.filter(t => String(t.ano) === ano);
         if (cat) f = f.filter(t => t.categoria === cat);
         f.sort((a, b) => a.data.localeCompare(b.data));
+        if (success?.transactionId && !f.some(t => t.id === success.transactionId)) {
+          const inserted = trans.find(t => t.id === success.transactionId);
+          if (inserted) f = [inserted, ...f];
+        }
+        if (success?.transactionId) {
+          f.sort((a, b) => {
+            if (a.id === success.transactionId) return -1;
+            if (b.id === success.transactionId) return 1;
+            return a.data.localeCompare(b.data);
+          });
+        }
         document.getElementById('base-subtotal').textContent = 'Subtotal: ' + H.formatarMoeda(f.reduce((s, t) => s + t.valor, 0));
         document.getElementById('base-tbody').innerHTML = f.length === 0
           ? '<tr><td colspan="12" class="empty-text">Nenhuma transação encontrada</td></tr>'
-          : f.map(t => `<tr>
+          : f.map(t => `<tr class="${success?.transactionId === t.id ? 'highlight inserted-highlight' : ''}">
               <td>${H.formatarData(t.data)}</td><td class="col-hide-mobile">${t.dia}</td><td class="col-hide-mobile">${H.esc(t.mes)}</td><td class="col-hide-mobile">${t.ano}</td>
               <td><span class="tipo-badge ${t.tipoOperacao.toLowerCase()}">${t.tipoOperacao}</span></td>
               <td>${H.esc(t.categoria)}</td><td class="col-hide-mobile">${H.esc(t.subcategoria)}</td><td class="col-hide-mobile">${H.esc(t.item)}</td>
@@ -230,6 +293,13 @@ PCF.Pages = PCF.Pages || {};
         if (btn && confirm('Remover esta transação?')) { S.deleteTransacao(btn.dataset.del); render(); }
       };
       filterAndRender();
+      if (success?.transactionId) {
+        requestAnimationFrame(() => {
+          const row = document.querySelector('.inserted-highlight');
+          if (row) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        });
+      }
+      if (success) setTimeout(() => { const m = document.getElementById('base-msg'); if (m) m.innerHTML = ''; }, 5000);
     };
     render();
   };
@@ -245,7 +315,8 @@ PCF.Pages = PCF.Pages || {};
     overlay.innerHTML = `
       <div class="modal modal-lg">
         <h3>Editar Transação</h3>
-        <form id="edit-trans-form">
+        <div id="edit-trans-msg"></div>
+        <form id="edit-trans-form" novalidate>
           <div class="form-row">
             <div class="form-group"><label>Data</label><input type="date" id="et-data" value="${t.data}" required></div>
             <div class="form-group"><label>Valor (R$)</label><input type="number" id="et-valor" step="0.01" value="${t.valor}" required></div>
@@ -305,20 +376,34 @@ PCF.Pages = PCF.Pages || {};
 
     document.getElementById('edit-trans-form').onsubmit = (e) => {
       e.preventDefault();
+      setFieldError('edit-trans-msg', '');
       const data = document.getElementById('et-data').value;
+      const tipoOperacao = document.getElementById('et-tipo-op').value;
+      const categoria = document.getElementById('et-cat').value;
+      const valor = parseFloat(document.getElementById('et-valor').value);
+      const validationError = validateTransacaoForm({ data, valor, categoria, tipoOperacao });
+      if (validationError) {
+        setFieldError('edit-trans-msg', validationError);
+        return;
+      }
       const info = H.extrairInfoData(data);
-      S.updateTransacao(t.id, {
-        data, dia: info.dia, mes: info.mes, ano: info.ano,
-        tipoOperacao: document.getElementById('et-tipo-op').value,
-        categoria: document.getElementById('et-cat').value,
-        subcategoria: document.getElementById('et-subcat').value,
-        item: document.getElementById('et-item').value.trim(),
-        valor: parseFloat(document.getElementById('et-valor').value) || 0,
-        formaPagamento: document.getElementById('et-pgto').value,
-        tipo: document.getElementById('et-ftipo').value,
-      });
-      overlay.remove();
-      onSave();
+      try {
+        S.updateTransacao(t.id, {
+          data, dia: info.dia, mes: info.mes, ano: info.ano,
+          tipoOperacao,
+          categoria,
+          subcategoria: document.getElementById('et-subcat').value,
+          item: document.getElementById('et-item').value.trim(),
+          valor,
+          formaPagamento: document.getElementById('et-pgto').value,
+          tipo: document.getElementById('et-ftipo').value,
+        });
+        overlay.remove();
+        onSave();
+      } catch (err) {
+        console.error('[PCF] Erro ao salvar edicao da transacao:', err);
+        setFieldError('edit-trans-msg', err?.message || 'Erro ao salvar a transacao. Verifique os campos e tente novamente.');
+      }
     };
   };
 

@@ -7,7 +7,7 @@ PCF.Helpers = (() => {
   const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const DIAS_SEMANA = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 
-  const FORMAS_PAGAMENTO = ['Dinheiro','PIX','Boleto','Cartão Débito','Cartão Crédito','Outros'];
+  const FORMAS_PAGAMENTO = ['Dinheiro','PIX','Boleto','Cartão Débito','Cartão Crédito','Transferência/TED','Outros'];
   const TIPOS_DESPESA = ['Fixo','Variável'];
 
   const formatarMoeda = (v) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
