@@ -47,12 +47,13 @@ PCF.Pages = PCF.Pages || {};
             <h3>Registros efetuados</h3>
             ${registros.length ? `
               <div class="table-container"><table class="table">
-                <thead><tr><th>Data</th><th>Peso</th><th>Altura</th><th>IMC</th></tr></thead>
+                <thead><tr><th>Data</th><th>Peso</th><th>Altura</th><th>IMC</th><th style="width:70px">Ações</th></tr></thead>
                 <tbody>${[...registros].reverse().map(r => `<tr>
                   <td>${H.formatarData(r.data)}</td>
                   <td>${Number(r.peso).toFixed(1)} kg</td>
                   <td>${Number(r.altura).toFixed(2)} m</td>
                   <td>${Number(r.imc || H.calcularIMC(r.peso, r.altura)).toFixed(2)}</td>
+                  <td><button class="btn-icon btn-danger" data-del-imc="${H.esc(r.id || r.data)}" title="Remover registro"><i data-lucide="trash-2"></i></button></td>
                 </tr>`).join('')}</tbody>
               </table></div>` : '<p class="empty-text">Nenhum registro de IMC salvo ainda.</p>'}
           </div>
@@ -96,6 +97,20 @@ PCF.Pages = PCF.Pages || {};
       S.saveIMC({ altura, peso, registros: novosRegistros });
       PCF.Pages.imc(container);
     };
+    container.querySelectorAll('[data-del-imc]').forEach(btn => {
+      btn.onclick = () => {
+        if (!confirm('Remover este registro de IMC?')) return;
+        const id = btn.dataset.delImc;
+        const novosRegistros = registros.filter(r => (r.id || r.data) !== id);
+        const ultimoRegistro = novosRegistros[novosRegistros.length - 1] || {};
+        S.saveIMC({
+          altura: saved.altura || ultimoRegistro.altura || '',
+          peso: ultimoRegistro.peso || 0,
+          registros: novosRegistros,
+        });
+        PCF.Pages.imc(container);
+      };
+    });
     calcular();
 
     if (registros.length && window.Chart) {
