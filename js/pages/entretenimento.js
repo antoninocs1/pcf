@@ -147,6 +147,23 @@ PCF.Pages = PCF.Pages || {};
     return { grid, words: placed, selected: null, message: 'Toque na primeira letra e depois na última letra da palavra.' };
   };
 
+  const isValidGame = (game) => {
+    if (!game || !Array.isArray(game.grid) || !Array.isArray(game.words)) return false;
+    if (game.grid.length !== SIZE || game.grid.some(row => !Array.isArray(row) || row.length !== SIZE)) return false;
+    return game.words.length > 0 && game.words.every(w =>
+      w && Array.isArray(w.cells) && w.cells.length && typeof w.word === 'string' && typeof w.titulo === 'string'
+    );
+  };
+
+  const loadSavedGame = () => {
+    const saved = S.getJogoPalavrasEstado ? S.getJogoPalavrasEstado() : null;
+    return isValidGame(saved) ? saved : buildGame();
+  };
+
+  const saveGame = (game) => {
+    if (S.saveJogoPalavrasEstado && isValidGame(game)) S.saveJogoPalavrasEstado(game);
+  };
+
   const cellsBetween = (start, end) => {
     const drRaw = end.r - start.r;
     const dcRaw = end.c - start.c;
@@ -199,7 +216,8 @@ PCF.Pages = PCF.Pages || {};
   };
 
   PCF.Pages.cacaPalavras = (container) => {
-    let game = buildGame();
+    let game = loadSavedGame();
+    saveGame(game);
 
     const render = () => {
       const foundCount = game.words.filter(w => w.found).length;
@@ -252,6 +270,7 @@ PCF.Pages = PCF.Pages || {};
 
       container.querySelector('#wg-new').onclick = () => {
         game = buildGame();
+        saveGame(game);
         render();
       };
 
@@ -262,6 +281,7 @@ PCF.Pages = PCF.Pages || {};
           if (!game.selected) {
             game.selected = key;
             game.message = 'Agora toque na última letra da palavra.';
+            saveGame(game);
             render();
             return;
           }
@@ -275,16 +295,19 @@ PCF.Pages = PCF.Pages || {};
           if (found) {
             found.found = true;
             game.message = `Você encontrou ${found.titulo}.`;
+            saveGame(game);
             render();
             const completed = game.words.every(w => w.found);
             showDefinition(found, completed ? () => {
               showCompletion(() => {
                 game = buildGame();
+                saveGame(game);
                 render();
               });
             } : null);
           } else {
             game.message = 'Ainda não foi dessa vez. Escolha a primeira letra e tente novamente.';
+            saveGame(game);
             render();
           }
         };

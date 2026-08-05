@@ -17,7 +17,8 @@ PCF.Store = (() => {
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
     'rodavida_reg', 'rodavida_config', 'plano_acao',
-    'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades'
+    'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades',
+    'jogo_palavras_estado'
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
@@ -2498,11 +2499,14 @@ PCF.Store = (() => {
 
   /* ---------- ENTRETENIMENTO: CAÇA-PALAVRAS ---------- */
   const _jpwU = () => `pcf_jogo_palavras_${currentUserId()}`;
+  const _jpwStateU = () => `pcf_jogo_palavras_estado_${currentUserId()}`;
   const getJogoPalavras = () => _get(_jpwU()) || [];
   const saveJogoPalavras = (arr) => _set(_jpwU(), arr || []);
   const addJogoPalavra = (item) => { const all = getJogoPalavras(); all.push({ id: _uid(), ativo: true, ...item }); saveJogoPalavras(all); return all; };
   const updateJogoPalavra = (id, data) => { const all = getJogoPalavras(); const i = all.findIndex(p => p.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveJogoPalavras(all); } return all; };
   const deleteJogoPalavra = (id) => { const all = getJogoPalavras().filter(p => p.id !== id); saveJogoPalavras(all); return all; };
+  const getJogoPalavrasEstado = () => _get(_jpwStateU()) || null;
+  const saveJogoPalavrasEstado = (state) => _set(_jpwStateU(), state || null);
 
   /* ---------- VIRTUDES REGISTROS ---------- */
   const _vrU = () => `pcf_virtudes_reg_${currentUserId()}`;
@@ -2570,6 +2574,7 @@ PCF.Store = (() => {
     getRodaVidaRegistros, saveRodaVidaRegistros, deleteRodaVidaRegistro,
     getVirtudesConfig, saveVirtudesConfig, addVirtude, updateVirtude, deleteVirtude,
     getJogoPalavras, saveJogoPalavras, addJogoPalavra, updateJogoPalavra, deleteJogoPalavra,
+    getJogoPalavrasEstado, saveJogoPalavrasEstado,
     getVirtudesReg, saveVirtudesReg, toggleVirtude, deleteVirtudReg,
     exportData, importTransacoes, importCategorias,
     restoreDefaultCategorias, restoreDefaultEmocoesConfig, restoreDefaultHabitos, restoreDefaultFrases, restoreDefaultVirtudes,
