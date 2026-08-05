@@ -3,7 +3,7 @@
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
-PCF.APP_VERSION = '1.002';
+PCF.APP_VERSION = '1.003';
 
 PCF.App = (() => {
   const S = PCF.Store;
@@ -830,6 +830,12 @@ PCF.App = (() => {
       ]
     },
     {
+      id: 'entretenimento', label: 'Entretenimento', icon: 'sparkles',
+      items: [
+        { hash: '#caca-palavras', icon: 'puzzle', label: 'Caça-Palavras Interior' },
+      ]
+    },
+    {
       id: 'diario', label: 'Diário', icon: 'book-open',
       items: [
         { hash: '#diario',        icon: 'book-open', label: 'Diário' },
@@ -880,6 +886,7 @@ PCF.App = (() => {
     '#virtudes-config': { label: 'Configuração de virtudes', grupo: 'Virtudes' },
     '#roda-vida': { label: 'Roda da Vida', grupo: 'Roda da Vida' },
     '#roda-vida-config': { label: 'Configuração da Roda da Vida', grupo: 'Roda da Vida' },
+    '#caca-palavras': { label: 'Caça-Palavras Interior', grupo: 'Entretenimento' },
     '#diario': { label: 'Diário', grupo: 'Diário' },
     '#diario-config': { label: 'Configuração do diário', grupo: 'Diário' },
     '#plano-acao': { label: 'Plano de Ação 5W2H', grupo: 'Plano de Ação' },
@@ -1241,6 +1248,7 @@ PCF.App = (() => {
       '#emocoes-config': pages.emocoesConfig,
       '#roda-vida':        pages.rodaVida,
       '#roda-vida-config': pages.rodaVidaConfig,
+      '#caca-palavras': pages.cacaPalavras,
       '#virtudes':           pages.virtudes,
       '#virtudes-relatorio': pages.virtudesRelatorio,
       '#virtudes-base':      pages.virtudesBase,
