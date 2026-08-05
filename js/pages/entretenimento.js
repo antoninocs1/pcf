@@ -20,6 +20,10 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Perseveranca', titulo: 'Perseverança', tipo: 'Virtude', descricao: 'Terminar o que se começou; persistir apesar dos obstáculos.' },
     { palavra: 'Integridade', titulo: 'Integridade', tipo: 'Virtude', descricao: 'Falar a verdade e apresentar-se de forma genuína.' },
     { palavra: 'Vitalidade', titulo: 'Vitalidade', tipo: 'Virtude', descricao: 'Encarar a vida com entusiasmo e energia; viver plenamente.' },
+    { palavra: 'Bondade', titulo: 'Bondade', tipo: 'Virtude', descricao: 'Disposição sincera de fazer o bem, agir com cuidado e favorecer o crescimento das pessoas.' },
+    { palavra: 'Benevolencia', titulo: 'Benevolência', tipo: 'Virtude', descricao: 'Atitude de querer o bem do outro, olhando suas necessidades com generosidade e boa vontade.' },
+    { palavra: 'Indulgencia', titulo: 'Indulgência', tipo: 'Virtude', descricao: 'Capacidade de compreender falhas humanas com misericórdia, sem abandonar a responsabilidade e o aprendizado.' },
+    { palavra: 'Tolerancia', titulo: 'Tolerância', tipo: 'Virtude', descricao: 'Respeitar diferenças, limites e ritmos sem agressividade, mantendo firmeza e abertura ao diálogo.' },
     { palavra: 'Empatia', titulo: 'Empatia', tipo: 'Virtude', descricao: 'Capacidade de perceber o outro com respeito, imaginando seus sentimentos e necessidades.' },
     { palavra: 'Paciencia', titulo: 'Paciência', tipo: 'Virtude', descricao: 'Saber esperar e perseverar sem perder o equilíbrio diante de processos, pessoas ou limites.' },
     { palavra: 'Disciplina', titulo: 'Disciplina', tipo: 'Virtude', descricao: 'Compromisso constante com pequenas ações que sustentam objetivos importantes.' },
@@ -28,6 +32,7 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Resiliencia', titulo: 'Resiliência', tipo: 'Virtude', descricao: 'Capacidade de se reorganizar depois de dificuldades, mantendo sentido e continuidade.' },
     { palavra: 'Inteligencia', titulo: 'Inteligência Social', tipo: 'Virtude', descricao: 'Estar ciente dos próprios sentimentos e motivações, bem como dos outros.' },
     { palavra: 'Equipe', titulo: 'Trabalho em Equipe', tipo: 'Virtude', descricao: 'Trabalhar bem como membro de um grupo; ser leal ao grupo.' },
+    { palavra: 'Justica', titulo: 'Justiça', tipo: 'Virtude', descricao: 'Buscar equilíbrio, verdade e respeito aos direitos de cada pessoa nas escolhas e relações.' },
     { palavra: 'Imparcial', titulo: 'Imparcialidade', tipo: 'Virtude', descricao: 'Tratar todas as pessoas segundo noções de imparcialidade e justiça.' },
     { palavra: 'Lideranca', titulo: 'Liderança', tipo: 'Virtude', descricao: 'Estimular um grupo do qual se é membro para fazer as coisas.' },
     { palavra: 'Autocontrole', titulo: 'Autocontrole', tipo: 'Virtude', descricao: 'Regular o que se sente e faz; ser disciplinado.' },
@@ -48,6 +53,7 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Equilibrio', titulo: 'Equilíbrio', tipo: 'Virtude', descricao: 'Harmonizar razão, emoção e ação para viver com mais clareza.' },
     { palavra: 'Amor', titulo: 'Amor', tipo: 'Sentimento', descricao: 'Força de cuidado, vínculo e responsabilidade que amplia o sentido da vida.' },
     { palavra: 'Paz', titulo: 'Paz', tipo: 'Sentimento', descricao: 'Quietude interior que nasce da coerência entre valores, escolhas e atitudes.' },
+    { palavra: 'Amizade', titulo: 'Amizade', tipo: 'Sentimento', descricao: 'Vínculo de confiança, presença e cuidado recíproco que fortalece a caminhada da vida.' },
     { palavra: 'Entusiasmo', titulo: 'Entusiasmo', tipo: 'Emoção', descricao: 'Ânimo vivo para participar, criar e investir energia em algo que faz sentido.' },
   ];
 
@@ -73,8 +79,15 @@ PCF.Pages = PCF.Pages || {};
     if (!words.length) {
       words = defaultWords();
       S.saveJogoPalavras(words);
+    } else {
+      words = words.map(normalizeEntry).filter(w => w.palavra && w.titulo);
+      const existing = new Set(words.map(w => w.palavra));
+      const missingDefaults = defaultWords().filter(w => !existing.has(w.palavra));
+      if (missingDefaults.length) {
+        words = [...words, ...missingDefaults];
+        S.saveJogoPalavras(words);
+      }
     }
-    words = words.map(normalizeEntry).filter(w => w.palavra && w.titulo);
     return activeOnly ? words.filter(w => w.ativo !== false) : words;
   };
   const restoreDefaultWords = () => S.saveJogoPalavras(defaultWords());
