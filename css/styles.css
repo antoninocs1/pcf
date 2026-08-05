@@ -2318,56 +2318,6 @@ body.privacy-modal-open { overflow: hidden; }
 .home-msg-refresh:hover { color: var(--accent); border-color: var(--accent); }
 .home-msg-refresh svg { width: 15px; height: 15px; display: block; }
 
-.home-game-cta {
-  display: grid;
-  grid-template-columns: 46px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 18px;
-  padding: 13px 16px;
-  border: 1px solid rgba(59,130,246,.35);
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(59,130,246,.16), rgba(34,197,94,.12));
-  color: var(--text);
-  text-decoration: none;
-  box-shadow: var(--shadow);
-}
-.home-game-cta:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent);
-}
-.home-game-cta-icon {
-  width: 46px;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  color: #fff;
-  background: linear-gradient(135deg, #2563eb, #16a34a);
-}
-.home-game-cta-icon svg {
-  width: 22px;
-  height: 22px;
-}
-.home-game-cta strong,
-.home-game-cta small {
-  display: block;
-}
-.home-game-cta strong {
-  font-size: 1rem;
-}
-.home-game-cta small {
-  margin-top: 2px;
-  color: var(--text-muted);
-  line-height: 1.35;
-}
-.home-game-cta-arrow {
-  width: 18px;
-  height: 18px;
-  color: var(--accent);
-}
-
 .home-modules-title {
   font-size: .72rem;
   font-weight: 700;
@@ -2434,17 +2384,6 @@ body.privacy-modal-open { overflow: hidden; }
 }
 @media (max-width: 480px) {
   .home-modules-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .home-game-cta {
-    grid-template-columns: 40px 1fr;
-    padding: 12px;
-  }
-  .home-game-cta-icon {
-    width: 40px;
-    height: 40px;
-  }
-  .home-game-cta-arrow {
-    display: none;
-  }
 }
 
 [data-theme="light"] .home-banner {
@@ -2453,9 +2392,6 @@ body.privacy-modal-open { overflow: hidden; }
 [data-theme="light"] .home-message-wrap {
   background: rgba(0,0,0,.02);
   border-color: rgba(0,0,0,.06);
-}
-[data-theme="light"] .home-game-cta {
-  background: linear-gradient(135deg, rgba(219,234,254,.95), rgba(220,252,231,.9));
 }
 [data-theme="light"] .home-module-icon { background: rgba(0,0,0,.05); }
 [data-theme="light"] .home-clock { text-shadow: none; }

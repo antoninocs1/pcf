@@ -687,14 +687,6 @@ PCF.App = (() => {
             </button>
           </div>
         </div>
-        <a href="#caca-palavras" class="home-game-cta">
-          <span class="home-game-cta-icon"><i data-lucide="puzzle"></i></span>
-          <span>
-            <strong>Caça-Palavras Interior</strong>
-            <small>Jogue agora e descubra virtudes, emoções e bons sentimentos.</small>
-          </span>
-          <i data-lucide="arrow-right" class="home-game-cta-arrow"></i>
-        </a>
         <div class="home-modules-title">Módulos</div>
         <div class="home-modules-grid">
           ${modules.map(m => `
