@@ -3163,36 +3163,4 @@ body.privacy-modal-open { overflow: hidden; }
   .hab-controls-toggle { margin-left: 0; }
 }
 
-/* ==================== RESPONSIVE POLISH ==================== */
-@media (max-width: 768px) {
-  .main-content { padding: 14px; padding-top: 52px; }
-  .page-header { padding-left: 50px; padding-right: 44px; gap: 8px 10px; }
-  .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .card { padding: 14px; }
-  .filters { gap: 8px; align-items: stretch; }
-  .filters select,
-  .filters input,
-  .filters .btn { min-width: 140px; flex: 1 1 140px; }
-  .radio-label { flex: 1 1 150px; justify-content: center; }
-  .chart-container { padding: 14px; }
-}
-
-@media (max-width: 480px) {
-  .main-content { padding-inline: 10px; }
-  .page-header { padding-right: 42px; margin-bottom: 12px; }
-  .page > h2:first-child,
-  .page-header h2 { font-size: 1.25rem; overflow-wrap: anywhere; }
-  .cards-grid { grid-template-columns: 1fr; }
-  .filters select,
-  .filters input,
-  .filters .btn { width: 100%; min-width: 0; }
-  .btn:not(.btn-icon):not(.sidebar-toggle):not(.btn-home-back):not(.landing-nav-toggle):not(.landing-nav-contact) { width: 100%; }
-  .table-container,
-  .table-wrapper,
-  .table-wrap,
-  .vrel-table-wrap,
-  .vconfig-table-wrap { margin-inline: -6px; max-width: calc(100% + 12px); }
-  .landing-footer-links { flex-direction: column; gap: 4px; }
-}
-
 
