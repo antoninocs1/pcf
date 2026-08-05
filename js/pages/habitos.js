@@ -1075,11 +1075,11 @@ PCF.Pages = PCF.Pages || {};
                 ${frases.length === 0 ? '<tr><td colspan="5" class="empty-text">Nenhuma mensagem cadastrada</td></tr>' :
                   frases.map(f => `
                   <tr>
-                    <td class="frase-cell-msg" data-label="Mensagem">"${H.esc(f.texto)}"</td>
-                    <td class="frase-cell-autor" data-label="Autor">${H.esc(f.autor || '—')}</td>
-                    <td class="frase-cell-cat" data-label="Categoria"><span class="chip-small">${H.esc(f.categoria || 'Geral')}</span></td>
-                    <td class="frase-cell-status" data-label="Status"><span class="tipo-badge ${f.ativo !== false ? 'receita' : 'despesa'}">${f.ativo !== false ? 'Ativa' : 'Inativa'}</span></td>
-                    <td class="frase-cell-actions" data-label="Ações">
+                    <td class="frase-cell-msg">"${H.esc(f.texto)}"</td>
+                    <td class="frase-cell-autor">${H.esc(f.autor || '—')}</td>
+                    <td class="frase-cell-cat"><span class="chip-small">${H.esc(f.categoria || 'Geral')}</span></td>
+                    <td class="frase-cell-status"><span class="tipo-badge ${f.ativo !== false ? 'receita' : 'despesa'}">${f.ativo !== false ? 'Ativa' : 'Inativa'}</span></td>
+                    <td class="frase-cell-actions">
                       <button class="btn-icon" data-edit="${f.id}" title="Editar"><i data-lucide="pencil"></i></button>
                       <button class="btn-icon btn-danger" data-del="${f.id}" title="Excluir"><i data-lucide="trash-2"></i></button>
                     </td>
