@@ -12,8 +12,8 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Gratidao', titulo: 'Gratidão', tipo: 'Virtude', descricao: 'Reconhecer o valor das pessoas, oportunidades e experiências recebidas, cultivando apreciação pela vida.' },
     { palavra: 'Criatividade', titulo: 'Criatividade', tipo: 'Virtude', descricao: 'Pensar em formas novas e produtivas de conceituar e fazer as coisas.' },
     { palavra: 'Curiosidade', titulo: 'Curiosidade', tipo: 'Virtude', descricao: 'Interessar-se pela experiência em andamento por si só.' },
-    { palavra: 'Critico', titulo: 'Senso Crítico', tipo: 'Virtude', descricao: 'Refletir sobre as coisas e examiná-las a partir de todos os ângulos.' },
-    { palavra: 'Aprendizado', titulo: 'Amor ao Aprendizado', tipo: 'Virtude', descricao: 'Dominar novas habilidades, tópicos e corpos de conhecimento.' },
+    //{ palavra: 'Critico', titulo: 'Senso Crítico', tipo: 'Virtude', descricao: 'Refletir sobre as coisas e examiná-las a partir de todos os ângulos.' },
+    //{ palavra: 'Aprendizado', titulo: 'Amor ao Aprendizado', tipo: 'Virtude', descricao: 'Dominar novas habilidades, tópicos e corpos de conhecimento.' },
     { palavra: 'Perspectiva', titulo: 'Perspectiva', tipo: 'Virtude', descricao: 'Ser capaz de dar conselhos sábios aos outros.' },
     { palavra: 'Coragem', titulo: 'Coragem', tipo: 'Virtude', descricao: 'Força interior para agir com consciência mesmo diante do medo, da dúvida ou da dificuldade.' },
     { palavra: 'Bravura', titulo: 'Bravura', tipo: 'Virtude', descricao: 'Não recuar diante de ameaças, dificuldades ou sofrimento.' },
@@ -31,16 +31,23 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Humildade', titulo: 'Humildade', tipo: 'Virtude', descricao: 'Reconhecer o próprio valor sem arrogância e aprender com pessoas, erros e circunstâncias.' },
     { palavra: 'Resiliencia', titulo: 'Resiliência', tipo: 'Virtude', descricao: 'Capacidade de se reorganizar depois de dificuldades, mantendo sentido e continuidade.' },
     { palavra: 'Inteligencia', titulo: 'Inteligência Social', tipo: 'Virtude', descricao: 'Estar ciente dos próprios sentimentos e motivações, bem como dos outros.' },
-    { palavra: 'Equipe', titulo: 'Trabalho em Equipe', tipo: 'Virtude', descricao: 'Trabalhar bem como membro de um grupo; ser leal ao grupo.' },
+    //{ palavra: 'Equipe', titulo: 'Trabalho em Equipe', tipo: 'Virtude', descricao: 'Trabalhar bem como membro de um grupo; ser leal ao grupo.' },
     { palavra: 'Justica', titulo: 'Justiça', tipo: 'Virtude', descricao: 'Buscar equilíbrio, verdade e respeito aos direitos de cada pessoa nas escolhas e relações.' },
-    { palavra: 'Imparcial', titulo: 'Imparcialidade', tipo: 'Virtude', descricao: 'Tratar todas as pessoas segundo noções de imparcialidade e justiça.' },
+    //{ palavra: 'Imparcial', titulo: 'Imparcialidade', tipo: 'Virtude', descricao: 'Tratar todas as pessoas segundo noções de imparcialidade e justiça.' },
     { palavra: 'Lideranca', titulo: 'Liderança', tipo: 'Virtude', descricao: 'Estimular um grupo do qual se é membro para fazer as coisas.' },
     { palavra: 'Autocontrole', titulo: 'Autocontrole', tipo: 'Virtude', descricao: 'Regular o que se sente e faz; ser disciplinado.' },
     { palavra: 'Humor', titulo: 'Humor', tipo: 'Virtude', descricao: 'Levar sorrisos às outras pessoas; levar a vida de forma mais leve.' },
-    { palavra: 'Espiritual', titulo: 'Espiritualidade', tipo: 'Virtude', descricao: 'Ter crenças coerentes em relação ao propósito e sentido maiores do universo.' },
-    { palavra: 'Beleza', titulo: 'Apreciação da Beleza', tipo: 'Virtude', descricao: 'Observar e apreciar a beleza, a excelência e o desempenho habilidoso.' },
+    //{ palavra: 'Espiritual', titulo: 'Espiritualidade', tipo: 'Virtude', descricao: 'Ter crenças coerentes em relação ao propósito e sentido maiores do universo.' },
+    //{ palavra: 'Beleza', titulo: 'Apreciação da Beleza', tipo: 'Virtude', descricao: 'Observar e apreciar a beleza, a excelência e o desempenho habilidoso.' },
     { palavra: 'Compaixao', titulo: 'Compaixão', tipo: 'Virtude', descricao: 'Sentir e agir com empatia e altruísmo em relação ao sofrimento alheio.' },
     { palavra: 'Honestidade', titulo: 'Honestidade', tipo: 'Virtude', descricao: 'Ser fiel à verdade em palavras e ações.' },
+    { palavra: 'Mansidao', titulo: 'Mansidão', tipo: 'Virtude', descricao: 'Agir com calma, domínio interior e firmeza serena, sem dureza ou agressividade.' },
+    { palavra: 'Zelo', titulo: 'Zelo', tipo: 'Virtude', descricao: 'Cuidar com dedicação, atenção e responsabilidade daquilo que é bom e importante.' },
+    { palavra: 'Candura', titulo: 'Candura', tipo: 'Virtude', descricao: 'Expressar pureza de intenção, simplicidade e sinceridade no trato com as pessoas.' },
+    { palavra: 'Gentileza', titulo: 'Gentileza', tipo: 'Virtude', descricao: 'Tratar as pessoas com delicadeza, respeito e consideração nas pequenas atitudes.' },
+    { palavra: 'Docura', titulo: 'Doçura', tipo: 'Virtude', descricao: 'Manifestar suavidade, ternura e bondade no modo de falar, agir e acolher.' },
+    { palavra: 'Fortaleza', titulo: 'Fortaleza', tipo: 'Virtude', descricao: 'Sustentar o bem com coragem, constância e resistência diante das dificuldades.' },
+    { palavra: 'Modestia', titulo: 'Modéstia', tipo: 'Virtude', descricao: 'Reconhecer o próprio valor sem vaidade, exibicionismo ou desejo de superioridade.' },
     { palavra: 'Respeito', titulo: 'Respeito', tipo: 'Virtude', descricao: 'Reconhecer e valorizar a dignidade de cada pessoa.' },
     { palavra: 'Solidariedade', titulo: 'Solidariedade', tipo: 'Virtude', descricao: 'Apoiar e se unir às outras pessoas nas dificuldades.' },
     { palavra: 'Fe', titulo: 'Fé', tipo: 'Virtude', descricao: 'Manter fidelidade e confiança nos valores e em Deus.' },
@@ -51,6 +58,7 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Generosidade', titulo: 'Generosidade', tipo: 'Virtude', descricao: 'Disposição de compartilhar tempo, atenção, conhecimento ou recursos com boa vontade.' },
     { palavra: 'Perdao', titulo: 'Perdão', tipo: 'Virtude', descricao: 'Libertar-se do peso da mágoa, sem negar aprendizados ou limites saudáveis.' },
     { palavra: 'Equilibrio', titulo: 'Equilíbrio', tipo: 'Virtude', descricao: 'Harmonizar razão, emoção e ação para viver com mais clareza.' },
+    { palavra: 'Responsabilidade', titulo: 'Responsabilidade', tipo: 'Virtude', descricao: 'Assumir deveres, escolhas e consequências com consciência, cuidado e compromisso.' },
     { palavra: 'Amor', titulo: 'Amor', tipo: 'Sentimento', descricao: 'Força de cuidado, vínculo e responsabilidade que amplia o sentido da vida.' },
     { palavra: 'Paz', titulo: 'Paz', tipo: 'Sentimento', descricao: 'Quietude interior que nasce da coerência entre valores, escolhas e atitudes.' },
     { palavra: 'Amizade', titulo: 'Amizade', tipo: 'Sentimento', descricao: 'Vínculo de confiança, presença e cuidado recíproco que fortalece a caminhada da vida.' },
@@ -200,7 +208,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header word-game-header">
             <div>
               <h2>✨ Caça-Palavras Interior</h2>
-              <p class="subtitle">Encontre bons sentimentos, emoções e virtudes. Ao descobrir uma palavra, veja sua definição.</p>
+              <p class="subtitle">Encontre bons sentimentos, emoções e virtudes. Ao descobrir uma palavra, reflita sobre sua definição.</p>
             </div>
             <button type="button" class="btn btn-primary" id="wg-new"><i data-lucide="refresh-cw"></i> Novo jogo</button>
           </div>

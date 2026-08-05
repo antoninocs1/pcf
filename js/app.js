@@ -867,7 +867,7 @@ PCF.App = (() => {
   const _navSaveExpanded = (obj) => { try { localStorage.setItem('pcf_nav_expanded', JSON.stringify(obj)); } catch {} };
 
   /* Rotas que exigem perfil Administrador */
-  const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios', '#diario-config', '#roda-vida-config', '#gerenciar-bases', '#relatorio-uso']);
+  const ADMIN_ROUTES = new Set(['#frases', '#importexport', '#usuarios', '#diario-config', '#roda-vida-config', '#caca-palavras-base', '#gerenciar-bases', '#relatorio-uso']);
 
   const ROUTE_USAGE_INFO = {
     '#home': { label: 'Início', grupo: 'Geral' },
