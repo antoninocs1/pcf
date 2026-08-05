@@ -3,7 +3,7 @@
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
-PCF.APP_VERSION = '1.001';
+PCF.APP_VERSION = '1.002';
 
 PCF.App = (() => {
   const S = PCF.Store;
