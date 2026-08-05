@@ -601,6 +601,63 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .user-modal-panel { display: none; }
 .user-modal-panel.active { display: block; }
+.profile-modal {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.profile-modal-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 28px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-modal-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.profile-back-btn[hidden] { display: none; }
+.profile-back-btn {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+.profile-modal-tabs {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0 28px;
+}
+.profile-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 28px 24px;
+  overscroll-behavior: contain;
+}
+.profile-modal .user-modal-panel[data-profile-panel="atividades"].active {
+  height: 100%;
+  min-height: 0;
+}
+.profile-modal.is-activities .profile-modal-body {
+  overflow: hidden;
+}
+.profile-activity-scroll {
+  max-height: min(520px, calc(90dvh - 190px));
+  height: min(520px, calc(90dvh - 190px));
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.profile-activity-scroll .table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-card);
+}
 .user-activity-table .table {
   border: 1px solid var(--border);
 }
@@ -672,6 +729,11 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   /* Modal responsivo: ocupa toda a largura, igual ao formulário de página */
   .modal-overlay { padding: 8px; align-items: flex-start; padding-top: 60px; }
   .modal { padding: 20px 16px; width: 100%; max-width: 100%; box-sizing: border-box; max-height: calc(100dvh - 68px); }
+  .profile-modal { padding: 0; max-height: calc(100dvh - 68px); }
+  .profile-modal-header { padding: 16px 18px 10px; }
+  .profile-modal-tabs { padding: 0 18px; }
+  .profile-modal-body { padding: 14px 18px 18px; }
+  .profile-activity-scroll { height: calc(100dvh - 190px); max-height: calc(100dvh - 190px); }
   .modal.modal-lg { max-width: 100%; }
   .modal-actions { flex-wrap: wrap; }
   .modal-actions .btn { flex: 1 1 auto; min-width: 100px; }
@@ -716,6 +778,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   /* Modal como bottom-sheet em telas muito pequenas */
   .modal-overlay { align-items: flex-end; padding: 0; }
   .modal { border-radius: var(--radius) var(--radius) 0 0; max-height: 92vh; max-height: 92dvh; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  .profile-modal {
+    padding: 0;
+    max-height: 92dvh;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .profile-activity-scroll { height: calc(92dvh - 180px); max-height: calc(92dvh - 180px); }
   .modal.modal-lg { max-width: 100%; }
   .modal-actions .btn { flex: 1 1 100%; }
   /* Agenda: formulário em coluna única */

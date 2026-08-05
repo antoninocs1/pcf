@@ -973,7 +973,7 @@ PCF.App = (() => {
     target.innerHTML = '<p class="empty-text">Carregando atividades...</p>';
     const atividades = await S.getAtividadesUsuario(user.id);
     target.innerHTML = `
-      <div class="table-container user-activity-table">
+      <div class="table-container user-activity-table profile-activity-scroll">
         <table class="table">
           <thead><tr><th style="width:54px"></th><th>Evento</th><th>Data</th></tr></thead>
           <tbody>${atividades.length ? atividades.map(a => `
@@ -995,12 +995,16 @@ PCF.App = (() => {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
-      <div class="modal modal-lg">
-        <h3><i data-lucide="settings"></i> Meu perfil</h3>
-        <div class="user-modal-tabs">
+      <div class="modal modal-lg profile-modal">
+        <div class="profile-modal-header">
+          <button type="button" class="btn-icon profile-back-btn" id="mp-back" title="Voltar" aria-label="Voltar" hidden><i data-lucide="arrow-left"></i></button>
+          <h3><i data-lucide="settings"></i> Meu perfil</h3>
+        </div>
+        <div class="user-modal-tabs profile-modal-tabs">
           <button type="button" class="user-modal-tab active" data-profile-tab="dados">Dados</button>
           <button type="button" class="user-modal-tab" data-profile-tab="atividades">Atividades</button>
         </div>
+        <div class="profile-modal-body">
         <div class="user-modal-panel active" data-profile-panel="dados">
         <div class="form-row">
           <div class="form-group"><label>Nome completo</label><input type="text" id="mp-nome" value="${H.esc(user.nome || '')}"></div>
@@ -1029,22 +1033,27 @@ PCF.App = (() => {
         <div class="user-modal-panel" data-profile-panel="atividades">
           <div id="mp-atividades"></div>
         </div>
+        </div>
       </div>`;
     document.body.appendChild(overlay);
+    if (window.lucide) lucide.createIcons();
     let atividadesCarregadas = false;
+    const showProfileTab = (name) => {
+      overlay.querySelector('.profile-modal')?.classList.toggle('is-activities', name === 'atividades');
+      overlay.querySelectorAll('.user-modal-tab').forEach(t => t.classList.toggle('active', t.dataset.profileTab === name));
+      overlay.querySelectorAll('.user-modal-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.dataset.profilePanel === name);
+      });
+      overlay.querySelector('#mp-back').hidden = name !== 'atividades';
+      if (name === 'atividades' && !atividadesCarregadas) {
+        atividadesCarregadas = true;
+        renderMinhasAtividades(user, overlay.querySelector('#mp-atividades'));
+      }
+    };
     overlay.querySelectorAll('.user-modal-tab').forEach(tab => {
-      tab.onclick = () => {
-        const name = tab.dataset.profileTab;
-        overlay.querySelectorAll('.user-modal-tab').forEach(t => t.classList.toggle('active', t === tab));
-        overlay.querySelectorAll('.user-modal-panel').forEach(panel => {
-          panel.classList.toggle('active', panel.dataset.profilePanel === name);
-        });
-        if (name === 'atividades' && !atividadesCarregadas) {
-          atividadesCarregadas = true;
-          renderMinhasAtividades(user, overlay.querySelector('#mp-atividades'));
-        }
-      };
+      tab.onclick = () => showProfileTab(tab.dataset.profileTab);
     });
+    overlay.querySelector('#mp-back').onclick = () => showProfileTab('dados');
     document.getElementById('mp-tel').oninput = function () { this.value = H.formatarTelefone(this.value); };
     const close = () => overlay.remove();
     overlay.onclick = e => { if (e.target === overlay) close(); };
