@@ -306,6 +306,12 @@ select { cursor: pointer; }
 
 .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .filters select { width: auto; min-width: 160px; }
+.categorias-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .input-file {
   background: var(--bg-input); border: 1px dashed var(--border); border-radius: var(--radius-sm);
@@ -736,6 +742,8 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   /* Filtros compactos: quebram linha somente quando faltar espaço */
   .filters { flex-direction: row; align-items: center; gap: 6px; }
   .filters select { width: auto; min-width: 0; flex: 1 1 calc(50% - 3px); }
+  .filters select[id$="-mes"] { flex-grow: 1.18; }
+  .filters select[id$="-ano"] { flex-grow: .82; }
   input[type="text"], input[type="email"], input[type="password"],
   input[type="number"], input[type="date"], input[type="time"], select, textarea {
     min-height: 38px;
@@ -772,6 +780,22 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .imc-chart-container canvas { min-height: 185px; max-height: 205px; }
   /* Tabela: padding menor */
   .table th, .table td { padding: 8px 8px; }
+}
+
+@media (max-width: 600px) {
+  .categorias-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+    width: 100%;
+    gap: 8px;
+  }
+  .categorias-actions .btn {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: .82rem;
+    white-space: nowrap;
+  }
 }
 
 /* ==================== PARTÍCULAS ==================== */
