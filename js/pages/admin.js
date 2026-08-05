@@ -436,7 +436,7 @@ PCF.Pages = PCF.Pages || {};
       target.innerHTML = '<p class="empty-text">Carregando atividades...</p>';
       const atividades = await S.getAtividadesUsuario(user.id);
       target.innerHTML = `
-        <div class="table-container user-activity-table">
+        <div class="table-container user-activity-table profile-activity-scroll">
           <table class="table">
             <thead><tr><th style="width:54px"></th><th>Evento</th><th>Data</th></tr></thead>
             <tbody>${atividades.length ? atividades.map(a => `
@@ -456,63 +456,74 @@ PCF.Pages = PCF.Pages || {};
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
-        <div class="modal modal-lg">
-          <h3>${isEdit ? 'Editar' : 'Novo'} usuário</h3>
-          <div class="user-modal-tabs">
+        <div class="modal modal-lg profile-modal">
+          <div class="profile-modal-header">
+            <button type="button" class="btn-icon profile-back-btn" id="um-back" title="Voltar" aria-label="Voltar" hidden><i data-lucide="arrow-left"></i></button>
+            <h3>${isEdit ? 'Editar' : 'Novo'} usuário</h3>
+          </div>
+          <div class="user-modal-tabs profile-modal-tabs">
             <button type="button" class="user-modal-tab active" data-user-tab="dados">Dados</button>
             <button type="button" class="user-modal-tab" data-user-tab="atividades" ${isEdit ? '' : 'disabled'}>Atividades</button>
           </div>
-          <form id="user-modal-form">
-            <div class="user-modal-panel active" data-user-panel="dados">
-              <div class="form-row">
-                <div class="form-group"><label>Nome completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
-                <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00"></div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
-                <div class="form-group"><label>Data de nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
-              </div>
-              <div class="form-group">
-                <label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>${isEdit ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}</label><input type="password" id="um-pass" ${isEdit ? '' : 'required'} minlength="4"></div>
-                <div class="form-group"><label>Confirmar Senha</label><input type="password" id="um-pass2" ${isEdit ? '' : 'required'}></div>
-              </div>
-              ${S.currentUserIsAdmin() ? `
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> Administrador</label>
-                  <small class="text-muted">Somente administradores podem criar outros administradores.</small>
+          <div class="profile-modal-body">
+            <form id="user-modal-form">
+              <div class="user-modal-panel active" data-user-panel="dados">
+                <div class="form-row">
+                  <div class="form-group"><label>Nome completo</label><input type="text" id="um-nome" value="${H.esc(user?.nome || '')}" required></div>
+                  <div class="form-group"><label>CPF</label><input type="text" id="um-cpf" value="${H.esc(user?.cpf || '')}" placeholder="000.000.000-00"></div>
                 </div>
-              </div>` : ''}
-              <div id="um-error" class="alert alert-error" style="display:none"></div>
-              <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" id="um-cancel">Cancelar</button>
-                <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
+                <div class="form-row">
+                  <div class="form-group"><label>Telefone</label><input type="text" id="um-tel" value="${H.esc(user?.telefone || '')}" placeholder="(00) 00000-0000"></div>
+                  <div class="form-group"><label>Data de nascimento</label><input type="date" id="um-nasc" value="${user?.dataNascimento || ''}"></div>
+                </div>
+                <div class="form-group">
+                  <label>E-mail</label><input type="email" id="um-email" value="${H.esc(user?.email || '')}" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label>${isEdit ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}</label><input type="password" id="um-pass" ${isEdit ? '' : 'required'} minlength="4"></div>
+                  <div class="form-group"><label>Confirmar Senha</label><input type="password" id="um-pass2" ${isEdit ? '' : 'required'}></div>
+                </div>
+                ${S.currentUserIsAdmin() ? `
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="check-label"><input type="checkbox" id="um-admin" ${user?.isAdmin ? 'checked' : ''}> Administrador</label>
+                    <small class="text-muted">Somente administradores podem criar outros administradores.</small>
+                  </div>
+                </div>` : ''}
+                <div id="um-error" class="alert alert-error" style="display:none"></div>
+                <div class="modal-actions">
+                  <button type="button" class="btn btn-secondary" id="um-cancel">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">${isEdit ? 'Salvar' : 'Criar'}</button>
+                </div>
               </div>
-            </div>
-            <div class="user-modal-panel" data-user-panel="atividades">
-              <div id="um-atividades"></div>
-            </div>
-          </form>
+              <div class="user-modal-panel" data-user-panel="atividades">
+                <div id="um-atividades"></div>
+              </div>
+            </form>
+          </div>
         </div>`;
       document.body.appendChild(overlay);
+      if (window.lucide) lucide.createIcons();
       let atividadesCarregadas = false;
+      const userModal = overlay.querySelector('.profile-modal');
+      const backBtn = overlay.querySelector('#um-back');
+      const showUserTab = (name) => {
+        if (name === 'atividades' && !isEdit) return;
+        userModal?.classList.toggle('is-activities', name === 'atividades');
+        overlay.querySelectorAll('.user-modal-tab').forEach(t => t.classList.toggle('active', t.dataset.userTab === name));
+        overlay.querySelectorAll('.user-modal-panel').forEach(panel => {
+          panel.classList.toggle('active', panel.dataset.userPanel === name);
+        });
+        if (backBtn) backBtn.hidden = name !== 'atividades';
+        if (name === 'atividades' && isEdit && !atividadesCarregadas) {
+          atividadesCarregadas = true;
+          renderAtividadesUsuario(user, overlay.querySelector('#um-atividades'));
+        }
+      };
       overlay.querySelectorAll('.user-modal-tab').forEach(tab => {
-        tab.onclick = () => {
-          if (tab.disabled) return;
-          const name = tab.dataset.userTab;
-          overlay.querySelectorAll('.user-modal-tab').forEach(t => t.classList.toggle('active', t === tab));
-          overlay.querySelectorAll('.user-modal-panel').forEach(panel => {
-            panel.classList.toggle('active', panel.dataset.userPanel === name);
-          });
-          if (name === 'atividades' && isEdit && !atividadesCarregadas) {
-            atividadesCarregadas = true;
-            renderAtividadesUsuario(user, overlay.querySelector('#um-atividades'));
-          }
-        };
+        tab.onclick = () => { if (!tab.disabled) showUserTab(tab.dataset.userTab); };
       });
+      if (backBtn) backBtn.onclick = () => showUserTab('dados');
       document.getElementById('um-cpf').oninput = function() { this.value = H.formatarCPF(this.value); };
       document.getElementById('um-tel').oninput = function() { this.value = H.formatarTelefone(this.value); };
       document.getElementById('um-cancel').onclick = () => overlay.remove();
