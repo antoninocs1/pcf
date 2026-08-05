@@ -1044,7 +1044,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>💬 Base de Mensagens</h2>
-            <div style="display:flex;gap:8px;align-items:center">
+            <div class="frases-actions">
               <button id="btn-restaurar-frases" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
               <button id="btn-add-frase" class="btn btn-primary">+ Nova mensagem</button>
             </div>

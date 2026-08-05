@@ -1473,6 +1473,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .hab-icone-btn.selected { border-color: var(--accent); background: rgba(59,130,246,.15); }
 
 /* Base de Mensagens */
+.frases-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .frases-table {
   table-layout: fixed;
 }
@@ -1779,6 +1785,19 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 
 @media (max-width: 600px) {
+  .frases-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+  .frases-actions .btn {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: .82rem;
+    white-space: nowrap;
+  }
   .frases-table,
   .frases-table tbody,
   .frases-table tr,
