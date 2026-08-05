@@ -3471,7 +3471,7 @@ body.privacy-modal-open { overflow: hidden; }
 }
 .word-board {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(13, 1fr);
   gap: 4px;
   width: min(100%, 620px);
   margin: 0 auto;
@@ -3559,6 +3559,45 @@ body.privacy-modal-open { overflow: hidden; }
   color: var(--text-muted);
   line-height: 1.55;
 }
+.word-base-header {
+  align-items: flex-start;
+}
+.word-base-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.word-base-toolbar input {
+  max-width: 440px;
+}
+.word-base-table-wrap {
+  overflow-x: auto;
+}
+.word-base-table {
+  min-width: 760px;
+}
+.word-base-table th:nth-child(1) { width: 180px; }
+.word-base-table th:nth-child(2) { width: 130px; }
+.word-base-table th:nth-child(4) { width: 72px; text-align: center; }
+.word-base-table th:nth-child(5) { width: 110px; }
+.word-base-table td:nth-child(1) small {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: .72rem;
+  letter-spacing: .04em;
+}
+.word-base-table td:nth-child(3) {
+  min-width: 300px;
+  line-height: 1.45;
+}
+.word-base-table td:nth-child(4) {
+  text-align: center;
+}
+.word-edit-modal textarea {
+  resize: vertical;
+}
 
 @media (max-width: 860px) {
   .word-game-layout {
@@ -3599,6 +3638,20 @@ body.privacy-modal-open { overflow: hidden; }
   }
   .word-token {
     padding: 8px 10px;
+  }
+  .word-base-header .page-header-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .word-base-header .page-header-actions .btn:first-child {
+    grid-column: 1 / -1;
+  }
+  .word-base-toolbar {
+    align-items: stretch;
+  }
+  .word-base-toolbar input {
+    max-width: none;
   }
 }
 

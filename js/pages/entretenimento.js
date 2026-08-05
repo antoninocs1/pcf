@@ -6,8 +6,9 @@ PCF.Pages = PCF.Pages || {};
 
 (function() {
   const H = PCF.Helpers;
+  const S = PCF.Store;
 
-  const WORD_BANK = [
+  const DEFAULT_WORD_BANK = [
     { palavra: 'Gratidao', titulo: 'Gratidão', tipo: 'Virtude', descricao: 'Reconhecer o valor das pessoas, oportunidades e experiências recebidas, cultivando apreciação pela vida.' },
     { palavra: 'Coragem', titulo: 'Coragem', tipo: 'Virtude', descricao: 'Força interior para agir com consciência mesmo diante do medo, da dúvida ou da dificuldade.' },
     { palavra: 'Empatia', titulo: 'Empatia', tipo: 'Virtude', descricao: 'Capacidade de perceber o outro com respeito, imaginando seus sentimentos e necessidades.' },
@@ -28,7 +29,7 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Entusiasmo', titulo: 'Entusiasmo', tipo: 'Emoção', descricao: 'Ânimo vivo para participar, criar e investir energia em algo que faz sentido.' },
   ];
 
-  const SIZE = 12;
+  const SIZE = 13;
   const WORDS_PER_GAME = 8;
   const DIRECTIONS = [
     { dr: 0, dc: 1 }, { dr: 1, dc: 0 }, { dr: 1, dc: 1 }, { dr: 1, dc: -1 },
@@ -36,6 +37,25 @@ PCF.Pages = PCF.Pages || {};
   ];
 
   const normalizeWord = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z]/g, '').toUpperCase();
+  const normalizeEntry = (entry) => ({
+    id: entry.id || S._uid(),
+    palavra: normalizeWord(entry.palavra || entry.titulo || ''),
+    titulo: (entry.titulo || entry.palavra || '').trim(),
+    tipo: (entry.tipo || 'Virtude').trim(),
+    descricao: (entry.descricao || '').trim(),
+    ativo: entry.ativo !== false,
+  });
+  const defaultWords = () => DEFAULT_WORD_BANK.map(normalizeEntry);
+  const getWordBank = (activeOnly = true) => {
+    let words = S.getJogoPalavras();
+    if (!words.length) {
+      words = defaultWords();
+      S.saveJogoPalavras(words);
+    }
+    words = words.map(normalizeEntry).filter(w => w.palavra && w.titulo);
+    return activeOnly ? words.filter(w => w.ativo !== false) : words;
+  };
+  const restoreDefaultWords = () => S.saveJogoPalavras(defaultWords());
   const shuffle = (arr) => arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(v => v[1]);
   const randomLetter = () => String.fromCharCode(65 + Math.floor(Math.random() * 26));
 
@@ -71,7 +91,7 @@ PCF.Pages = PCF.Pages || {};
   const buildGame = () => {
     const grid = Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => ''));
     const placed = [];
-    shuffle(WORD_BANK).forEach(entry => {
+    shuffle(getWordBank(true)).forEach(entry => {
       if (placed.length >= WORDS_PER_GAME) return;
       const item = placeWord(grid, entry);
       if (item) placed.push(item);
@@ -226,6 +246,157 @@ PCF.Pages = PCF.Pages || {};
           }
         };
       });
+    };
+
+    render();
+  };
+
+  PCF.Pages.cacaPalavrasBase = (container) => {
+    let filtro = '';
+
+    const render = () => {
+      const all = getWordBank(false);
+      const filtered = filtro ? all.filter(item => {
+        const haystack = `${item.titulo} ${item.tipo} ${item.descricao}`.toLowerCase();
+        return haystack.includes(filtro.toLowerCase());
+      }) : all;
+
+      container.innerHTML = `
+        <div class="page word-base-page">
+          <div class="page-header word-base-header">
+            <div>
+              <h2><i data-lucide="database"></i> Base do Caça-Palavras</h2>
+              <p class="subtitle">Gerencie as palavras, tipos e definições usadas no jogo.</p>
+            </div>
+            <div class="page-header-actions">
+              <a href="#caca-palavras" class="btn btn-secondary btn-sm"><i data-lucide="puzzle"></i> Jogar</a>
+              <button type="button" class="btn btn-outline btn-sm" id="wb-restore"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+              <button type="button" class="btn btn-primary btn-sm" id="wb-new"><i data-lucide="plus"></i> Nova palavra</button>
+            </div>
+          </div>
+
+          <div class="base-toolbar word-base-toolbar">
+            <input type="search" id="wb-search" class="form-control" placeholder="Buscar palavra, tipo ou definição" value="${H.esc(filtro)}">
+            <span class="badge badge-neutral">${filtered.length} de ${all.length}</span>
+          </div>
+
+          <div class="table-container word-base-table-wrap">
+            <table class="data-table word-base-table">
+              <thead>
+                <tr>
+                  <th>Palavra</th>
+                  <th>Tipo</th>
+                  <th>Definição</th>
+                  <th>Ativa</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filtered.length ? filtered.map(item => `
+                  <tr class="${item.ativo === false ? 'row-inactive' : ''}">
+                    <td><strong>${H.esc(item.titulo)}</strong><small>${H.esc(item.palavra)}</small></td>
+                    <td><span class="badge badge-neutral">${H.esc(item.tipo)}</span></td>
+                    <td class="text-muted">${H.esc(item.descricao)}</td>
+                    <td><input type="checkbox" data-wb-active="${H.esc(item.id)}" ${item.ativo !== false ? 'checked' : ''}></td>
+                    <td class="actions-cell">
+                      <button type="button" class="btn btn-icon btn-ghost" data-wb-edit="${H.esc(item.id)}" title="Editar"><i data-lucide="pencil"></i></button>
+                      <button type="button" class="btn btn-icon btn-danger" data-wb-del="${H.esc(item.id)}" title="Excluir"><i data-lucide="trash-2"></i></button>
+                    </td>
+                  </tr>`).join('') : '<tr><td colspan="5" class="empty-text">Nenhuma palavra encontrada.</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+
+      if (window.lucide) lucide.createIcons();
+
+      container.querySelector('#wb-search').oninput = (e) => {
+        filtro = e.target.value.trim();
+        render();
+      };
+      container.querySelector('#wb-new').onclick = () => openWordModal(null);
+      container.querySelector('#wb-restore').onclick = () => {
+        if (!confirm('Restaurar a base padrão do Caça-Palavras? As alterações atuais serão substituídas.')) return;
+        restoreDefaultWords();
+        render();
+      };
+      container.querySelectorAll('[data-wb-edit]').forEach(btn => {
+        btn.onclick = () => openWordModal(all.find(item => item.id === btn.dataset.wbEdit));
+      });
+      container.querySelectorAll('[data-wb-del]').forEach(btn => {
+        btn.onclick = () => {
+          if (!confirm('Excluir esta palavra do jogo?')) return;
+          S.deleteJogoPalavra(btn.dataset.wbDel);
+          render();
+        };
+      });
+      container.querySelectorAll('[data-wb-active]').forEach(chk => {
+        chk.onchange = () => {
+          S.updateJogoPalavra(chk.dataset.wbActive, { ativo: chk.checked });
+          render();
+        };
+      });
+    };
+
+    const openWordModal = (item) => {
+      const isEdit = !!item;
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal modal-md word-edit-modal">
+          <h3><i data-lucide="${isEdit ? 'pencil' : 'plus-circle'}"></i> ${isEdit ? 'Editar' : 'Nova'} palavra</h3>
+          <form id="wb-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Palavra *</label>
+                <input type="text" id="wb-title" class="form-control" value="${H.esc(item?.titulo || '')}" maxlength="24" required>
+              </div>
+              <div class="form-group">
+                <label>Tipo</label>
+                <select id="wb-type" class="form-control">
+                  ${['Virtude', 'Sentimento', 'Emoção'].map(type => `<option value="${type}" ${item?.tipo === type ? 'selected' : ''}>${type}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Definição / descrição *</label>
+              <textarea id="wb-description" class="form-control" rows="4" maxlength="420" required>${H.esc(item?.descricao || '')}</textarea>
+            </div>
+            <label class="check-label"><input type="checkbox" id="wb-active" ${item?.ativo === false ? '' : 'checked'}> Palavra ativa no jogo</label>
+            <div id="wb-error" class="alert alert-error" style="display:none"></div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="wb-cancel">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+      if (window.lucide) lucide.createIcons();
+
+      const close = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) close(); };
+      overlay.querySelector('#wb-cancel').onclick = close;
+      overlay.querySelector('#wb-form').onsubmit = (e) => {
+        e.preventDefault();
+        const titulo = overlay.querySelector('#wb-title').value.trim();
+        const descricao = overlay.querySelector('#wb-description').value.trim();
+        const errEl = overlay.querySelector('#wb-error');
+        const palavra = normalizeWord(titulo);
+        if (!titulo || !palavra) { errEl.textContent = 'Informe uma palavra válida.'; errEl.style.display = 'block'; return; }
+        if (palavra.length > SIZE) { errEl.textContent = `Use uma palavra com até ${SIZE} letras para caber no tabuleiro.`; errEl.style.display = 'block'; return; }
+        if (!descricao) { errEl.textContent = 'Informe a definição da palavra.'; errEl.style.display = 'block'; return; }
+        const data = {
+          palavra,
+          titulo,
+          tipo: overlay.querySelector('#wb-type').value,
+          descricao,
+          ativo: overlay.querySelector('#wb-active').checked,
+        };
+        if (isEdit) S.updateJogoPalavra(item.id, data);
+        else S.addJogoPalavra(data);
+        close();
+        render();
+      };
     };
 
     render();

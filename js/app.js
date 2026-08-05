@@ -833,6 +833,7 @@ PCF.App = (() => {
       id: 'entretenimento', label: 'Entretenimento', icon: 'sparkles',
       items: [
         { hash: '#caca-palavras', icon: 'puzzle', label: 'Caça-Palavras Interior' },
+        { hash: '#caca-palavras-base', icon: 'database', label: 'Base do Caça-Palavras' },
       ]
     },
     {
@@ -887,6 +888,7 @@ PCF.App = (() => {
     '#roda-vida': { label: 'Roda da Vida', grupo: 'Roda da Vida' },
     '#roda-vida-config': { label: 'Configuração da Roda da Vida', grupo: 'Roda da Vida' },
     '#caca-palavras': { label: 'Caça-Palavras Interior', grupo: 'Entretenimento' },
+    '#caca-palavras-base': { label: 'Base do Caça-Palavras', grupo: 'Entretenimento' },
     '#diario': { label: 'Diário', grupo: 'Diário' },
     '#diario-config': { label: 'Configuração do diário', grupo: 'Diário' },
     '#plano-acao': { label: 'Plano de Ação 5W2H', grupo: 'Plano de Ação' },
@@ -1249,6 +1251,7 @@ PCF.App = (() => {
       '#roda-vida':        pages.rodaVida,
       '#roda-vida-config': pages.rodaVidaConfig,
       '#caca-palavras': pages.cacaPalavras,
+      '#caca-palavras-base': pages.cacaPalavrasBase,
       '#virtudes':           pages.virtudes,
       '#virtudes-relatorio': pages.virtudesRelatorio,
       '#virtudes-base':      pages.virtudesBase,

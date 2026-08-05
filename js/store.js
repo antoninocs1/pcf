@@ -2496,6 +2496,14 @@ PCF.Store = (() => {
   const updateVirtude = (id, data) => { const all = getVirtudesConfig(); const i = all.findIndex(v => v.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveVirtudesConfig(all); } return all; };
   const deleteVirtude = (id) => { const all = getVirtudesConfig().filter(v => v.id !== id); saveVirtudesConfig(all); return all; };
 
+  /* ---------- ENTRETENIMENTO: CAÇA-PALAVRAS ---------- */
+  const _jpwU = () => `pcf_jogo_palavras_${currentUserId()}`;
+  const getJogoPalavras = () => _get(_jpwU()) || [];
+  const saveJogoPalavras = (arr) => _set(_jpwU(), arr || []);
+  const addJogoPalavra = (item) => { const all = getJogoPalavras(); all.push({ id: _uid(), ativo: true, ...item }); saveJogoPalavras(all); return all; };
+  const updateJogoPalavra = (id, data) => { const all = getJogoPalavras(); const i = all.findIndex(p => p.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveJogoPalavras(all); } return all; };
+  const deleteJogoPalavra = (id) => { const all = getJogoPalavras().filter(p => p.id !== id); saveJogoPalavras(all); return all; };
+
   /* ---------- VIRTUDES REGISTROS ---------- */
   const _vrU = () => `pcf_virtudes_reg_${currentUserId()}`;
   const getVirtudesReg = () => _get(_vrU()) || [];
@@ -2561,6 +2569,7 @@ PCF.Store = (() => {
     getRodaVidaConfig, saveRodaVidaConfig,
     getRodaVidaRegistros, saveRodaVidaRegistros, deleteRodaVidaRegistro,
     getVirtudesConfig, saveVirtudesConfig, addVirtude, updateVirtude, deleteVirtude,
+    getJogoPalavras, saveJogoPalavras, addJogoPalavra, updateJogoPalavra, deleteJogoPalavra,
     getVirtudesReg, saveVirtudesReg, toggleVirtude, deleteVirtudReg,
     exportData, importTransacoes, importCategorias,
     restoreDefaultCategorias, restoreDefaultEmocoesConfig, restoreDefaultHabitos, restoreDefaultFrases, restoreDefaultVirtudes,
