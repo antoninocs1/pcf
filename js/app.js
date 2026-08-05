@@ -30,6 +30,7 @@ PCF.App = (() => {
     { icon: 'check-square',  title: 'Hábitos',        desc: 'Acompanhe hábitos diários, visualização mensal e relatórios de consistência.' },
     { icon: 'list-todo',     title: 'Plano de Ação',  desc: 'Organize ações em 5W2H, acompanhe status, vincule contatos e gere lembretes na agenda.' },
     { icon: 'target',        title: 'Roda da Vida',   desc: 'Avalie e visualize as principais áreas da sua vida em um gráfico radial interativo.' },
+    { icon: 'sparkles',      title: 'Entretenimento', desc: 'Jogos educativos de autoconhecimento, como o Caça-Palavras Interior com virtudes, emoções e definições.' },
     { icon: 'gem',           title: 'Virtudes',       desc: 'Cultive virtudes diariamente, acompanhe seu crescimento de caráter e receba sugestões integradas.' },
     { icon: 'book-open',     title: 'Diário',          desc: 'Diário pessoal para registrar reflexões, pensamentos e acompanhar sua evolução.' },
     { icon: 'calendar',      title: 'Agenda',          desc: 'Gerencie compromissos e eventos de forma prática em uma agenda interativa.' },
@@ -63,14 +64,14 @@ PCF.App = (() => {
               <div class="pcf-slide-body">
                 <div class="pcf-slide-emoji">💰</div>
                 <h2 class="pcf-slide-title">Planejamento para o Sucesso Pessoal</h2>
-                <p class="pcf-slide-sub">Organize suas finanças, emoções, hábitos e projetos de vida em uma plataforma completa e integrada.</p>
+                <p class="pcf-slide-sub">Organize suas finanças, emoções, hábitos, jogos de autoconhecimento e projetos de vida em uma plataforma completa e integrada.</p>
                 <button class="pcf-cta-btn" id="pcf-cta-login">Começar agora →</button>
               </div>
             </div>
             <div class="pcf-carousel-slide pcf-slide-2">
               <div class="pcf-slide-body">
                 <h2 class="pcf-slide-title">Funções Existentes</h2>
-                <p class="pcf-slide-sub">11 módulos integrados para cobrir planejamento, rotina e desenvolvimento pessoal</p>
+                <p class="pcf-slide-sub">12 módulos integrados para cobrir planejamento, rotina, autoconhecimento e desenvolvimento pessoal</p>
                 <div class="pcf-modules-grid">
                   <span class="pcf-module-chip">💰 Financeiro</span>
                   <span class="pcf-module-chip">🧠 Emoções</span>
@@ -78,6 +79,7 @@ PCF.App = (() => {
                   <span class="pcf-module-chip">🗂 Plano de Ação</span>
                   <span class="pcf-module-chip">💎 Virtudes</span>
                   <span class="pcf-module-chip">🎯 Roda da Vida</span>
+                  <span class="pcf-module-chip">✨ Entretenimento</span>
                   <span class="pcf-module-chip">📖 Diário</span>
                   <span class="pcf-module-chip">📅 Agenda</span>
                   <span class="pcf-module-chip">❤️ Saúde / IMC</span>
@@ -95,8 +97,8 @@ PCF.App = (() => {
                   <div class="pcf-report-card"><span>📈</span><span>Evolução de Hábitos</span></div>
                   <div class="pcf-report-card"><span>🧠</span><span>Análise de Emoções</span></div>
                   <div class="pcf-report-card"><span>💎</span><span>Sequência de virtudes</span></div>
+                  <div class="pcf-report-card"><span>✨</span><span>Jogos de autoconhecimento</span></div>
                   <div class="pcf-report-card"><span>🎯</span><span>Histórico Roda da Vida</span></div>
-                  <div class="pcf-report-card"><span>💸</span><span>4 Forças do Dinheiro</span></div>
                 </div>
               </div>
             </div>
@@ -123,9 +125,11 @@ PCF.App = (() => {
                   <div class="pcf-int-arrows">↕</div>
                   <div class="pcf-int-row">
                     <div class="pcf-int-center-node">📍 Linha do Tempo</div>
+                    <div class="pcf-int-line">───</div>
+                    <div class="pcf-int-center-node">✨ Entretenimento</div>
                   </div>
                 </div>
-                <p class="pcf-int-note">A Linha do Tempo organiza os marcos da sua história, enquanto sugestões automáticas preenchem a Roda da Vida com base nas atividades diárias</p>
+                <p class="pcf-int-note">A Linha do Tempo organiza os marcos da sua história, enquanto jogos educativos reforçam virtudes, emoções e autoconhecimento.</p>
               </div>
             </div>
           </div>
@@ -234,7 +238,7 @@ PCF.App = (() => {
             </div>
             <div class="landing-about-stats">
               <div class="landing-stat">
-                <span class="landing-stat-number">11+</span>
+                <span class="landing-stat-number">12+</span>
                 <span class="landing-stat-label">Módulos</span>
               </div>
               <div class="landing-stat">
@@ -656,6 +660,7 @@ PCF.App = (() => {
       { icon: 'list-todo',    label: 'Plano de Ação',     hash: '#plano-acao', color: '#0f766e' },
       { icon: 'calendar',     label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
       { icon: 'target',       label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
+      { icon: 'sparkles',     label: 'Caça-Palavras',     hash: '#caca-palavras', color: '#2563eb' },
       { icon: 'gem',          label: 'Virtudes',          hash: '#virtudes',  color: '#7c3aed' },
       { icon: 'heart',        label: 'IMC',               hash: '#imc',       color: '#dc2626' },
       { icon: 'users',        label: 'Contatos Pessoais', hash: '#contatos',  color: '#64748b' },
@@ -682,6 +687,14 @@ PCF.App = (() => {
             </button>
           </div>
         </div>
+        <a href="#caca-palavras" class="home-game-cta">
+          <span class="home-game-cta-icon"><i data-lucide="puzzle"></i></span>
+          <span>
+            <strong>Caça-Palavras Interior</strong>
+            <small>Jogue agora e descubra virtudes, emoções e bons sentimentos.</small>
+          </span>
+          <i data-lucide="arrow-right" class="home-game-cta-arrow"></i>
+        </a>
         <div class="home-modules-title">Módulos</div>
         <div class="home-modules-grid">
           ${modules.map(m => `
