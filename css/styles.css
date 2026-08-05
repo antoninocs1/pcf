@@ -1823,7 +1823,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     white-space: nowrap;
   }
   .frases-table {
-    min-width: 0;
+    min-width: 620px;
     table-layout: fixed;
   }
   .frases-table th,
@@ -1832,11 +1832,11 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     font-size: .84rem;
     vertical-align: top;
   }
-  .frases-table .frase-col-msg { width: 49%; }
-  .frases-table .frase-col-autor { width: 17%; }
-  .frases-table .frase-col-cat { width: 15%; }
-  .frases-table .frase-col-status { width: 10%; }
-  .frases-table th:last-child { width: 9% !important; }
+  .frases-table .frase-col-msg { width: 40%; }
+  .frases-table .frase-col-autor { width: 18%; }
+  .frases-table .frase-col-cat { width: 18%; }
+  .frases-table .frase-col-status { width: 13%; }
+  .frases-table th:last-child { width: 11% !important; }
   .frases-table td.frase-cell-msg {
     white-space: normal !important;
     overflow-wrap: anywhere;
@@ -1847,6 +1847,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     white-space: normal !important;
     overflow-wrap: anywhere;
   }
+  .frases-table td.frase-cell-status {
+    white-space: nowrap !important;
+  }
   .frases-table .chip-small,
   .frases-table .tipo-badge {
     padding-inline: 5px;
@@ -1854,6 +1857,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   }
   .frase-cell-actions {
     white-space: nowrap !important;
+    min-width: 58px;
   }
   .frase-cell-actions .btn-icon {
     width: 22px;
