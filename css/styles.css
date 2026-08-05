@@ -1472,6 +1472,27 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .hab-icone-btn:hover { background: rgba(255,255,255,.08); }
 .hab-icone-btn.selected { border-color: var(--accent); background: rgba(59,130,246,.15); }
 
+/* Base de Mensagens */
+.frases-table {
+  table-layout: fixed;
+}
+.frases-table .frase-col-msg { width: 46%; }
+.frases-table .frase-col-autor { width: 18%; }
+.frases-table .frase-col-cat { width: 16%; }
+.frases-table .frase-col-status { width: 11%; }
+.frase-cell-msg {
+  white-space: normal;
+  line-height: 1.4;
+}
+.frase-cell-autor,
+.frase-cell-cat {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.frase-cell-actions {
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .hab-item { flex-wrap: wrap; }
   .hab-item-obs { width: 100%; }
@@ -1755,6 +1776,34 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+@media (max-width: 600px) {
+  .frases-table {
+    min-width: 560px;
+  }
+  .frases-table th,
+  .frases-table td {
+    padding: 8px 9px;
+    font-size: .82rem;
+  }
+  .frases-table .frase-col-msg { width: 250px; }
+  .frases-table .frase-col-autor { width: 88px; }
+  .frases-table .frase-col-cat { width: 96px; }
+  .frases-table .frase-col-status { width: 70px; }
+  .frases-table th:last-child { width: 56px !important; }
+  .frase-cell-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .frase-cell-actions .btn-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .frase-cell-actions .btn-icon svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 .landing-support-link svg { width: 16px; height: 16px; }
 

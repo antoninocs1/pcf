@@ -1060,14 +1060,14 @@ PCF.Pages = PCF.Pages || {};
             </div>
           </div>` : ''}
 
-          <div class="table-container">
-            <table class="table">
+          <div class="table-container frases-table-wrap">
+            <table class="table frases-table">
               <thead>
                 <tr>
-                  <th>Mensagem</th>
-                  <th>Autor</th>
-                  <th>Categoria</th>
-                  <th>Status</th>
+                  <th class="frase-col-msg">Mensagem</th>
+                  <th class="frase-col-autor">Autor</th>
+                  <th class="frase-col-cat">Categoria</th>
+                  <th class="frase-col-status">Status</th>
                   <th style="width:100px">Ações</th>
                 </tr>
               </thead>
@@ -1075,11 +1075,11 @@ PCF.Pages = PCF.Pages || {};
                 ${frases.length === 0 ? '<tr><td colspan="5" class="empty-text">Nenhuma mensagem cadastrada</td></tr>' :
                   frases.map(f => `
                   <tr>
-                    <td style="max-width:380px;white-space:normal;line-height:1.4">"${H.esc(f.texto)}"</td>
-                    <td>${H.esc(f.autor || '—')}</td>
-                    <td><span class="chip-small">${H.esc(f.categoria || 'Geral')}</span></td>
-                    <td><span class="tipo-badge ${f.ativo !== false ? 'receita' : 'despesa'}">${f.ativo !== false ? 'Ativa' : 'Inativa'}</span></td>
-                    <td>
+                    <td class="frase-cell-msg">"${H.esc(f.texto)}"</td>
+                    <td class="frase-cell-autor">${H.esc(f.autor || '—')}</td>
+                    <td class="frase-cell-cat"><span class="chip-small">${H.esc(f.categoria || 'Geral')}</span></td>
+                    <td class="frase-cell-status"><span class="tipo-badge ${f.ativo !== false ? 'receita' : 'despesa'}">${f.ativo !== false ? 'Ativa' : 'Inativa'}</span></td>
+                    <td class="frase-cell-actions">
                       <button class="btn-icon" data-edit="${f.id}" title="Editar"><i data-lucide="pencil"></i></button>
                       <button class="btn-icon btn-danger" data-del="${f.id}" title="Excluir"><i data-lucide="trash-2"></i></button>
                     </td>
