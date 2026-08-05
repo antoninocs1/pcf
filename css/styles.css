@@ -3544,10 +3544,10 @@ body.privacy-modal-open { overflow: hidden; }
 .word-cell {
   aspect-ratio: 1;
   min-width: 0;
-  border: 1px solid var(--border);
+  border: 1px solid var(--word-cell-border, var(--border));
   border-radius: 7px;
-  background: rgba(255,255,255,.88);
-  color: var(--text);
+  background: var(--word-cell-bg, rgba(255,255,255,.88));
+  color: var(--word-cell-text, var(--text));
   font-size: clamp(.76rem, 2.5vw, 1.05rem);
   font-weight: 800;
   line-height: 1;
@@ -3560,12 +3560,25 @@ body.privacy-modal-open { overflow: hidden; }
 .word-cell.selected {
   outline: 3px solid rgba(59,130,246,.35);
   border-color: var(--accent);
-  background: rgba(59,130,246,.12);
+  background: var(--word-cell-selected-bg, rgba(59,130,246,.12));
 }
 .word-cell.found {
   border-color: rgba(34,197,94,.55);
-  background: rgba(34,197,94,.18);
-  color: #15803d;
+  background: var(--word-cell-found-bg, rgba(34,197,94,.18));
+  color: var(--word-cell-found-text, #15803d);
+}
+[data-theme="dark"] .word-cell,
+body:not([data-theme="light"]) .word-cell {
+  --word-cell-bg: rgba(30,41,59,.92);
+  --word-cell-border: rgba(148,163,184,.32);
+  --word-cell-text: #e5edf7;
+  --word-cell-selected-bg: rgba(59,130,246,.32);
+  --word-cell-found-bg: rgba(34,197,94,.24);
+  --word-cell-found-text: #86efac;
+}
+[data-theme="dark"] .word-game-intro-icon,
+body:not([data-theme="light"]) .word-game-intro-icon {
+  background: rgba(148,163,184,.22);
 }
 .word-game-tip {
   min-height: 22px;
