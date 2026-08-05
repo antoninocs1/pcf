@@ -10,13 +10,35 @@ PCF.Pages = PCF.Pages || {};
 
   const DEFAULT_WORD_BANK = [
     { palavra: 'Gratidao', titulo: 'Gratidão', tipo: 'Virtude', descricao: 'Reconhecer o valor das pessoas, oportunidades e experiências recebidas, cultivando apreciação pela vida.' },
+    { palavra: 'Criatividade', titulo: 'Criatividade', tipo: 'Virtude', descricao: 'Pensar em formas novas e produtivas de conceituar e fazer as coisas.' },
+    { palavra: 'Curiosidade', titulo: 'Curiosidade', tipo: 'Virtude', descricao: 'Interessar-se pela experiência em andamento por si só.' },
+    { palavra: 'Critico', titulo: 'Senso Crítico', tipo: 'Virtude', descricao: 'Refletir sobre as coisas e examiná-las a partir de todos os ângulos.' },
+    { palavra: 'Aprendizado', titulo: 'Amor ao Aprendizado', tipo: 'Virtude', descricao: 'Dominar novas habilidades, tópicos e corpos de conhecimento.' },
+    { palavra: 'Perspectiva', titulo: 'Perspectiva', tipo: 'Virtude', descricao: 'Ser capaz de dar conselhos sábios aos outros.' },
     { palavra: 'Coragem', titulo: 'Coragem', tipo: 'Virtude', descricao: 'Força interior para agir com consciência mesmo diante do medo, da dúvida ou da dificuldade.' },
+    { palavra: 'Bravura', titulo: 'Bravura', tipo: 'Virtude', descricao: 'Não recuar diante de ameaças, dificuldades ou sofrimento.' },
+    { palavra: 'Perseveranca', titulo: 'Perseverança', tipo: 'Virtude', descricao: 'Terminar o que se começou; persistir apesar dos obstáculos.' },
+    { palavra: 'Integridade', titulo: 'Integridade', tipo: 'Virtude', descricao: 'Falar a verdade e apresentar-se de forma genuína.' },
+    { palavra: 'Vitalidade', titulo: 'Vitalidade', tipo: 'Virtude', descricao: 'Encarar a vida com entusiasmo e energia; viver plenamente.' },
     { palavra: 'Empatia', titulo: 'Empatia', tipo: 'Virtude', descricao: 'Capacidade de perceber o outro com respeito, imaginando seus sentimentos e necessidades.' },
     { palavra: 'Paciencia', titulo: 'Paciência', tipo: 'Virtude', descricao: 'Saber esperar e perseverar sem perder o equilíbrio diante de processos, pessoas ou limites.' },
     { palavra: 'Disciplina', titulo: 'Disciplina', tipo: 'Virtude', descricao: 'Compromisso constante com pequenas ações que sustentam objetivos importantes.' },
     { palavra: 'Prudencia', titulo: 'Prudência', tipo: 'Virtude', descricao: 'Escolher com cuidado, avaliando consequências antes de agir.' },
     { palavra: 'Humildade', titulo: 'Humildade', tipo: 'Virtude', descricao: 'Reconhecer o próprio valor sem arrogância e aprender com pessoas, erros e circunstâncias.' },
     { palavra: 'Resiliencia', titulo: 'Resiliência', tipo: 'Virtude', descricao: 'Capacidade de se reorganizar depois de dificuldades, mantendo sentido e continuidade.' },
+    { palavra: 'Inteligencia', titulo: 'Inteligência Social', tipo: 'Virtude', descricao: 'Estar ciente dos próprios sentimentos e motivações, bem como dos outros.' },
+    { palavra: 'Equipe', titulo: 'Trabalho em Equipe', tipo: 'Virtude', descricao: 'Trabalhar bem como membro de um grupo; ser leal ao grupo.' },
+    { palavra: 'Imparcial', titulo: 'Imparcialidade', tipo: 'Virtude', descricao: 'Tratar todas as pessoas segundo noções de imparcialidade e justiça.' },
+    { palavra: 'Lideranca', titulo: 'Liderança', tipo: 'Virtude', descricao: 'Estimular um grupo do qual se é membro para fazer as coisas.' },
+    { palavra: 'Autocontrole', titulo: 'Autocontrole', tipo: 'Virtude', descricao: 'Regular o que se sente e faz; ser disciplinado.' },
+    { palavra: 'Humor', titulo: 'Humor', tipo: 'Virtude', descricao: 'Levar sorrisos às outras pessoas; levar a vida de forma mais leve.' },
+    { palavra: 'Espiritual', titulo: 'Espiritualidade', tipo: 'Virtude', descricao: 'Ter crenças coerentes em relação ao propósito e sentido maiores do universo.' },
+    { palavra: 'Beleza', titulo: 'Apreciação da Beleza', tipo: 'Virtude', descricao: 'Observar e apreciar a beleza, a excelência e o desempenho habilidoso.' },
+    { palavra: 'Compaixao', titulo: 'Compaixão', tipo: 'Virtude', descricao: 'Sentir e agir com empatia e altruísmo em relação ao sofrimento alheio.' },
+    { palavra: 'Honestidade', titulo: 'Honestidade', tipo: 'Virtude', descricao: 'Ser fiel à verdade em palavras e ações.' },
+    { palavra: 'Respeito', titulo: 'Respeito', tipo: 'Virtude', descricao: 'Reconhecer e valorizar a dignidade de cada pessoa.' },
+    { palavra: 'Solidariedade', titulo: 'Solidariedade', tipo: 'Virtude', descricao: 'Apoiar e se unir às outras pessoas nas dificuldades.' },
+    { palavra: 'Fe', titulo: 'Fé', tipo: 'Virtude', descricao: 'Manter fidelidade e confiança nos valores e em Deus.' },
     { palavra: 'Serenidade', titulo: 'Serenidade', tipo: 'Sentimento', descricao: 'Estado de calma consciente que ajuda a responder melhor aos acontecimentos.' },
     { palavra: 'Esperanca', titulo: 'Esperança', tipo: 'Sentimento', descricao: 'Confiança ativa de que a vida pode melhorar quando unimos fé, atitude e paciência.' },
     { palavra: 'Alegria', titulo: 'Alegria', tipo: 'Emoção', descricao: 'Energia positiva que nasce do contato com algo significativo, belo ou satisfatório.' },
@@ -142,8 +164,8 @@ PCF.Pages = PCF.Pages || {};
     overlay.innerHTML = `
       <div class="modal word-modal">
         <div class="word-modal-kind">Partida concluída</div>
-        <h3>Você encontrou todas as palavras</h3>
-        <p>Bom exercício de atenção e autoconhecimento. Cada palavra encontrada é um convite para observar como ela aparece no seu dia.</p>
+        <h3>Parabéns, você encontrou todas as palavras!</h3>
+        <p>Agora vale uma pausa: quais virtudes você quer cultivar mais de perto? Quais sentimentos deseja fortalecer e quais emoções quer compreender melhor nos próximos dias?</p>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" id="word-close">Fechar</button>
           <button type="button" class="btn btn-primary" id="word-new-game">Novo jogo</button>
