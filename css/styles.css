@@ -1480,16 +1480,16 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .frases-table .frase-col-autor { width: 18%; }
 .frases-table .frase-col-cat { width: 16%; }
 .frases-table .frase-col-status { width: 11%; }
-.frase-cell-msg {
+.frases-table td.frase-cell-msg {
   white-space: normal;
   line-height: 1.4;
 }
-.frase-cell-autor,
-.frase-cell-cat {
+.frases-table td.frase-cell-autor,
+.frases-table td.frase-cell-cat {
   white-space: normal;
   overflow-wrap: anywhere;
 }
-.frase-cell-actions {
+.frases-table td.frase-cell-actions {
   white-space: nowrap;
 }
 
@@ -1779,21 +1779,55 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 
 @media (max-width: 600px) {
-  .frases-table {
-    min-width: 560px;
-  }
-  .frases-table th,
+  .frases-table,
+  .frases-table tbody,
+  .frases-table tr,
   .frases-table td {
-    padding: 8px 9px;
-    font-size: .82rem;
+    display: block;
+    width: 100%;
   }
-  .frases-table .frase-col-msg { width: 250px; }
-  .frases-table .frase-col-autor { width: 88px; }
-  .frases-table .frase-col-cat { width: 96px; }
-  .frases-table .frase-col-status { width: 70px; }
-  .frases-table th:last-child { width: 56px !important; }
-  .frase-cell-actions {
+  .frases-table { background: transparent; table-layout: auto; }
+  .frases-table thead { display: none; }
+  .frases-table tr {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .frases-table td {
     display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    white-space: normal;
+    text-align: right;
+    font-size: .84rem;
+  }
+  .frases-table td:last-child { border-bottom: 0; }
+  .frases-table td::before {
+    content: attr(data-label);
+    flex: 0 0 82px;
+    color: var(--text-muted);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+  .frases-table td.frase-cell-msg {
+    display: block;
+    text-align: left;
+    line-height: 1.45;
+  }
+  .frases-table td.frase-cell-msg::before {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .frase-cell-actions {
+    justify-content: flex-end;
     gap: 4px;
   }
   .frase-cell-actions .btn-icon {
