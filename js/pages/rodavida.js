@@ -362,6 +362,12 @@ PCF.Pages = PCF.Pages || {};
         rvBadge.replaceWith(dateInput);
         const newBtn = rvNav.querySelector('#rv-nova');
         rvNav.insertBefore(todayBtn, newBtn || null);
+        if (newBtn) {
+          const extraActions = document.createElement('div');
+          extraActions.className = 'rv-extra-actions page-actions';
+          rvNav.after(extraActions);
+          extraActions.appendChild(newBtn);
+        }
       }
       PCF.App.applyStandardHeader?.(container, '#roda-vida');
 

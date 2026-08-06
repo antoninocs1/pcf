@@ -870,6 +870,10 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     white-space: nowrap;
   }
   .rv-nav-area #rv-nova { min-width: 128px; }
+  .rv-extra-actions {
+    width: 100%;
+    margin-top: 6px;
+  }
   .imc-chart-container { height: 250px; min-height: 0; }
   .imc-chart-container canvas { min-height: 185px; max-height: 205px; }
   /* Tabela: padding menor */
@@ -1824,6 +1828,8 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   align-items: center;
   flex-wrap: nowrap;
   min-width: 0;
+  width: fit-content;
+  max-width: 100%;
 }
 .date-nav-controls input[type="date"] {
   flex: 0 1 180px;
@@ -1964,6 +1970,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   flex-wrap: wrap; gap: 14px; margin-bottom: 16px; padding-right: 48px;
 }
 .rv-nav-area { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rv-extra-actions {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  justify-content: flex-start;
+}
 .rv-nav-area .btn { min-height: 38px; padding-top: 0; padding-bottom: 0; }
 .rv-date-badge {
   padding: 5px 14px; background: var(--bg-card); border: 1px solid var(--border);
