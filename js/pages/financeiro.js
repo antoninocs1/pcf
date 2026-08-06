@@ -65,10 +65,10 @@ PCF.Pages = PCF.Pages || {};
     const anos = [...new Set(trans.map(t => t.ano))].sort();
     container.innerHTML = `
       <div class="page">
-        <div class="page-header">
-          <h2>Painel financeiro</h2>
-        </div>
         <div class="finance-sticky">
+          <div class="page-header">
+            <h2>Painel financeiro</h2>
+          </div>
           ${PCF.renderFinanceTabs('#dashboard')}
           <div class="finance-tab-controls filters">
             <select id="dash-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
@@ -138,8 +138,10 @@ PCF.Pages = PCF.Pages || {};
     const cats = S.getCategorias();
     container.innerHTML = `
       <div class="page">
-        <h2>Inserir Transação Financeira</h2><br>
         <div class="finance-sticky">
+          <div class="page-header">
+            <h2>Inserir Transação Financeira</h2>
+          </div>
           ${PCF.renderFinanceTabs('#inserir')}
         </div>
         <div id="inserir-msg"></div>
@@ -260,26 +262,26 @@ PCF.Pages = PCF.Pages || {};
       const anos = [...new Set(trans.map(t => t.ano).filter(Boolean))].sort((a, b) => b - a);
       container.innerHTML = `
         <div class="page">
-          <div class="page-header">
-            <h2>Base de Dados Financeira</h2>
-          </div>
           <div class="finance-sticky">
-          ${PCF.renderFinanceTabs('#base')}
-          <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
-          <div class="finance-tab-controls page-actions">
-            <span class="badge" id="base-subtotal"></span>
-            <button type="button" class="btn btn-primary" id="base-nova-transacao">
-              <i data-lucide="plus"></i> Nova transação financeira
-            </button>
+            <div class="page-header">
+              <h2>Base de Dados Financeira</h2>
+            </div>
+            ${PCF.renderFinanceTabs('#base')}
+            <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
+            <div class="finance-tab-controls page-actions">
+              <span class="badge" id="base-subtotal"></span>
+              <button type="button" class="btn btn-primary" id="base-nova-transacao">
+                <i data-lucide="plus"></i> Nova transação financeira
+              </button>
+            </div>
+            <div class="filters">
+              <select id="base-tipo"><option value="">Todos os Tipos</option><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option><option value="INVESTIMENTO">Investimento</option></select>
+              <select id="base-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+              <select id="base-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
+              <select id="base-cat"><option value="">Todas as Categorias</option>${categorias.map(c => `<option value="${H.esc(c)}">${H.esc(c)}</option>`).join('')}</select>
+            </div>
           </div>
-          <div class="filters">
-            <select id="base-tipo"><option value="">Todos os Tipos</option><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option><option value="INVESTIMENTO">Investimento</option></select>
-            <select id="base-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
-            <select id="base-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
-            <select id="base-cat"><option value="">Todas as Categorias</option>${categorias.map(c => `<option value="${H.esc(c)}">${H.esc(c)}</option>`).join('')}</select>
-          </div>
-          </div>
-          <div class="table-container"><table class="table">
+          <div class="table-container finance-data-table"><table class="table">
             <thead><tr><th>Data</th><th class="col-hide-mobile">Dia</th><th class="col-hide-mobile">Mês</th><th class="col-hide-mobile">Ano</th><th>Tipo</th><th>Categoria</th><th class="col-hide-mobile">Subcategoria</th><th class="col-hide-mobile">Item</th><th>Valor</th><th class="col-hide-mobile">Forma de pagamento</th><th class="col-hide-mobile">Fixo/variável</th><th style="width:80px">Ações</th></tr></thead>
             <tbody id="base-tbody"></tbody>
           </table></div>
@@ -453,10 +455,10 @@ PCF.Pages = PCF.Pages || {};
 
     container.innerHTML = `
       <div class="page">
-        <div class="page-header">
-          <h2>Relatório Financeiro</h2>
-        </div>
         <div class="finance-sticky">
+          <div class="page-header">
+            <h2>Relatório Financeiro</h2>
+          </div>
           ${PCF.renderFinanceTabs('#relatorios')}
           <div class="finance-tab-controls filters">
             <select id="rel-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
@@ -592,8 +594,10 @@ PCF.Pages = PCF.Pages || {};
 
     container.innerHTML = `
       <div class="page">
-        <h2>4 Forças do Dinheiro</h2><br>
         <div class="finance-sticky">
+          <div class="page-header">
+            <h2>4 Forças do Dinheiro</h2>
+          </div>
           ${PCF.renderFinanceTabs('#ciclo')}
         </div>
         <p class="subtitle">Ciclo do Dinheiro — Visão geral das entradas, saídas, investimentos e saldo.</p>

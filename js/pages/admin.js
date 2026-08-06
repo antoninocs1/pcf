@@ -17,10 +17,10 @@ PCF.Pages = PCF.Pages || {};
       const filtered = filtroTipo ? cats.filter(c => c.tipoOperacao === filtroTipo) : cats;
       container.innerHTML = `
         <div class="page">
-          <div class="page-header">
-            <h2>Configuração de categorias</h2>
-          </div>
           <div class="finance-sticky">
+            <div class="page-header">
+              <h2>Configuração de categorias</h2>
+            </div>
             ${PCF.renderFinanceTabs ? PCF.renderFinanceTabs('#categorias') : ''}
             <div class="finance-tab-controls categorias-actions">
               <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
@@ -33,7 +33,7 @@ PCF.Pages = PCF.Pages || {};
               </select>
             </div>
           </div>
-          <div class="table-container"><table class="table">
+          <div class="table-container finance-data-table"><table class="table">
             <thead><tr><th>Tipo de operação</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
             <tbody>${filtered.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma categoria</td></tr>' :
               filtered.map(c => `<tr>

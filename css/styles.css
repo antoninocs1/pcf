@@ -1681,6 +1681,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   padding: 4px 0 1px;
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 88%, rgba(15,23,42,0) 100%);
 }
+.finance-sticky .page-header {
+  margin-bottom: 12px;
+}
 .finance-tabs { margin-top: -4px; }
 .finance-tab { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
 .finance-tab svg { width: 17px; height: 17px; flex-shrink: 0; }
@@ -1691,6 +1694,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .finance-tab-controls.page-actions,
 .finance-tab-controls.categorias-actions {
   justify-content: flex-start;
+}
+.finance-data-table .table thead th {
+  position: sticky;
+  top: 162px;
+  z-index: 25;
+  background: var(--bg-card);
 }
 .gb-section { display: flex; flex-direction: column; gap: 12px; }
 .gb-section-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
@@ -1749,6 +1758,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     scroll-snap-type: x mandatory; padding-bottom: 2px;
   }
   .finance-sticky { top: 50px; }
+  .finance-data-table .table thead th { top: 232px; }
   .diario-tab {
     flex: 0 0 auto; padding: 10px 14px; font-size: .82rem;
     scroll-snap-align: start; min-height: 44px;
