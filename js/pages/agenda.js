@@ -240,6 +240,7 @@ const checkAndShowAlerts = () => {};
         if (cmpData !== 0) return cmpData;
         return (a.hora || '').localeCompare(b.hora || '');
       });
+      const contatosMap = Object.fromEntries((S.getContatos ? S.getContatos() : []).map(c => [c.id, c]));
       const acoesVinculadas = getPlanoAcoesVinculadas();
       const saudeVinculados = getSaudeEventosVinculados();
       const countsByDate = getCombinedMonthCounts(compromissos, acoesVinculadas, saudeVinculados);
@@ -472,6 +473,7 @@ const checkAndShowAlerts = () => {};
                 <thead>
                   <tr>
                     <th>Registro</th>
+                    <th>Para quem</th>
                     <th>Quando</th>
                     <th>Local</th>
                     <th>Status</th>
@@ -481,8 +483,10 @@ const checkAndShowAlerts = () => {};
                 <tbody>
                   ${saudeVinculados.map(evento => {
                     const statusCor = STATUS_COLORS[evento.status] || '#6b7280';
+                    const responsavel = evento.responsavelContatoId ? (contatosMap[evento.responsavelContatoId]?.nome || 'Contato removido') : 'Própria pessoa';
                     return `<tr>
                       <td>${H.esc(evento.tipo || 'Saúde')} - ${H.esc(evento.descricao || '')}</td>
+                      <td>${H.esc(responsavel)}</td>
                       <td>${H.formatarData(evento.data)} ${evento.hora || ''}</td>
                       <td>${H.esc(evento.local || '—')}</td>
                       <td><span class="status-badge" style="background:${statusCor}">${H.esc(evento.status || 'Pendente')}</span></td>

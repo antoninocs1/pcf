@@ -1726,6 +1726,7 @@ PCF.Pages = PCF.Pages || {};
       const eventos = S.getSaudeEventos ? [...S.getSaudeEventos()].sort((a, b) =>
         (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || '')
       ) : [];
+      const contatosMap = Object.fromEntries((S.getContatos ? S.getContatos() : []).map(c => [c.id, c]));
       return `
         <div class="gb-section">
           <div class="gb-section-header">
@@ -1738,13 +1739,15 @@ PCF.Pages = PCF.Pages || {};
           ${eventos.length === 0 ? '<p class="empty-text">Nenhuma consulta, exame ou procedimento registrado</p>' : `
           <div class="table-wrapper">
             <table class="table">
-              <thead><tr><th>Tipo</th><th>Descrição</th><th>Data</th><th class="col-hide-mobile">Revisão</th><th>Status</th><th class="col-hide-mobile">Agenda</th><th style="width:60px">Ações</th></tr></thead>
+              <thead><tr><th>Tipo</th><th>Descrição</th><th>Para quem</th><th>Data</th><th class="col-hide-mobile">Revisão</th><th>Status</th><th class="col-hide-mobile">Agenda</th><th style="width:60px">Ações</th></tr></thead>
               <tbody>
                 ${eventos.map(ev => {
                   const cor = STATUS_COLORS_SE[ev.status] || '#6b7280';
+                  const responsavel = ev.responsavelContatoId ? (contatosMap[ev.responsavelContatoId]?.nome || 'Contato removido') : 'Própria pessoa';
                   return `<tr>
                     <td>${H.esc(ev.tipo || 'Outros')}</td>
                     <td><strong>${H.esc(ev.descricao || '—')}</strong>${ev.local ? `<br><small class="text-muted">${H.esc(ev.local)}</small>` : ''}</td>
+                    <td>${H.esc(responsavel)}</td>
                     <td>${ev.data ? _fmtDate(ev.data) : '—'} ${ev.hora || ''}</td>
                     <td class="col-hide-mobile">${ev.proximaRevisao ? _fmtDate(ev.proximaRevisao) : '—'}</td>
                     <td><span class="status-badge" style="background:${cor}">${H.esc(ev.status || 'Pendente')}</span></td>

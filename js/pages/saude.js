@@ -168,6 +168,11 @@ PCF.Pages = PCF.Pages || {};
     const render = () => {
       const eventos = (S.getSaudeEventos ? S.getSaudeEventos() : [])
         .sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
+      const contatos = S.getContatos ? S.getContatos() : [];
+      const contatoMap = Object.fromEntries(contatos.map(c => [c.id, c]));
+      const nomeResponsavel = (evento) => evento.responsavelContatoId
+        ? (contatoMap[evento.responsavelContatoId]?.nome || 'Contato removido')
+        : 'Própria pessoa';
       const pendentes = eventos.filter(e => e.status === 'Pendente').length;
       const realizados = eventos.filter(e => e.status === 'Realizado').length;
       const vinculados = eventos.filter(e => e.agendaAtivo && e.data).length;
@@ -201,6 +206,14 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group">
                 <label>Profissional / Clínica / Laboratório</label>
                 <input type="text" id="se-local" placeholder="Nome do profissional, clínica ou laboratório">
+              </div>
+              <div class="form-group">
+                <label>Para quem?</label>
+                <select id="se-responsavel">
+                  <option value="">Própria pessoa</option>
+                  ${contatos.map(c => `<option value="${H.esc(c.id)}">${H.esc(c.nome)}</option>`).join('')}
+                </select>
+                <small class="form-hint">Use um contato quando a consulta/exame for de alguém sob sua responsabilidade.</small>
               </div>
               <div class="form-group">
                 <label>Status</label>
@@ -238,11 +251,12 @@ PCF.Pages = PCF.Pages || {};
             ${eventos.length === 0 ? '<p class="empty-text">Nenhuma consulta, exame ou procedimento registrado.</p>' : `
               <div class="table-container">
                 <table class="table">
-                  <thead><tr><th>Tipo</th><th>Descrição</th><th>Data</th><th>Revisão</th><th>Status</th><th>Agenda</th><th style="width:104px">Ações</th></tr></thead>
+                  <thead><tr><th>Tipo</th><th>Descrição</th><th>Para quem</th><th>Data</th><th>Revisão</th><th>Status</th><th>Agenda</th><th style="width:104px">Ações</th></tr></thead>
                   <tbody>${eventos.map(e => `
                     <tr>
                       <td>${H.esc(e.tipo || 'Outros')}</td>
                       <td><strong>${H.esc(e.descricao || '')}</strong>${e.local ? `<br><small>${H.esc(e.local)}</small>` : ''}</td>
+                      <td>${H.esc(nomeResponsavel(e))}</td>
                       <td>${e.data ? H.formatarData(e.data) : '—'} ${e.hora || ''}</td>
                       <td>${e.proximaRevisao ? H.formatarData(e.proximaRevisao) : '—'}</td>
                       <td><span class="status-badge" style="background:${STATUS_COLORS[e.status] || '#6b7280'}">${H.esc(e.status || 'Pendente')}</span></td>
@@ -287,6 +301,7 @@ PCF.Pages = PCF.Pages || {};
           tipo: document.getElementById('se-tipo').value,
           descricao: document.getElementById('se-descricao').value.trim(),
           local: document.getElementById('se-local').value.trim(),
+          responsavelContatoId: document.getElementById('se-responsavel').value,
           status: document.getElementById('se-status').value,
           data: document.getElementById('se-data').value,
           hora: document.getElementById('se-hora').value,
@@ -323,6 +338,7 @@ PCF.Pages = PCF.Pages || {};
           document.getElementById('se-tipo').value = item.tipo || TIPOS[0];
           document.getElementById('se-descricao').value = item.descricao || '';
           document.getElementById('se-local').value = item.local || '';
+          document.getElementById('se-responsavel').value = item.responsavelContatoId || '';
           document.getElementById('se-status').value = item.status || 'Pendente';
           document.getElementById('se-data').value = item.data || '';
           document.getElementById('se-hora').value = item.hora || '';

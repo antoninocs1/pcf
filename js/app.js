@@ -851,8 +851,8 @@ PCF.App = (() => {
     {
       id: 'saude', label: 'Saúde', icon: 'heart-pulse',
       items: [
-        { hash: '#imc', icon: 'heart', label: 'IMC' },
         { hash: '#saude-consultas', icon: 'clipboard-plus', label: 'Consultas e Exames' },
+        { hash: '#imc', icon: 'heart', label: 'IMC' },
       ]
     },
     {
