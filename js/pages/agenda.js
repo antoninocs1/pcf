@@ -35,6 +35,13 @@ const checkAndShowAlerts = () => {};
     let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     let selectedDate = H.hoje();
 
+    const renderPreservingScroll = () => {
+      const x = window.scrollX;
+      const y = window.scrollY;
+      render();
+      requestAnimationFrame(() => window.scrollTo(x, y));
+    };
+
     const normalizeDateKey = (date) => {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -537,25 +544,27 @@ const checkAndShowAlerts = () => {};
           })()}
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#agenda');
+
       startClock();
       document.getElementById('ag-btn-timer').onclick = () => showTimerModal();
       document.getElementById('ag-btn-crono').onclick = () => showCronoModal();
       document.getElementById('ag-cal-prev').onclick = () => {
         currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
-        render();
+        renderPreservingScroll();
       };
       document.getElementById('ag-cal-next').onclick = () => {
         currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-        render();
+        renderPreservingScroll();
       };
       document.getElementById('ag-cal-today').onclick = () => {
         currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
         selectedDate = H.hoje();
-        render();
+        renderPreservingScroll();
         const inputData = document.getElementById('ag-data');
         if (inputData) {
           inputData.value = selectedDate;
-          inputData.focus();
         }
       };
 
@@ -605,9 +614,8 @@ const checkAndShowAlerts = () => {};
           selectedDate = dayBtn.dataset.agDate;
           if (inputData) {
             inputData.value = dayBtn.dataset.agDate;
-            inputData.focus();
           }
-          render();
+          renderPreservingScroll();
         }
       };
     };

@@ -250,6 +250,9 @@ a:hover { text-decoration: underline; }
 .contatos-search-wrap { display: flex; align-items: center; gap: 6px; }
 .contatos-search-wrap .input-search { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--text); font-size: .92rem; min-width: 200px; outline: none; transition: border-color .2s; }
 .contatos-search-wrap .input-search:focus { border-color: var(--primary); }
+.app-tab-controls .contatos-search-wrap { align-items: center; min-height: 38px; }
+.app-tab-controls .contatos-search-wrap .input-search { height: 38px; min-height: 38px; }
+.app-tab-controls .contatos-search-wrap .btn { height: 38px; min-height: 38px; flex: 0 0 auto; }
 .subtitle { color: var(--text-muted); margin-bottom: 16px; font-size: .92rem; }
 .text-muted { color: var(--text-muted); font-size: .85rem; }
 

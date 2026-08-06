@@ -383,7 +383,7 @@ PCF.Pages = PCF.Pages || {};
             <div class="contatos-search-wrap">
               <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou e-mail" value="${H.esc(_searchTerm)}">
               <button id="btn-usuarios-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
-              ${_searchTerm ? `<button id="btn-usuarios-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
+              <button id="btn-usuarios-clear" class="btn btn-secondary" title="Limpar busca" ${_searchTerm ? '' : 'aria-hidden="true" tabindex="-1" style="visibility:hidden"'}><i data-lucide="x"></i></button>
             </div>
             <button id="btn-add-user" class="btn btn-primary">+ Novo usuário</button>
           </div>
@@ -402,6 +402,9 @@ PCF.Pages = PCF.Pages || {};
             </tbody>
           </table></div>
         </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#usuarios');
 
       const searchInput = document.getElementById('usuarios-search');
       const doSearch = () => { _searchTerm = searchInput.value; render(); };
@@ -1032,7 +1035,7 @@ PCF.Pages = PCF.Pages || {};
             <div class="contatos-search-wrap">
               <input type="text" id="contatos-search" class="input-search" placeholder="Buscar por nome ou e-mail" value="${H.esc(_searchTerm)}">
               <button id="btn-contatos-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
-              ${_searchTerm ? `<button id="btn-contatos-clear" class="btn btn-secondary" title="Limpar busca"><i data-lucide="x"></i></button>` : ''}
+              <button id="btn-contatos-clear" class="btn btn-secondary" title="Limpar busca" ${_searchTerm ? '' : 'aria-hidden="true" tabindex="-1" style="visibility:hidden"'}><i data-lucide="x"></i></button>
             </div>
             <button id="btn-add-contato" class="btn btn-primary">+ Novo contato</button>
           </div>
@@ -1051,6 +1054,9 @@ PCF.Pages = PCF.Pages || {};
             </tbody>
           </table></div>
         </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#contatos');
 
       const searchInput = document.getElementById('contatos-search');
       const doSearch = () => { _searchTerm = searchInput.value; render(); };
@@ -1128,6 +1134,12 @@ PCF.Pages = PCF.Pages || {};
 
     let selectedDate = new Date().toISOString().slice(0, 10);
     let sugestoesTab = '';
+    const renderPreservingScroll = () => {
+      const x = window.scrollX;
+      const y = window.scrollY;
+      render();
+      requestAnimationFrame(() => window.scrollTo(x, y));
+    };
 
     const render = () => {
       const TABS_SUGESTOES = S.getDiarioTabs();
@@ -1188,13 +1200,13 @@ PCF.Pages = PCF.Pages || {};
 
       PCF.App.applyStandardHeader?.(container, '#diario');
 
-      document.getElementById('diario-data').onchange = (e) => { selectedDate = e.target.value; render(); };
-      document.getElementById('btn-diario-hoje').onclick = () => { selectedDate = today; render(); };
+      document.getElementById('diario-data').onchange = (e) => { selectedDate = e.target.value; renderPreservingScroll(); };
+      document.getElementById('btn-diario-hoje').onclick = () => { selectedDate = today; renderPreservingScroll(); };
       document.getElementById('btn-diario-prev').onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
         d.setDate(d.getDate() - 1);
         selectedDate = d.toISOString().slice(0, 10);
-        render();
+        renderPreservingScroll();
       };
       document.getElementById('btn-diario-next').onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
@@ -1202,7 +1214,7 @@ PCF.Pages = PCF.Pages || {};
         const next = d.toISOString().slice(0, 10);
         if (next <= today) {
           selectedDate = next;
-          render();
+          renderPreservingScroll();
         }
       };
 
@@ -1224,7 +1236,7 @@ PCF.Pages = PCF.Pages || {};
       };
 
       container.querySelectorAll('[data-goto]').forEach(item => {
-        item.onclick = () => { selectedDate = item.dataset.goto; render(); };
+        item.onclick = () => { selectedDate = item.dataset.goto; renderPreservingScroll(); };
       });
 
       container.querySelectorAll('.diario-tab').forEach(tab => {

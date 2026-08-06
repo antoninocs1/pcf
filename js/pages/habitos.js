@@ -95,6 +95,12 @@ PCF.Pages = PCF.Pages || {};
     let fraseExibida = getFraseHoje();
     let timerInterval = null;
     const paineisAbertos = new Set();
+    const renderPreservingScroll = () => {
+      const x = window.scrollX;
+      const y = window.scrollY;
+      render();
+      requestAnimationFrame(() => window.scrollTo(x, y));
+    };
     const intensidadeDoSlider = (slider) => {
       if (!slider) return 100;
       const max = Math.max(1, Number(slider.max) || 1);
@@ -313,13 +319,13 @@ PCF.Pages = PCF.Pages || {};
       const _btnOutraFrase = document.getElementById('btn-outra-frase');
       if (_btnOutraFrase) _btnOutraFrase.onclick = () => { fraseExibida = _sortearFrase(fraseExibida); atualizarBanner(); };
 
-      document.getElementById('hab-data').onchange = function () { selectedDate = this.value; render(); };
-      const _btnHoje = document.getElementById('btn-hab-hoje'); if (_btnHoje) _btnHoje.onclick = () => { selectedDate = H.hoje(); render(); };
+      document.getElementById('hab-data').onchange = function () { selectedDate = this.value; renderPreservingScroll(); };
+      const _btnHoje = document.getElementById('btn-hab-hoje'); if (_btnHoje) _btnHoje.onclick = () => { selectedDate = H.hoje(); renderPreservingScroll(); };
       const _btnPrev = document.getElementById('btn-hab-prev'); if (_btnPrev) _btnPrev.onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
         d.setDate(d.getDate() - 1);
         selectedDate = d.toISOString().slice(0, 10);
-        render();
+        renderPreservingScroll();
       };
       const _btnNext = document.getElementById('btn-hab-next'); if (_btnNext) _btnNext.onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
@@ -327,7 +333,7 @@ PCF.Pages = PCF.Pages || {};
         const next = d.toISOString().slice(0, 10);
         if (next <= H.hoje()) {
           selectedDate = next;
-          render();
+          renderPreservingScroll();
         }
       };
 
@@ -578,6 +584,12 @@ PCF.Pages = PCF.Pages || {};
     const now = new Date();
     let viewYear = now.getFullYear();
     let viewMonth = now.getMonth() + 1;
+    const renderPreservingScroll = () => {
+      const x = window.scrollX;
+      const y = window.scrollY;
+      render();
+      requestAnimationFrame(() => window.scrollTo(x, y));
+    };
 
     const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -657,10 +669,10 @@ PCF.Pages = PCF.Pages || {};
       PCF.App.applyStandardHeader?.(container, '#habitos-mensal');
 
       document.getElementById('btn-mes-ant').onclick = () => {
-        viewMonth--; if (viewMonth < 1) { viewMonth = 12; viewYear--; } render();
+        viewMonth--; if (viewMonth < 1) { viewMonth = 12; viewYear--; } renderPreservingScroll();
       };
       document.getElementById('btn-mes-prox').onclick = () => {
-        viewMonth++; if (viewMonth > 12) { viewMonth = 1; viewYear++; } render();
+        viewMonth++; if (viewMonth > 12) { viewMonth = 1; viewYear++; } renderPreservingScroll();
       };
 
       container.querySelectorAll('.hab-cell').forEach(cell => {
@@ -669,7 +681,7 @@ PCF.Pages = PCF.Pages || {};
           const data = cell.dataset.date;
           const reg = S.getRegistrosHabitos().find(r => r.habitoId === habitoId && r.data === data);
           S.upsertRegistroHabito({ habitoId, data, completo: !(reg?.completo || false), observacao: reg?.observacao || '' });
-          render();
+          renderPreservingScroll();
         };
       });
     };

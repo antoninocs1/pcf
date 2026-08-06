@@ -257,6 +257,12 @@ PCF.Pages = PCF.Pages || {};
     const sugestoes = _calcSugestoes(config);
     let registros  = S.getRodaVidaRegistros();
     let curDate    = new Date().toISOString().split('T')[0];
+    const renderPreservingScroll = () => {
+      const x = window.scrollX;
+      const y = window.scrollY;
+      render();
+      requestAnimationFrame(() => window.scrollTo(x, y));
+    };
 
     const _getSorted   = () => [...new Set(registros.map(r => r.data))].sort();
     const _regForDate  = (d) => registros.find(r => r.data === d);
@@ -388,22 +394,22 @@ PCF.Pages = PCF.Pages || {};
       /* navegação */
       document.getElementById('rv-prev').onclick = () => {
         const d = _getSorted()[_getSorted().indexOf(curDate) - 1];
-        if (d) { curDate = d; render(); }
+        if (d) { curDate = d; renderPreservingScroll(); }
       };
       document.getElementById('rv-next').onclick = () => {
         const d = _getSorted()[_getSorted().indexOf(curDate) + 1];
-        if (d) { curDate = d; render(); }
+        if (d) { curDate = d; renderPreservingScroll(); }
       };
       document.getElementById('rv-date').onchange = (e) => {
-        if (e.target.value) { curDate = e.target.value; render(); }
+        if (e.target.value) { curDate = e.target.value; renderPreservingScroll(); }
       };
       document.getElementById('rv-hoje').onclick = () => {
         curDate = new Date().toISOString().split('T')[0];
-        render();
+        renderPreservingScroll();
       };
       document.getElementById('rv-nova').onclick = () => {
         curDate = new Date().toISOString().split('T')[0];
-        render();
+        renderPreservingScroll();
       };
 
       /* salvar */

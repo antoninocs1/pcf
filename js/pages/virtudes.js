@@ -81,6 +81,12 @@ PCF.Pages = PCF.Pages || {};
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   PCF.Pages.virtudes = (container) => {
     let selectedDate = H.hoje();
+    const renderPreservingScroll = () => {
+      const x = window.scrollX;
+      const y = window.scrollY;
+      render();
+      requestAnimationFrame(() => window.scrollTo(x, y));
+    };
 
     const render = () => {
       const virtudes = S.getVirtudesConfig().filter(v => v.ativo !== false);
@@ -167,20 +173,20 @@ PCF.Pages = PCF.Pages || {};
     const _bindEvents = () => {
       const dateEl = container.querySelector('#virt-date');
       if (dateEl) {
-        dateEl.onchange = () => { selectedDate = dateEl.value; render(); };
+        dateEl.onchange = () => { selectedDate = dateEl.value; renderPreservingScroll(); };
       }
       container.querySelector('#virt-prev-day')?.addEventListener('click', () => {
         const d = new Date(selectedDate + 'T12:00:00'); d.setDate(d.getDate() - 1);
-        selectedDate = d.toISOString().split('T')[0]; render();
+        selectedDate = d.toISOString().split('T')[0]; renderPreservingScroll();
       });
       container.querySelector('#virt-next-day')?.addEventListener('click', () => {
         const d = new Date(selectedDate + 'T12:00:00'); d.setDate(d.getDate() + 1);
         const hoje = H.hoje();
-        if (d.toISOString().split('T')[0] <= hoje) { selectedDate = d.toISOString().split('T')[0]; render(); }
+        if (d.toISOString().split('T')[0] <= hoje) { selectedDate = d.toISOString().split('T')[0]; renderPreservingScroll(); }
       });
       container.querySelector('#virt-today')?.addEventListener('click', () => {
         selectedDate = H.hoje();
-        render();
+        renderPreservingScroll();
       });
 
       const btnOutraVidaFeliz = container.querySelector('#btn-outra-vida-feliz');
