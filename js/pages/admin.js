@@ -20,6 +20,9 @@ PCF.Pages = PCF.Pages || {};
           <div class="finance-sticky">
             <div class="page-header">
               <h2>Configuração de categorias</h2>
+              <button type="button" class="btn-home-back finance-home-button" title="Tela Inicial" aria-label="Tela Inicial">
+                <i data-lucide="home"></i>
+              </button>
             </div>
             ${PCF.renderFinanceTabs ? PCF.renderFinanceTabs('#categorias') : ''}
             <div class="finance-tab-controls categorias-actions">
@@ -51,6 +54,9 @@ PCF.Pages = PCF.Pages || {};
 
       if (window.lucide) lucide.createIcons();
       if (PCF.activateFinanceTabs) PCF.activateFinanceTabs(container);
+      container.querySelectorAll('.finance-home-button').forEach(btn => {
+        btn.onclick = () => { location.hash = '#home'; };
+      });
       document.getElementById('cat-filtro-tipo').onchange = function() { filtroTipo = this.value; render(); };
       document.getElementById('btn-add-cat').onclick = () => showCatModal();
       document.getElementById('btn-restaurar-cats').onclick = () => {

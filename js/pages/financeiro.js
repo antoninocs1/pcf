@@ -28,7 +28,15 @@ PCF.Pages = PCF.Pages || {};
 
   PCF.activateFinanceTabs = (container) => {
     container.querySelector('.finance-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    container.querySelectorAll('.finance-home-button').forEach(btn => {
+      btn.onclick = () => { location.hash = '#home'; };
+    });
   };
+
+  const financeHomeButton = () => `
+    <button type="button" class="btn-home-back finance-home-button" title="Tela Inicial" aria-label="Tela Inicial">
+      <i data-lucide="home"></i>
+    </button>`;
 
   const setFieldError = (targetId, message) => {
     const el = document.getElementById(targetId);
@@ -68,6 +76,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky">
           <div class="page-header">
             <h2>Painel financeiro</h2>
+            ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#dashboard')}
           <div class="finance-tab-controls filters">
@@ -141,6 +150,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky finance-sticky-compact">
           <div class="page-header">
             <h2>Inserir Transação Financeira</h2>
+            ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#inserir')}
         </div>
@@ -265,6 +275,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="finance-sticky">
             <div class="page-header">
               <h2>Base de Dados Financeira</h2>
+              ${financeHomeButton()}
             </div>
             ${PCF.renderFinanceTabs('#base')}
             <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
@@ -458,6 +469,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky">
           <div class="page-header">
             <h2>Relatório Financeiro</h2>
+            ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#relatorios')}
           <div class="finance-tab-controls filters">
@@ -597,6 +609,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky">
           <div class="page-header">
             <h2>4 Forças do Dinheiro</h2>
+            ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#ciclo')}
         </div>

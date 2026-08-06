@@ -1206,7 +1206,10 @@ PCF.App = (() => {
       }
     });
     const backBtn = document.getElementById('btn-home-back');
-    if (backBtn) backBtn.style.display = hash === '#home' ? 'none' : '';
+    if (backBtn) {
+      const financeHashes = new Set(['#dashboard', '#inserir', '#base', '#relatorios', '#ciclo', '#categorias']);
+      backBtn.style.display = hash === '#home' || financeHashes.has(hash) ? 'none' : '';
+    }
   };
 
   /* ==================== ROUTER ==================== */
