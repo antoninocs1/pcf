@@ -1028,6 +1028,7 @@ PCF.App = (() => {
     if (title.parentElement !== header) {
       header.insertBefore(title, header.firstChild);
     }
+    title.removeAttribute('style');
     const titleBreak = title.nextSibling;
     if (titleBreak && titleBreak.nodeName === 'BR') titleBreak.remove();
     if (routeItem?.icon) {
