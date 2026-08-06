@@ -160,6 +160,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#virtudes');
       _bindEvents();
     };
 

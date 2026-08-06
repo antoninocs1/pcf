@@ -1183,6 +1183,8 @@ PCF.Pages = PCF.Pages || {};
           </div>` : ''}
         </div>`;
 
+      PCF.App.applyStandardHeader?.(container, '#diario');
+
       document.getElementById('diario-data').onchange = (e) => { selectedDate = e.target.value; render(); };
       document.getElementById('btn-diario-hoje').onclick = () => { selectedDate = today; render(); };
       document.getElementById('btn-diario-prev').onclick = () => {

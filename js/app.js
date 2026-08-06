@@ -1754,7 +1754,7 @@ PCF.App = (() => {
     });
   };
 
-  return { boot, route, registerChart, destroyCharts, applyTheme };
+  return { boot, route, registerChart, destroyCharts, applyTheme, applyStandardHeader };
 })();
 
 document.addEventListener('DOMContentLoaded', PCF.App.boot);

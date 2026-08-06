@@ -307,6 +307,8 @@ PCF.Pages = PCF.Pages || {};
           `}
         </div>`;
 
+      PCF.App.applyStandardHeader?.(container, '#habitos');
+
       /* Eventos */
       const _btnOutraFrase = document.getElementById('btn-outra-frase');
       if (_btnOutraFrase) _btnOutraFrase.onclick = () => { fraseExibida = _sortearFrase(fraseExibida); atualizarBanner(); };
