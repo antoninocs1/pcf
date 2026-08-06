@@ -870,10 +870,6 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     white-space: nowrap;
   }
   .rv-nav-area #rv-nova { min-width: 128px; }
-  .rv-extra-actions {
-    width: 100%;
-    margin-top: 6px;
-  }
   .imc-chart-container { height: 250px; min-height: 0; }
   .imc-chart-container canvas { min-height: 185px; max-height: 205px; }
   /* Tabela: padding menor */
@@ -1829,7 +1825,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   flex-wrap: nowrap;
   min-width: 0;
   width: fit-content;
-  max-width: max-content;
+  max-width: 100%;
 }
 .date-nav-controls input[type="date"] {
   flex: 0 1 180px;
@@ -1970,19 +1966,17 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   flex-wrap: wrap; gap: 14px; margin-bottom: 16px; padding-right: 48px;
 }
 .rv-nav-area { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.rv-extra-actions {
-  position: relative;
-  z-index: 1;
-  margin-top: 8px;
-  justify-content: flex-start;
-}
 .app-tab-controls .rv-nav-area {
-  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
 }
-.app-tab-controls .rv-extra-actions {
+.rv-nav-area #rv-date {
+  flex: 0 1 170px;
+  min-width: 140px;
+}
+.rv-nav-area #rv-hoje {
   flex: 0 0 auto;
-  width: auto;
-  margin-top: 0;
+  white-space: nowrap;
 }
 .rv-nav-area .btn { min-height: 38px; padding-top: 0; padding-bottom: 0; }
 .rv-date-badge {

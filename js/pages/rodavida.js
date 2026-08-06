@@ -362,12 +362,6 @@ PCF.Pages = PCF.Pages || {};
         rvBadge.replaceWith(dateInput);
         const newBtn = rvNav.querySelector('#rv-nova');
         rvNav.insertBefore(todayBtn, newBtn || null);
-        if (newBtn) {
-          const extraActions = document.createElement('div');
-          extraActions.className = 'rv-extra-actions page-actions';
-          rvNav.after(extraActions);
-          extraActions.appendChild(newBtn);
-        }
         const header = container.querySelector('.rv-topbar');
         const subtitle = header?.querySelector('.subtitle');
         if (subtitle) header.after(subtitle);
