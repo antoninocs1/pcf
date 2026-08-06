@@ -539,6 +539,9 @@ PCF.Pages = PCF.Pages || {};
           </div>
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#roda-vida-config');
+
       /* ── botões quadrante ── */
       document.getElementById('rvc-add-quad').onclick = () => _openQuadModal(-1);
 

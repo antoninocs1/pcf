@@ -197,6 +197,9 @@ PCF.Pages = PCF.Pages || {};
           </div>
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#emocoes-config');
+
       document.getElementById('btn-add-emo-sup').onclick = () => showEmoModal('sup');
       document.getElementById('btn-restaurar-emocoes').onclick = () => {
         if (confirm('Restaurar emoções padrão? A configuração atual de emoções será substituída pela padrão.')) {
@@ -1279,6 +1282,9 @@ PCF.Pages = PCF.Pages || {};
           </table></div>
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#diario-config');
+
       document.getElementById('btn-add-dtab').onclick = () => showTabModal();
       container.onclick = (e) => {
         const up = e.target.closest('[data-up]');
@@ -1777,10 +1783,11 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
-      container.querySelector('.gb-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      PCF.App.applyStandardHeader?.(container, '#gerenciar-bases');
+      container.querySelector('[data-gbtab].active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 
       /* ---- Troca de abas ---- */
-      container.querySelectorAll('.gb-tab').forEach(btn => {
+      container.querySelectorAll('[data-gbtab]').forEach(btn => {
         btn.onclick = () => { activeTab = btn.dataset.gbtab; render(); };
       });
 

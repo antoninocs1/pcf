@@ -334,6 +334,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#virtudes-relatorio');
 
       container.querySelector('#vrel-periodo')?.addEventListener('change', e => { periodo = parseInt(e.target.value); render(); });
       container.querySelector('#vrel-virtude')?.addEventListener('change', e => { filtroVirtude = e.target.value; render(); });
@@ -393,6 +394,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#virtudes-config');
       _bindConfigEvents();
     };
 
@@ -554,6 +556,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#virtudes-base');
       container.querySelector('#vbase-date')?.addEventListener('change', e => { filtroData = e.target.value; render(); });
       container.querySelector('#vbase-virtude')?.addEventListener('change', e => { filtroVirtude = e.target.value; render(); });
       container.querySelector('#vbase-clear')?.addEventListener('click', () => { filtroData = ''; filtroVirtude = ''; render(); });

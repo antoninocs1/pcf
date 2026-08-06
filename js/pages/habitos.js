@@ -653,6 +653,9 @@ PCF.Pages = PCF.Pages || {};
           `}
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#habitos-mensal');
+
       document.getElementById('btn-mes-ant').onclick = () => {
         viewMonth--; if (viewMonth < 1) { viewMonth = 12; viewYear--; } render();
       };
@@ -779,6 +782,9 @@ PCF.Pages = PCF.Pages || {};
           `}
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#habitos-relatorio');
+
       if (habitos.length > 0) {
         const dailyData = labels.map(d => {
           const done = habitos.filter(h => registros.find(r => r.habitoId === h.id && r.data === d && r.completo)).length;
@@ -893,6 +899,9 @@ PCF.Pages = PCF.Pages || {};
             </table>
           </div>
         </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#habitos-config');
 
       document.getElementById('btn-add-hab').onclick = () => showHabitoModal(null, CATEGORIAS_HAB, ICONES_HAB, render);
       document.getElementById('btn-restaurar-habitos').onclick = () => {
@@ -1108,6 +1117,9 @@ PCF.Pages = PCF.Pages || {};
           </div>
           <p class="text-muted" style="margin-top:8px;font-size:.8rem">A frase do dia é selecionada automaticamente com base na data atual, dentre as mensagens ativas.</p>
         </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#frases');
 
       document.getElementById('btn-add-frase').onclick = () => showFraseModal(null, CATEGORIAS_FRASE, render);
       document.getElementById('btn-restaurar-frases').onclick = () => {

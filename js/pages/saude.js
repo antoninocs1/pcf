@@ -60,6 +60,9 @@ PCF.Pages = PCF.Pages || {};
         </div>
       </div>`;
 
+    if (window.lucide) lucide.createIcons();
+    PCF.App.applyStandardHeader?.(container, '#imc');
+
     const calcular = () => {
       const peso = parseFloat(document.getElementById('imc-peso').value) || 0;
       const altura = parseFloat(document.getElementById('imc-altura').value) || 0;
@@ -273,6 +276,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#saude-consultas');
 
       const resetForm = () => {
         editingId = null;
@@ -430,6 +434,9 @@ PCF.Pages = PCF.Pages || {};
             </div>
           </div>
         </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#emocoes');
 
       let selSup = null;
       document.getElementById('emo-intensidade').oninput = function() { document.getElementById('emo-int-val').textContent = this.value; };

@@ -132,6 +132,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#linha-tempo');
       document.getElementById('lt-add').onclick = () => showModal();
       const emptyAdd = document.getElementById('lt-empty-add');
       if (emptyAdd) emptyAdd.onclick = () => showModal();

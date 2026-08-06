@@ -267,6 +267,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#caca-palavras');
 
       container.querySelector('#wg-new').onclick = () => {
         game = buildGame();
@@ -375,6 +376,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#caca-palavras-base');
 
       container.querySelector('#wb-search').oninput = (e) => {
         filtro = e.target.value.trim();

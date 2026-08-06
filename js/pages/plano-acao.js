@@ -166,6 +166,9 @@ PCF.Pages = PCF.Pages || {};
           </div>
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#plano-acao');
+
       document.getElementById('pa-agenda-ativo').onchange = toggleWhenFields;
       toggleWhenFields();
 
@@ -230,8 +233,6 @@ PCF.Pages = PCF.Pages || {};
           render();
         }
       };
-
-      if (window.lucide) lucide.createIcons();
     };
 
     render();
