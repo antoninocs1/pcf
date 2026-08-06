@@ -142,8 +142,8 @@ PCF.Pages = PCF.Pages || {};
           <div class="virtudes-date-bar date-nav-controls">
             <button id="virt-prev-day" class="btn btn-ghost btn-sm" title="Dia anterior"><i data-lucide="chevron-left"></i></button>
             <input type="date" id="virt-date" class="form-control-inline" value="${selectedDate}" max="${hoje}">
-            <button id="virt-today" class="btn btn-secondary btn-sm">Hoje</button>
             <button id="virt-next-day" class="btn btn-ghost btn-sm" title="Próximo dia" ${selectedDate >= hoje ? 'disabled' : ''}><i data-lucide="chevron-right"></i></button>
+            <button id="virt-today" class="btn btn-secondary btn-sm">Hoje</button>
           </div>
 
           <div class="virtudes-progress-wrap">

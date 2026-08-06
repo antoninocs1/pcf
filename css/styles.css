@@ -1832,7 +1832,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   width: auto;
   min-width: 150px;
 }
-.date-nav-controls .btn:not([id$="-hoje"]):not(#rv-nova) {
+.date-nav-controls .btn:not([id$="-hoje"]):not([id$="-today"]):not(#rv-nova) {
   flex: 0 0 38px;
   width: 38px;
   min-width: 38px;
@@ -1890,7 +1890,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     width: 100%;
     gap: 6px;
   }
-  .app-tab-controls .date-nav-controls .btn:not([id$="-hoje"]):not(#rv-nova) {
+  .app-tab-controls .date-nav-controls .btn:not([id$="-hoje"]):not([id$="-today"]):not(#rv-nova) {
     flex-basis: 36px;
     width: 36px;
     min-width: 36px;
