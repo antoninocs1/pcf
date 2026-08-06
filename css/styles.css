@@ -1752,6 +1752,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   height: 18px;
   display: block;
 }
+.finance-menu-button { display: none; }
 .finance-data-table {
   max-height: calc(100dvh - 290px);
   overflow: auto;
@@ -1832,6 +1833,8 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   }
   body.route-finance .sidebar-toggle,
   body.route-finance #btn-home-back { display: none !important; }
+  body.route-finance .main-content { padding-top: 10px; }
+  body.route-finance .finance-menu-button { display: inline-flex; }
   body.route-finance .finance-sticky .page-header { padding-left: 0; }
   body.route-finance .finance-sticky .page-header h2 { font-size: 1.2rem; }
   .finance-data-table { max-height: calc(100dvh - 330px); }
