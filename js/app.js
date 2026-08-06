@@ -3,7 +3,7 @@
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
-PCF.APP_VERSION = '1.003';
+PCF.APP_VERSION = '1.004';
 
 PCF.App = (() => {
   const S = PCF.Store;
@@ -971,6 +971,64 @@ PCF.App = (() => {
     return H.formatarData(iso);
   };
 
+  const getRouteGroup = (hash) => {
+    const isAdmin = S.currentUserIsAdmin();
+    for (const group of navGroups) {
+      if (group.standalone) continue;
+      const items = isAdmin ? group.items : group.items.filter(n => !ADMIN_ROUTES.has(n.hash));
+      if (items.some(item => item.hash === hash)) {
+        return { ...group, items };
+      }
+    }
+
+    if (['#usuarios', '#gerenciar-bases', '#relatorio-uso', '#importexport'].includes(hash)) {
+      const items = navGroups
+        .filter(g => g.standalone && g.adminOnly)
+        .map(({ hash, icon, label }) => ({ hash, icon, label }));
+      return { id: 'administracao', label: 'AdministraÃ§Ã£o', icon: 'settings', items };
+    }
+
+    return null;
+  };
+
+  const renderGroupTabs = (group, activeHash) => {
+    if (!group || !group.items || group.items.length < 2) return '';
+    return `
+      <div class="app-tabs gb-tabs" aria-label="NavegaÃ§Ã£o de ${group.label}">
+        ${group.items.map(tab => `
+          <a class="app-tab gb-tab${tab.hash === activeHash ? ' active' : ''}" href="${tab.hash}">
+            <i data-lucide="${tab.icon}"></i> ${tab.label}
+          </a>`).join('')}
+      </div>`;
+  };
+
+  const applyStandardHeader = (container, hash) => {
+    if (!container || hash === '#home' || hash === '#apoie') return;
+    const page = container.querySelector('.page');
+    if (!page || page.querySelector(':scope > .finance-sticky, :scope > .app-sticky')) return;
+
+    let header = page.querySelector(':scope > .page-header');
+    if (!header) {
+      const title = page.querySelector(':scope > h2:first-child');
+      if (!title) return;
+      header = document.createElement('div');
+      header.className = 'page-header';
+      title.replaceWith(header);
+      header.appendChild(title);
+      const strayBreak = header.nextSibling;
+      if (strayBreak && strayBreak.nodeName === 'BR') strayBreak.remove();
+    }
+
+    const sticky = document.createElement('div');
+    sticky.className = 'app-sticky';
+    page.insertBefore(sticky, header);
+    sticky.appendChild(header);
+    const tabs = renderGroupTabs(getRouteGroup(hash), hash);
+    if (tabs) sticky.insertAdjacentHTML('beforeend', tabs);
+    sticky.querySelector('.gb-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (window.lucide) lucide.createIcons();
+  };
+
   const labelAtividade = (atividade, user) => {
     const nome = user?.nome || user?.email || 'Usuário';
     const labels = {
@@ -1279,6 +1337,7 @@ PCF.App = (() => {
       try {
         const renderResult = renderFn(mc);
         if (renderResult && typeof renderResult.catch === 'function') {
+          renderResult.then(() => applyStandardHeader(mc, hash)).catch(() => {});
           renderResult.catch(err => {
             console.error('[PCF] Erro ao renderizar página', hash, err);
             mc.innerHTML = `<div class="page"><div class="alert alert-error">
@@ -1288,6 +1347,7 @@ PCF.App = (() => {
             </div></div>`;
           });
         }
+        applyStandardHeader(mc, hash);
         if (hash !== '#relatorio-uso') {
           const usageInfo = ROUTE_USAGE_INFO[hash] || { label: hash.replace('#', ''), grupo: 'Geral' };
           S.registrarUsoFuncionalidade({ hash, ...usageInfo });
