@@ -68,6 +68,7 @@ a:hover { text-decoration: underline; }
   position: relative;
   display: flex;
   align-items: center;
+  min-height: 48px;
 }
 .auth-field-icon {
   position: absolute;
@@ -79,14 +80,22 @@ a:hover { text-decoration: underline; }
   z-index: 1;
 }
 .auth-input-wrap input[type="email"],
-.auth-input-wrap input[type="password"] {
+.auth-input-wrap input[type="password"],
+.auth-input-wrap input[type="text"] {
+  height: 48px;
   min-height: 48px;
   padding-left: 44px;
-  padding-right: 46px;
+  padding-right: 50px;
   border-radius: 10px;
   font-size: .95rem;
+  line-height: 1.2;
 }
-.auth-input-wrap-plain input[type="password"] {
+.auth-input-wrap-plain {
+  min-height: 40px;
+}
+.auth-input-wrap-plain input[type="password"],
+.auth-input-wrap-plain input[type="text"] {
+  height: 40px;
   min-height: 40px;
   padding-left: 12px;
 }
@@ -734,7 +743,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   }
   body.sidebar-open { overflow: hidden; }
   body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
-  .main-content { margin-left: 0; padding: 16px; padding-top: 14px; }
+  .main-content { --mobile-content-pad: 16px; margin-left: 0; padding: 16px; padding-top: 14px; }
   .page-actions { width: 100%; }
   .page-actions > .btn { flex: 0 1 auto; }
   .form-row { grid-template-columns: 1fr; }
@@ -1700,11 +1709,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .gb-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(59,130,246,.06); }
 .finance-sticky,
 .app-sticky {
+  --sticky-inline-pad: 0px;
   position: sticky;
   top: 0;
   z-index: 120;
   margin-bottom: 14px;
-  padding: 0 0 10px;
+  padding: 0 var(--sticky-inline-pad) 10px;
   background: var(--bg);
   box-shadow: 0 10px 18px rgba(2, 6, 23, .16);
 }
@@ -1921,16 +1931,21 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     scroll-snap-type: x mandatory; padding-bottom: 2px;
   }
   .finance-sticky,
-  .app-sticky { top: 0; }
+  .app-sticky {
+    --sticky-inline-pad: var(--mobile-content-pad, 16px);
+    top: 0;
+    margin-left: calc(-1 * var(--mobile-content-pad, 16px));
+    margin-right: calc(-1 * var(--mobile-content-pad, 16px));
+  }
   .finance-sticky::before {
-    left: -16px;
-    right: -16px;
+    left: 0;
+    right: 0;
     top: -120px;
     height: 124px;
   }
   .app-sticky::before {
-    left: -16px;
-    right: -16px;
+    left: 0;
+    right: 0;
     top: -120px;
     height: 124px;
   }
