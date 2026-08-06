@@ -475,23 +475,25 @@ PCF.Pages = PCF.Pages || {};
                     <button class="btn btn-sm btn-outline rvc-del-quad" data-qi="${qi}" title="Remover quadrante" style="color:var(--danger)" ${config.length <= 1 ? 'disabled' : ''}><i data-lucide="trash-2"></i></button>
                   </div>
                 </div>
-                <table class="table rvc-cat-table">
-                  <thead><tr><th>Ícone</th><th>Nome</th><th>Rótulo curto</th><th>Cor</th><th>Integração</th><th></th></tr></thead>
-                  <tbody>
-                    ${q.categorias.map((cat, ci) => `
-                      <tr data-qi="${qi}" data-ci="${ci}">
-                        <td data-label="Ícone">${cat.icon}</td>
-                        <td data-label="Nome">${H.esc(cat.label)}</td>
-                        <td data-label="Rótulo"><small>${H.esc(cat.labelCurto || '')}</small></td>
-                        <td data-label="Cor"><span class="rvc-cor-dot" style="background:${cat.cor}"></span></td>
-                        <td data-label="Integração"><small>${INTEGRACAO_OPTS.find(o=>o.value===cat.integracaoFonte)?.label || '—'}</small></td>
-                        <td class="rvc-cat-acts" data-label="Ações">
-                          <button class="btn btn-sm btn-outline rvc-edit-cat" data-qi="${qi}" data-ci="${ci}" title="Editar"><i data-lucide="pencil"></i></button>
-                          <button class="btn btn-sm btn-outline rvc-del-cat" data-qi="${qi}" data-ci="${ci}" title="Remover" style="color:var(--danger)"><i data-lucide="trash-2"></i></button>
-                        </td>
-                      </tr>`).join('')}
-                  </tbody>
-                </table>
+                <div class="table-container">
+                  <table class="table rvc-cat-table">
+                    <thead><tr><th>Ícone</th><th>Nome</th><th>Rótulo curto</th><th>Cor</th><th>Integração</th><th></th></tr></thead>
+                    <tbody>
+                      ${q.categorias.map((cat, ci) => `
+                        <tr data-qi="${qi}" data-ci="${ci}">
+                          <td data-label="Ícone">${cat.icon}</td>
+                          <td data-label="Nome">${H.esc(cat.label)}</td>
+                          <td data-label="Rótulo"><small>${H.esc(cat.labelCurto || '')}</small></td>
+                          <td data-label="Cor"><span class="rvc-cor-dot" style="background:${cat.cor}"></span></td>
+                          <td data-label="Integração"><small>${INTEGRACAO_OPTS.find(o=>o.value===cat.integracaoFonte)?.label || '—'}</small></td>
+                          <td class="rvc-cat-acts" data-label="Ações">
+                            <button class="btn btn-sm btn-outline rvc-edit-cat" data-qi="${qi}" data-ci="${ci}" title="Editar"><i data-lucide="pencil"></i></button>
+                            <button class="btn btn-sm btn-outline rvc-del-cat" data-qi="${qi}" data-ci="${ci}" title="Remover" style="color:var(--danger)"><i data-lucide="trash-2"></i></button>
+                          </td>
+                        </tr>`).join('')}
+                    </tbody>
+                  </table>
+                </div>
                 <div class="rvc-add-cat-wrap">
                   <button class="btn btn-sm btn-outline rvc-add-cat" data-qi="${qi}">+ Categoria</button>
                 </div>

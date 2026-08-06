@@ -2396,25 +2396,8 @@ body.privacy-modal-open { overflow: hidden; }
     gap: 6px; margin-top: 4px;
   }
   .rvc-quad-actions .btn { width: 100%; min-width: 0; min-height: 34px; padding: 5px 8px; }
-  .rvc-cat-table, .rvc-cat-table tbody, .rvc-cat-table tr, .rvc-cat-table td {
-    display: block; width: 100%; box-sizing: border-box;
-  }
-  .rvc-cat-table thead { display: none; }
-  .rvc-cat-table { background: transparent; overflow: visible; }
-  .rvc-cat-table tr {
-    padding: 8px 10px; margin-bottom: 10px;
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    background: rgba(148,163,184,.04);
-  }
-  .rvc-cat-table td {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; padding: 6px 0; border: 0; white-space: normal; text-align: right;
-  }
-  .rvc-cat-table td::before {
-    content: attr(data-label); color: var(--text-muted); font-size: .75rem;
-    font-weight: 600; text-transform: uppercase; text-align: left;
-  }
-  .rvc-cat-table .rvc-cat-acts { white-space: normal; }
+  .rvc-cat-table { min-width: 560px; }
+  .rvc-cat-table .rvc-cat-acts { white-space: nowrap; }
   .rvc-cat-table .rvc-cat-acts .btn { min-width: 38px; min-height: 34px; padding: 5px 8px; }
   .rvc-add-cat, .rvc-add-cat-wrap { width: 100%; }
   .modal-box .modal-actions .btn { flex: 1 1 120px; }
