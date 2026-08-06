@@ -227,6 +227,16 @@ a:hover { text-decoration: underline; }
 .page > h2:first-child + br { display: none; }
 .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 14px; margin-bottom: 16px; padding-right: 48px; }
 .page-header h2 { font-size: 1.5rem; font-weight: 600; }
+.page-header h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-header h2 svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
 .page-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .contatos-search-wrap { display: flex; align-items: center; gap: 6px; }
 .contatos-search-wrap .input-search { padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--text); font-size: .92rem; min-width: 200px; outline: none; transition: border-color .2s; }
@@ -1833,6 +1843,17 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   border-color: rgba(59,130,246,.3);
 }
 .diario-header-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.diario-header-controls input[type="date"],
+.virtudes-date-bar input[type="date"] {
+  flex: 0 1 180px;
+  width: auto;
+  min-width: 150px;
+}
+.diario-header-controls .btn,
+.virtudes-date-bar .btn,
+.rv-nav-area .btn {
+  min-height: 38px;
+}
 .diario-today { display: block; margin-bottom: 24px; }
 .diario-day-title { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .diario-day-title h3 { margin: 0; }
@@ -1865,6 +1886,11 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .diario-header-controls { width: 100%; gap: 8px; }
   #diario-data { flex: 1; min-width: 0; min-height: 44px; font-size: 1rem; padding: 6px 10px; box-sizing: border-box; }
   #btn-diario-hoje { flex-shrink: 0; min-height: 44px; padding: 0 16px; font-size: .95rem; }
+  .app-tab-controls #diario-data,
+  .virtudes-date-bar #virt-date {
+    flex: 0 1 170px;
+    min-width: 145px;
+  }
 
   /* Sugestões */
   .diario-sugestoes-header {
@@ -1936,10 +1962,11 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   flex-wrap: wrap; gap: 14px; margin-bottom: 16px; padding-right: 48px;
 }
 .rv-nav-area { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.rv-nav-area .btn { height: 30px; padding-top: 0; padding-bottom: 0; }
+.rv-nav-area .btn { min-height: 38px; padding-top: 0; padding-bottom: 0; }
 .rv-date-badge {
   padding: 5px 14px; background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 999px; font-size: .9rem; font-weight: 500; white-space: nowrap;
+  min-height: 38px; display: inline-flex; align-items: center;
 }
 .rv-date-badge.is-saved { border-color: var(--success); color: var(--success); }
 

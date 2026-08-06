@@ -1140,8 +1140,10 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2><i data-lucide="book-open"></i> Meu Diário</h2>
             <div class="diario-header-controls">
+              <button class="btn btn-secondary btn-sm" id="btn-diario-prev" title="Dia anterior"><i data-lucide="chevron-left"></i></button>
               <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
               <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
+              <button class="btn btn-secondary btn-sm" id="btn-diario-next" title="Próximo dia" ${selectedDate >= today ? 'disabled' : ''}><i data-lucide="chevron-right"></i></button>
             </div>
           </div>
 
@@ -1183,6 +1185,21 @@ PCF.Pages = PCF.Pages || {};
 
       document.getElementById('diario-data').onchange = (e) => { selectedDate = e.target.value; render(); };
       document.getElementById('btn-diario-hoje').onclick = () => { selectedDate = today; render(); };
+      document.getElementById('btn-diario-prev').onclick = () => {
+        const d = new Date(selectedDate + 'T12:00:00');
+        d.setDate(d.getDate() - 1);
+        selectedDate = d.toISOString().slice(0, 10);
+        render();
+      };
+      document.getElementById('btn-diario-next').onclick = () => {
+        const d = new Date(selectedDate + 'T12:00:00');
+        d.setDate(d.getDate() + 1);
+        const next = d.toISOString().slice(0, 10);
+        if (next <= today) {
+          selectedDate = next;
+          render();
+        }
+      };
 
       document.getElementById('diario-salvar').onclick = () => {
         const texto = document.getElementById('diario-texto').value;
@@ -1239,11 +1256,11 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2><i data-lucide="settings"></i> Configuração do diário</h2>
-            <button id="btn-add-dtab" class="btn btn-primary">+ Nova aba</button>
+            <button id="btn-add-dtab" class="btn btn-primary">+ Nova Classe de Perguntas</button>
           </div>
           <p class="subtitle">Configure as abas e perguntas de reflexão exibidas no banner do Diário.</p>
           <div class="table-container"><table class="table">
-            <thead><tr><th style="width:60px">Ícone</th><th>Nome da aba</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
+            <thead><tr><th style="width:60px">Ícone</th><th>Nome da Classe</th><th>Perguntas</th><th style="width:150px">Ações</th></tr></thead>
             <tbody>${tabs.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma aba configurada</td></tr>' :
               tabs.map((t, idx) => `<tr>
                 <td style="font-size:1.4rem;text-align:center">${H.esc(t.icon || '')}</td>
@@ -1296,7 +1313,7 @@ PCF.Pages = PCF.Pages || {};
           <form id="dtab-form">
             <div class="form-row">
               <div class="form-group" style="flex:0 0 100px"><label>Ícone</label><input type="text" id="dtab-icon" value="${H.esc(tab?.icon || '')}" placeholder="💡" maxlength="4"></div>
-              <div class="form-group"><label>Nome da aba</label><input type="text" id="dtab-label" value="${H.esc(tab?.label || '')}" required placeholder="Ex.: Relacionamentos"></div>
+              <div class="form-group"><label>Nome da Classe</label><input type="text" id="dtab-label" value="${H.esc(tab?.label || '')}" required placeholder="Ex.: Relacionamentos"></div>
             </div>
             <div class="form-group">
               <label>Perguntas</label>

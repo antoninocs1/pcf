@@ -142,6 +142,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="virtudes-date-bar">
             <button id="virt-prev-day" class="btn btn-ghost btn-sm" title="Dia anterior"><i data-lucide="chevron-left"></i></button>
             <input type="date" id="virt-date" class="form-control-inline" value="${selectedDate}" max="${hoje}">
+            <button id="virt-today" class="btn btn-secondary btn-sm">Hoje</button>
             <button id="virt-next-day" class="btn btn-ghost btn-sm" title="Próximo dia" ${selectedDate >= hoje ? 'disabled' : ''}><i data-lucide="chevron-right"></i></button>
           </div>
 
@@ -175,6 +176,10 @@ PCF.Pages = PCF.Pages || {};
         const d = new Date(selectedDate + 'T12:00:00'); d.setDate(d.getDate() + 1);
         const hoje = H.hoje();
         if (d.toISOString().split('T')[0] <= hoje) { selectedDate = d.toISOString().split('T')[0]; render(); }
+      });
+      container.querySelector('#virt-today')?.addEventListener('click', () => {
+        selectedDate = H.hoje();
+        render();
       });
 
       const btnOutraVidaFeliz = container.querySelector('#btn-outra-vida-feliz');

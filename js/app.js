@@ -1007,7 +1007,9 @@ PCF.App = (() => {
     const page = container.querySelector('.page');
     if (!page || page.querySelector(':scope > .finance-sticky, :scope > .app-sticky')) return;
 
-    let header = page.querySelector(':scope > .page-header');
+    const group = getRouteGroup(hash);
+    const routeItem = group?.items?.find(item => item.hash === hash);
+    let header = page.querySelector(':scope > .page-header, :scope > .rv-topbar');
     if (!header) {
       const title = page.querySelector(':scope > h2:first-child');
       if (!title) return;
@@ -1018,20 +1020,40 @@ PCF.App = (() => {
       const strayBreak = header.nextSibling;
       if (strayBreak && strayBreak.nodeName === 'BR') strayBreak.remove();
     }
+    header.classList.add('page-header');
+    header.classList.remove('rv-topbar');
+
+    let title = header.querySelector('h2');
+    if (!title) return;
+    if (title.parentElement !== header) {
+      header.insertBefore(title, header.firstChild);
+    }
+    const titleBreak = title.nextSibling;
+    if (titleBreak && titleBreak.nodeName === 'BR') titleBreak.remove();
+    if (routeItem?.icon && !title.querySelector('i[data-lucide]')) {
+      title.insertAdjacentHTML('afterbegin', `<i data-lucide="${routeItem.icon}"></i> `);
+    }
 
     const sticky = document.createElement('div');
     sticky.className = 'app-sticky';
     page.insertBefore(sticky, header);
 
-    const title = header.querySelector('h2');
     const controls = document.createElement('div');
     controls.className = 'app-tab-controls page-actions';
     [...header.children].forEach(child => {
       if (child !== title) controls.appendChild(child);
     });
+    const groupHashes = new Set((group?.items || []).map(item => item.hash));
+    controls.querySelectorAll('a[href]').forEach(link => {
+      if (groupHashes.has(link.getAttribute('href'))) link.remove();
+    });
+    [...controls.children].forEach(child => {
+      if (!child.textContent.trim() && child.children.length === 0) child.remove();
+      if (child.children.length === 0 && !child.textContent.trim()) child.remove();
+    });
 
     sticky.appendChild(header);
-    const tabs = renderGroupTabs(getRouteGroup(hash), hash);
+    const tabs = renderGroupTabs(group, hash);
     if (tabs) sticky.insertAdjacentHTML('beforeend', tabs);
     if (controls.children.length) sticky.appendChild(controls);
     sticky.querySelector('.gb-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
