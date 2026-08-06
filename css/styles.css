@@ -1754,7 +1754,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   align-items: center;
   justify-content: flex-start;
 }
-.rv-page .app-tab-controls { margin-top: 4px; }
+.rv-page .app-tab-controls { margin-top: 0; }
 .rv-page .app-tab-controls .date-nav-controls,
 .rv-page .app-tab-controls .page-actions {
   margin-top: 0;
