@@ -1829,7 +1829,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   flex-wrap: nowrap;
   min-width: 0;
   width: fit-content;
-  max-width: 100%;
+  max-width: max-content;
 }
 .date-nav-controls input[type="date"] {
   flex: 0 1 180px;
@@ -1975,6 +1975,14 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   z-index: 1;
   margin-top: 8px;
   justify-content: flex-start;
+}
+.app-tab-controls .rv-nav-area {
+  flex: 0 0 auto;
+}
+.app-tab-controls .rv-extra-actions {
+  flex: 0 0 auto;
+  width: auto;
+  margin-top: 0;
 }
 .rv-nav-area .btn { min-height: 38px; padding-top: 0; padding-bottom: 0; }
 .rv-date-badge {
