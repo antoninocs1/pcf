@@ -24,9 +24,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="finance-tab-controls categorias-actions">
             <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
             <button id="btn-add-cat" class="btn btn-primary">+ Nova categoria</button>
-          </div>
-          <div class="filters">
-            <select id="cat-filtro-tipo">
+            <select id="cat-filtro-tipo" class="cat-filter-select">
               <option value="">Todos os Tipos</option>
               <option value="RECEITA" ${filtroTipo === 'RECEITA' ? 'selected' : ''}>Receita</option>
               <option value="DESPESA" ${filtroTipo === 'DESPESA' ? 'selected' : ''}>Despesa</option>

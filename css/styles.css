@@ -312,6 +312,10 @@ select { cursor: pointer; }
   gap: 8px;
   flex-wrap: wrap;
 }
+.categorias-actions .cat-filter-select {
+  margin-left: auto;
+  min-width: 180px;
+}
 
 .input-file {
   background: var(--bg-input); border: 1px dashed var(--border); border-radius: var(--radius-sm);
@@ -856,6 +860,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
     width: 100%;
     gap: 8px;
+  }
+  .categorias-actions .cat-filter-select {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
   }
   .categorias-actions .btn {
     width: 100%;
