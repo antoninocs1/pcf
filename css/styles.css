@@ -1684,6 +1684,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .gb-tab:hover { background: rgba(255,255,255,.04); color: var(--text); }
 .gb-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(59,130,246,.06); }
+.finance-tabs { margin-top: -4px; }
+.finance-tab { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+.finance-tab svg { width: 17px; height: 17px; flex-shrink: 0; }
 .gb-section { display: flex; flex-direction: column; gap: 12px; }
 .gb-section-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
 .gb-section-header h3 { display: flex; align-items: center; gap: 8px; font-size: 1rem; margin: 0; }

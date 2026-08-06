@@ -24,6 +24,7 @@ PCF.Pages = PCF.Pages || {};
               <button id="btn-add-cat" class="btn btn-primary">+ Nova categoria</button>
             </div>
           </div>
+          ${PCF.renderFinanceTabs ? PCF.renderFinanceTabs('#categorias') : ''}
           <div class="filters">
             <select id="cat-filtro-tipo">
               <option value="">Todos os Tipos</option>
@@ -48,6 +49,8 @@ PCF.Pages = PCF.Pages || {};
           </table></div>
         </div>`;
 
+      if (window.lucide) lucide.createIcons();
+      if (PCF.activateFinanceTabs) PCF.activateFinanceTabs(container);
       document.getElementById('cat-filtro-tipo').onchange = function() { filtroTipo = this.value; render(); };
       document.getElementById('btn-add-cat').onclick = () => showCatModal();
       document.getElementById('btn-restaurar-cats').onclick = () => {

@@ -9,6 +9,26 @@ PCF.Pages = PCF.Pages || {};
   const H = PCF.Helpers;
   const reg = PCF.App.registerChart;
   const FIN_SUCCESS_KEY = 'pcf_financeiro_success';
+  const FINANCE_TABS = [
+    { hash: '#dashboard', icon: 'layout-dashboard', label: 'Painel' },
+    { hash: '#inserir', icon: 'plus-circle', label: 'Inserir' },
+    { hash: '#base', icon: 'database', label: 'Base de Dados' },
+    { hash: '#relatorios', icon: 'trending-up', label: 'Relatórios' },
+    { hash: '#ciclo', icon: 'circle-dollar-sign', label: '4 Forças' },
+    { hash: '#categorias', icon: 'folder', label: 'Categorias' },
+  ];
+
+  PCF.renderFinanceTabs = (activeHash) => `
+    <div class="finance-tabs gb-tabs" aria-label="Navegação financeira">
+      ${FINANCE_TABS.map(tab => `
+        <a class="finance-tab gb-tab${tab.hash === activeHash ? ' active' : ''}" href="${tab.hash}">
+          <i data-lucide="${tab.icon}"></i> ${tab.label}
+        </a>`).join('')}
+    </div>`;
+
+  PCF.activateFinanceTabs = (container) => {
+    container.querySelector('.finance-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  };
 
   const setFieldError = (targetId, message) => {
     const el = document.getElementById(targetId);
@@ -52,12 +72,16 @@ PCF.Pages = PCF.Pages || {};
             <select id="dash-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
           </div>
         </div>
+        ${PCF.renderFinanceTabs('#dashboard')}
         <div class="cards-grid" id="dash-cards"></div>
         <div class="charts-grid">
           <div class="chart-container"><h3>Despesas por Categoria</h3><canvas id="chart-pie-desp"></canvas></div>
           <div class="chart-container"><h3>Receitas x Despesas por Mês</h3><canvas id="chart-bar-mes"></canvas></div>
         </div>
       </div>`;
+
+    if (window.lucide) lucide.createIcons();
+    PCF.activateFinanceTabs(container);
 
     const refresh = () => {
       const mes = document.getElementById('dash-mes')?.value || '';
@@ -113,6 +137,7 @@ PCF.Pages = PCF.Pages || {};
     container.innerHTML = `
       <div class="page">
         <h2>Inserir Transação Financeira</h2><br>
+        ${PCF.renderFinanceTabs('#inserir')}
         <div id="inserir-msg"></div>
         <form id="form-inserir" class="form" novalidate>
           <div class="form-group"><label>Tipo de Operação</label>
@@ -138,6 +163,9 @@ PCF.Pages = PCF.Pages || {};
           <button type="submit" class="btn btn-primary">Registrar Transação</button>
         </form>
       </div>`;
+
+    if (window.lucide) lucide.createIcons();
+    PCF.activateFinanceTabs(container);
 
     const updateCats = () => {
       const tipo = document.querySelector('input[name="tipoOp"]:checked').value;
@@ -237,6 +265,7 @@ PCF.Pages = PCF.Pages || {};
               </button>
             </div>
           </div>
+          ${PCF.renderFinanceTabs('#base')}
           <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
           <div class="filters">
             <select id="base-tipo"><option value="">Todos os Tipos</option><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option><option value="INVESTIMENTO">Investimento</option></select>
@@ -249,6 +278,9 @@ PCF.Pages = PCF.Pages || {};
             <tbody id="base-tbody"></tbody>
           </table></div>
         </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.activateFinanceTabs(container);
 
       const filterAndRender = () => {
         const tipo = document.getElementById('base-tipo').value;
@@ -422,6 +454,7 @@ PCF.Pages = PCF.Pages || {};
             <select id="rel-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
           </div>
         </div>
+        ${PCF.renderFinanceTabs('#relatorios')}
         <div class="charts-grid">
           <div class="chart-container"><h3>Receitas por Categoria</h3><canvas id="rel-pie-rec"></canvas><div id="rel-tab-rec" class="chart-table"></div></div>
           <div class="chart-container"><h3>Despesas por Categoria</h3><canvas id="rel-pie-desp"></canvas><div id="rel-tab-desp" class="chart-table"></div></div>
@@ -431,6 +464,9 @@ PCF.Pages = PCF.Pages || {};
           <div class="chart-container"><h3>Despesas por Mês</h3><canvas id="rel-bar-desp-mes"></canvas></div>
         </div>
       </div>`;
+
+    if (window.lucide) lucide.createIcons();
+    PCF.activateFinanceTabs(container);
 
     const refresh = () => {
       PCF.App.destroyCharts();
@@ -549,6 +585,7 @@ PCF.Pages = PCF.Pages || {};
     container.innerHTML = `
       <div class="page">
         <h2>4 Forças do Dinheiro</h2><br>
+        ${PCF.renderFinanceTabs('#ciclo')}
         <p class="subtitle">Ciclo do Dinheiro — Visão geral das entradas, saídas, investimentos e saldo.</p>
 
         <div class="farol-banner" style="border-color:${farolCor}; background:${farolCor}15">
@@ -576,5 +613,7 @@ PCF.Pages = PCF.Pages || {};
           </div>
         </div>
       </div>`;
+    if (window.lucide) lucide.createIcons();
+    PCF.activateFinanceTabs(container);
   };
 })();
