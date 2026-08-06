@@ -3731,7 +3731,7 @@ body.privacy-modal-open { overflow: hidden; }
   border-color: #16a34a;
 }
 [data-theme="dark"] .word-cell,
-body:not([data-theme="light"]) .word-cell {
+html:not([data-theme]) .word-cell {
   --word-cell-bg: rgba(30,41,59,.92);
   --word-cell-border: rgba(148,163,184,.32);
   --word-cell-text: #e5edf7;
@@ -3740,7 +3740,7 @@ body:not([data-theme="light"]) .word-cell {
   --word-cell-found-text: #86efac;
 }
 [data-theme="dark"] .word-game-intro-icon,
-body:not([data-theme="light"]) .word-game-intro-icon {
+html:not([data-theme]) .word-game-intro-icon {
   background: rgba(148,163,184,.22);
 }
 .word-game-tip {
