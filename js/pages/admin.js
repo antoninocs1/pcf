@@ -1373,6 +1373,7 @@ PCF.Pages = PCF.Pages || {};
       { id: 'habitos',   icon: '🌱', label: 'Hábitos'      },
       { id: 'virtudes',  icon: '💎', label: 'Virtudes'     },
       { id: 'rodavida',  icon: '🎯', label: 'Roda da Vida' },
+      { id: 'saudeeventos', icon: '🩺', label: 'Consultas e Exames' },
       { id: 'agenda',    icon: '📅', label: 'Agenda'       },
       { id: 'planoacao', icon: '🗂', label: 'Plano de Ação' },
       { id: 'diario',    icon: '📖', label: 'Diário'       },
@@ -1719,7 +1720,45 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
     };
 
-    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, agenda: renderAgenda, planoacao: renderPlanoAcao, diario: renderDiario, linhatempo: renderLinhaTempo };
+    /* ---- Seção: Consultas e Exames ---- */
+    const renderSaudeEventos = () => {
+      const STATUS_COLORS_SE = { 'Pendente': '#f59e0b', 'Realizado': '#16a34a', 'Cancelado': '#dc2626' };
+      const eventos = S.getSaudeEventos ? [...S.getSaudeEventos()].sort((a, b) =>
+        (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || '')
+      ) : [];
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>🩺 Consultas e Exames <span class="badge badge-neutral">${eventos.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#saude-consultas" class="btn btn-secondary btn-sm">+ Novo / editar</a>
+              <button id="gb-clear-saudeeventos" class="btn btn-danger btn-sm"${eventos.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${eventos.length === 0 ? '<p class="empty-text">Nenhuma consulta, exame ou procedimento registrado</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Tipo</th><th>Descrição</th><th>Data</th><th class="col-hide-mobile">Revisão</th><th>Status</th><th class="col-hide-mobile">Agenda</th><th style="width:60px">Ações</th></tr></thead>
+              <tbody>
+                ${eventos.map(ev => {
+                  const cor = STATUS_COLORS_SE[ev.status] || '#6b7280';
+                  return `<tr>
+                    <td>${H.esc(ev.tipo || 'Outros')}</td>
+                    <td><strong>${H.esc(ev.descricao || '—')}</strong>${ev.local ? `<br><small class="text-muted">${H.esc(ev.local)}</small>` : ''}</td>
+                    <td>${ev.data ? _fmtDate(ev.data) : '—'} ${ev.hora || ''}</td>
+                    <td class="col-hide-mobile">${ev.proximaRevisao ? _fmtDate(ev.proximaRevisao) : '—'}</td>
+                    <td><span class="status-badge" style="background:${cor}">${H.esc(ev.status || 'Pendente')}</span></td>
+                    <td class="col-hide-mobile">${ev.agendaAtivo ? '<span class="badge badge-info">Sim</span>' : '<span class="badge badge-neutral">Não</span>'}</td>
+                    <td><button class="btn-icon btn-danger" data-gb-del-se="${ev.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, saudeeventos: renderSaudeEventos, agenda: renderAgenda, planoacao: renderPlanoAcao, diario: renderDiario, linhatempo: renderLinhaTempo };
 
     /* ---- Render principal ---- */
     const render = () => {
@@ -1767,6 +1806,9 @@ PCF.Pages = PCF.Pages || {};
       if (q('gb-clear-rv')) q('gb-clear-rv').onclick = () =>
         confirmClear('Avaliações da Roda da Vida', () => S.getRodaVidaRegistros().length, () => S.saveRodaVidaRegistros([]));
 
+      if (q('gb-clear-saudeeventos')) q('gb-clear-saudeeventos').onclick = () =>
+        confirmClear('Consultas e Exames', () => (S.getSaudeEventos ? S.getSaudeEventos().length : 0), () => S.saveSaudeEventos && S.saveSaudeEventos([]));
+
       if (q('gb-add-agenda')) q('gb-add-agenda').onclick = () => showAgendaModal(null);
       if (q('gb-clear-agenda')) q('gb-clear-agenda').onclick = () =>
         confirmClear('Agenda', () => S.getCompromissos().length, () => S.saveCompromissos([]));
@@ -1811,6 +1853,10 @@ PCF.Pages = PCF.Pages || {};
         /* Roda da Vida */
         const delRv = e.target.closest('[data-gb-del-rv]');
         if (delRv && confirm('Excluir esta avaliação da Roda da Vida?')) { S.deleteRodaVidaRegistro(delRv.dataset.gbDelRv); render(); return; }
+
+        /* Consultas e Exames */
+        const delSe = e.target.closest('[data-gb-del-se]');
+        if (delSe && confirm('Remover este registro de consulta/exame?')) { S.deleteSaudeEvento && S.deleteSaudeEvento(delSe.dataset.gbDelSe); render(); return; }
 
         /* Agenda */
         const editAg = e.target.closest('[data-gb-edit-ag]');

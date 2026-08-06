@@ -849,19 +849,19 @@ PCF.App = (() => {
       ]
     },
     {
-      id: 'planoacao', label: 'Plano de Ação', icon: 'list-todo',
-      items: [
-        { hash: '#plano-acao', icon: 'list-todo', label: 'Plano de Ação 5W2H' },
-      ]
-    },
-    { standalone: true, hash: '#agenda',       icon: 'calendar',  label: 'Agenda' },
-    {
       id: 'saude', label: 'Saúde', icon: 'heart-pulse',
       items: [
         { hash: '#imc', icon: 'heart', label: 'IMC' },
         { hash: '#saude-consultas', icon: 'clipboard-plus', label: 'Consultas e Exames' },
       ]
     },
+    {
+      id: 'planoacao', label: 'Plano de Ação', icon: 'list-todo',
+      items: [
+        { hash: '#plano-acao', icon: 'list-todo', label: 'Plano de Ação 5W2H' },
+      ]
+    },
+    { standalone: true, hash: '#agenda',       icon: 'calendar',  label: 'Agenda' },
     { standalone: true, hash: '#contatos',     icon: 'user',      label: 'Contatos Pessoais' },
     { standalone: true, adminOnly: true, hash: '#usuarios',       icon: 'users',    label: 'Configuração de usuários' },
     { standalone: true, adminOnly: true, hash: '#gerenciar-bases', icon: 'database', label: 'Gerenciar Bases de Dados' },

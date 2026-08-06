@@ -205,6 +205,7 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group">
                 <label>Status</label>
                 <select id="se-status">${STATUS.map(s => `<option value="${s}">${s}</option>`).join('')}</select>
+                <small class="form-hint">Pendente significa agendado ou ainda aguardando realização.</small>
               </div>
               <fieldset class="plano-acao-when plano-acao-form-span-2">
                 <legend>Data e horário</legend>
@@ -267,9 +268,19 @@ PCF.Pages = PCF.Pages || {};
         document.getElementById('saude-evento-form').reset();
         document.getElementById('se-data').value = H.hoje();
         document.getElementById('se-agenda-ativo').checked = true;
+        syncRevisaoMin();
+      };
+
+      const syncRevisaoMin = () => {
+        const dataConsulta = document.getElementById('se-data').value;
+        const revisaoEl = document.getElementById('se-revisao');
+        revisaoEl.min = dataConsulta || '';
+        if (dataConsulta && revisaoEl.value && revisaoEl.value < dataConsulta) revisaoEl.value = '';
       };
 
       document.getElementById('se-cancel').onclick = resetForm;
+      document.getElementById('se-data').onchange = syncRevisaoMin;
+      syncRevisaoMin();
       document.getElementById('saude-evento-form').onsubmit = (e) => {
         e.preventDefault();
         const data = {
@@ -285,6 +296,10 @@ PCF.Pages = PCF.Pages || {};
         };
         if (!data.descricao) { alert('Informe a descrição do registro.'); return; }
         if (data.agendaAtivo && !data.data) { alert('Para vincular na Agenda, informe uma data.'); return; }
+        if (data.data && data.proximaRevisao && data.proximaRevisao < data.data) {
+          alert('A próxima revisão não pode ser anterior à data da consulta/exame.');
+          return;
+        }
         if (editingId) S.updateSaudeEvento(editingId, data);
         else S.addSaudeEvento(data);
         render();
@@ -314,6 +329,7 @@ PCF.Pages = PCF.Pages || {};
           document.getElementById('se-revisao').value = item.proximaRevisao || '';
           document.getElementById('se-observacoes').value = item.observacoes || '';
           document.getElementById('se-agenda-ativo').checked = !!item.agendaAtivo;
+          syncRevisaoMin();
           document.getElementById('saude-evento-form').scrollIntoView({ behavior: 'smooth' });
           return;
         }
