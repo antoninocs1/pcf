@@ -3791,16 +3791,21 @@ body:not([data-theme="light"]) .word-game-intro-icon {
   line-height: 1.55;
 }
 .word-base-header {
-  align-items: flex-start;
+  align-items: center;
 }
 .word-base-toolbar {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 .word-base-toolbar input {
+  flex: 1 1 280px;
+  width: auto;
   max-width: 440px;
+  min-width: 220px;
+  min-height: 38px;
 }
 .word-base-table-wrap {
   overflow-x: auto;
@@ -3883,6 +3888,7 @@ body:not([data-theme="light"]) .word-game-intro-icon {
   }
   .word-base-toolbar input {
     max-width: none;
+    min-width: 0;
   }
 }
 

@@ -1034,6 +1034,7 @@ PCF.App = (() => {
     if (routeItem?.icon) {
       title.innerHTML = `<i data-lucide="${routeItem.icon}"></i> ${H.esc(routeItem.label)}`;
     }
+    const headerSubtitles = [...header.querySelectorAll('.subtitle')];
 
     const sticky = document.createElement('div');
     sticky.className = 'app-sticky';
@@ -1057,6 +1058,13 @@ PCF.App = (() => {
     const tabs = renderGroupTabs(group, hash);
     if (tabs) sticky.insertAdjacentHTML('beforeend', tabs);
     if (controls.children.length) sticky.appendChild(controls);
+    headerSubtitles.reverse().forEach(subtitle => {
+      sticky.after(subtitle);
+    });
+    [...controls.children].forEach(child => {
+      if (!child.textContent.trim() && child.children.length === 0) child.remove();
+    });
+    if (controls.parentElement && !controls.textContent.trim() && controls.children.length === 0) controls.remove();
     sticky.querySelector('.gb-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (window.lucide) lucide.createIcons();
   };
