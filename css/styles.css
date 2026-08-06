@@ -1675,7 +1675,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .gb-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(59,130,246,.06); }
 .finance-sticky {
   position: sticky;
-  top: 0;
+  top: 22px;
   z-index: 35;
   margin-bottom: 14px;
   padding: 4px 0 10px;
@@ -1684,6 +1684,10 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .finance-sticky .page-header {
   margin-bottom: 12px;
+}
+.finance-sticky-compact {
+  margin-bottom: 6px;
+  padding-bottom: 4px;
 }
 .finance-tabs { margin-top: -4px; }
 .finance-tab { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }

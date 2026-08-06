@@ -138,7 +138,7 @@ PCF.Pages = PCF.Pages || {};
     const cats = S.getCategorias();
     container.innerHTML = `
       <div class="page">
-        <div class="finance-sticky">
+        <div class="finance-sticky finance-sticky-compact">
           <div class="page-header">
             <h2>Inserir Transação Financeira</h2>
           </div>
