@@ -67,12 +67,12 @@ PCF.Pages = PCF.Pages || {};
       <div class="page">
         <div class="page-header">
           <h2>Painel financeiro</h2>
-          <div class="filters">
-            <select id="dash-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
-            <select id="dash-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
-          </div>
         </div>
         ${PCF.renderFinanceTabs('#dashboard')}
+        <div class="finance-tab-controls filters">
+          <select id="dash-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
+          <select id="dash-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+        </div>
         <div class="cards-grid" id="dash-cards"></div>
         <div class="charts-grid">
           <div class="chart-container"><h3>Despesas por Categoria</h3><canvas id="chart-pie-desp"></canvas></div>
@@ -258,15 +258,15 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>Base de Dados Financeira</h2>
-            <div class="page-actions">
-              <span class="badge" id="base-subtotal"></span>
-              <button type="button" class="btn btn-primary" id="base-nova-transacao">
-                <i data-lucide="plus"></i> Nova transação financeira
-              </button>
-            </div>
           </div>
           ${PCF.renderFinanceTabs('#base')}
           <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
+          <div class="finance-tab-controls page-actions">
+            <span class="badge" id="base-subtotal"></span>
+            <button type="button" class="btn btn-primary" id="base-nova-transacao">
+              <i data-lucide="plus"></i> Nova transação financeira
+            </button>
+          </div>
           <div class="filters">
             <select id="base-tipo"><option value="">Todos os Tipos</option><option value="RECEITA">Receita</option><option value="DESPESA">Despesa</option><option value="INVESTIMENTO">Investimento</option></select>
             <select id="base-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
@@ -449,12 +449,12 @@ PCF.Pages = PCF.Pages || {};
       <div class="page">
         <div class="page-header">
           <h2>Relatório Financeiro</h2>
-          <div class="filters">
-            <select id="rel-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
-            <select id="rel-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
-          </div>
         </div>
         ${PCF.renderFinanceTabs('#relatorios')}
+        <div class="finance-tab-controls filters">
+          <select id="rel-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
+          <select id="rel-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+        </div>
         <div class="charts-grid">
           <div class="chart-container"><h3>Receitas por Categoria</h3><canvas id="rel-pie-rec"></canvas><div id="rel-tab-rec" class="chart-table"></div></div>
           <div class="chart-container"><h3>Despesas por Categoria</h3><canvas id="rel-pie-desp"></canvas><div id="rel-tab-desp" class="chart-table"></div></div>

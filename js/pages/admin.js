@@ -19,12 +19,12 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>Configuração de categorias</h2>
-            <div class="categorias-actions">
-              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
-              <button id="btn-add-cat" class="btn btn-primary">+ Nova categoria</button>
-            </div>
           </div>
           ${PCF.renderFinanceTabs ? PCF.renderFinanceTabs('#categorias') : ''}
+          <div class="finance-tab-controls categorias-actions">
+            <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+            <button id="btn-add-cat" class="btn btn-primary">+ Nova categoria</button>
+          </div>
           <div class="filters">
             <select id="cat-filtro-tipo">
               <option value="">Todos os Tipos</option>
