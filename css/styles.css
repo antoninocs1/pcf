@@ -1666,12 +1666,15 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 
 /* ==================== GERENCIAR BASES ==================== */
 .gb-tabs {
-  display: flex; gap: 0; flex-wrap: nowrap; margin-bottom: 20px;
-  border-bottom: 1px solid var(--border); overflow-x: auto;
+  display: flex; gap: 0; flex-wrap: nowrap; width: 100%; max-width: 100%;
+  min-width: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity;
-  scrollbar-width: none;
+  scrollbar-width: thin; scrollbar-color: rgba(148,163,184,.45) transparent;
 }
-.gb-tabs::-webkit-scrollbar { display: none; }
+.gb-tabs::-webkit-scrollbar { height: 6px; }
+.gb-tabs::-webkit-scrollbar-track { background: transparent; }
+.gb-tabs::-webkit-scrollbar-thumb { background: rgba(148,163,184,.45); border-radius: 999px; }
 .gb-tab {
   flex: 0 0 auto; padding: 8px 16px; border: none; background: transparent;
   color: var(--text-muted); font-size: .9rem; cursor: pointer;
