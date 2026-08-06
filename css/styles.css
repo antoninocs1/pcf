@@ -855,27 +855,6 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .table th, .table td { padding: 8px 8px; }
 }
 
-@media (max-width: 600px) {
-  .categorias-actions {
-    display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
-    width: 100%;
-    gap: 8px;
-  }
-  .categorias-actions .cat-filter-select {
-    grid-column: 1 / -1;
-    width: 100%;
-    min-width: 0;
-  }
-  .categorias-actions .btn {
-    width: 100%;
-    min-width: 0;
-    padding-inline: 8px;
-    font-size: .82rem;
-    white-space: nowrap;
-  }
-}
-
 /* ==================== PARTÍCULAS ==================== */
 #pcf-particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 
