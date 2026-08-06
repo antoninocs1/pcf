@@ -84,7 +84,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky">
           <div class="page-header">
             ${financeMenuButton()}
-            <h2>Painel financeiro</h2>
+            <h2><i data-lucide="layout-dashboard"></i> Painel financeiro</h2>
             ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#dashboard')}
@@ -159,7 +159,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky finance-sticky-compact">
           <div class="page-header">
             ${financeMenuButton()}
-            <h2>Inserir Transação Financeira</h2>
+            <h2><i data-lucide="plus-circle"></i> Inserir Transação Financeira</h2>
             ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#inserir')}
@@ -285,7 +285,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="finance-sticky">
             <div class="page-header">
               ${financeMenuButton()}
-              <h2>Base de Dados Financeira</h2>
+              <h2><i data-lucide="database"></i> Base de Dados Financeira</h2>
               ${financeHomeButton()}
             </div>
             ${PCF.renderFinanceTabs('#base')}
@@ -480,7 +480,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky">
           <div class="page-header">
             ${financeMenuButton()}
-            <h2>Relatório Financeiro</h2>
+            <h2><i data-lucide="trending-up"></i> Relatório Financeiro</h2>
             ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#relatorios')}
@@ -621,7 +621,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="finance-sticky">
           <div class="page-header">
             ${financeMenuButton()}
-            <h2>4 Forças do Dinheiro</h2>
+            <h2><i data-lucide="circle-dollar-sign"></i> 4 Forças do Dinheiro</h2>
             ${financeHomeButton()}
           </div>
           ${PCF.renderFinanceTabs('#ciclo')}

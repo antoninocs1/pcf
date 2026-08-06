@@ -22,7 +22,7 @@ PCF.Pages = PCF.Pages || {};
               <button type="button" class="finance-header-button finance-menu-button" title="Abrir menu" aria-label="Abrir menu">
                 <i data-lucide="menu"></i>
               </button>
-              <h2>Configuração de categorias</h2>
+              <h2><i data-lucide="folder"></i> Configuração de categorias</h2>
               <button type="button" class="finance-header-button finance-home-button" title="Tela Inicial" aria-label="Tela Inicial">
                 <i data-lucide="home"></i>
               </button>

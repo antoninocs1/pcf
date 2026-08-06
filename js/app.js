@@ -1030,8 +1030,8 @@ PCF.App = (() => {
     }
     const titleBreak = title.nextSibling;
     if (titleBreak && titleBreak.nodeName === 'BR') titleBreak.remove();
-    if (routeItem?.icon && !title.querySelector('i[data-lucide]')) {
-      title.insertAdjacentHTML('afterbegin', `<i data-lucide="${routeItem.icon}"></i> `);
+    if (routeItem?.icon) {
+      title.innerHTML = `<i data-lucide="${routeItem.icon}"></i> ${H.esc(routeItem.label)}`;
     }
 
     const sticky = document.createElement('div');
