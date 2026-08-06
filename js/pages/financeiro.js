@@ -65,7 +65,7 @@ PCF.Pages = PCF.Pages || {};
     const anos = [...new Set(trans.map(t => t.ano))].sort();
     container.innerHTML = `
       <div class="page">
-        <div class="finance-sticky">
+        <div class="finance-header">
           <div class="page-header">
             <h2>Painel financeiro</h2>
           </div>
@@ -138,7 +138,7 @@ PCF.Pages = PCF.Pages || {};
     const cats = S.getCategorias();
     container.innerHTML = `
       <div class="page">
-        <div class="finance-sticky">
+        <div class="finance-header">
           <div class="page-header">
             <h2>Inserir Transação Financeira</h2>
           </div>
@@ -455,7 +455,7 @@ PCF.Pages = PCF.Pages || {};
 
     container.innerHTML = `
       <div class="page">
-        <div class="finance-sticky">
+        <div class="finance-header">
           <div class="page-header">
             <h2>Relatório Financeiro</h2>
           </div>
@@ -594,7 +594,7 @@ PCF.Pages = PCF.Pages || {};
 
     container.innerHTML = `
       <div class="page">
-        <div class="finance-sticky">
+        <div class="finance-header">
           <div class="page-header">
             <h2>4 Forças do Dinheiro</h2>
           </div>

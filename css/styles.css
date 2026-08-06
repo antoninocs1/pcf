@@ -1685,6 +1685,13 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .finance-sticky .page-header {
   margin-bottom: 12px;
 }
+.finance-header {
+  margin-bottom: 14px;
+  padding: 4px 0 1px;
+}
+.finance-header .page-header {
+  margin-bottom: 12px;
+}
 .finance-tabs { margin-top: -4px; }
 .finance-tab { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
 .finance-tab svg { width: 17px; height: 17px; flex-shrink: 0; }
