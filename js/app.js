@@ -1209,7 +1209,7 @@ PCF.App = (() => {
     });
     const backBtn = document.getElementById('btn-home-back');
     if (backBtn) {
-      backBtn.style.display = hash === '#home' || financeHashes.has(hash) ? 'none' : '';
+      backBtn.style.display = hash === '#home' ? 'none' : '';
     }
   };
 

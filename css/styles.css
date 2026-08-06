@@ -720,7 +720,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   }
   body.sidebar-open { overflow: hidden; }
   body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
-  .main-content { margin-left: 0; padding: 16px; padding-top: 52px; }
+  .main-content { margin-left: 0; padding: 16px; padding-top: 14px; }
   .page-actions { width: 100%; }
   .page-actions > .btn { flex: 0 1 auto; }
   .form-row { grid-template-columns: 1fr; }
@@ -1676,9 +1676,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .finance-sticky {
   position: sticky;
   top: 0;
-  z-index: 35;
+  z-index: 120;
   margin-bottom: 14px;
-  padding: 6px 0 10px;
+  padding: 0 0 10px;
   background: var(--bg);
   box-shadow: 0 10px 18px rgba(2, 6, 23, .16);
 }
@@ -1687,8 +1687,8 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   position: absolute;
   left: -32px;
   right: -32px;
-  top: -120px;
-  height: 124px;
+  top: -160px;
+  height: 164px;
   background: var(--bg);
 }
 .finance-sticky .page-header {
@@ -1752,7 +1752,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   height: 18px;
   display: block;
 }
-.finance-menu-button { display: none; }
+.finance-header-button { display: none; }
 .finance-data-table {
   max-height: calc(100dvh - 290px);
   overflow: auto;
@@ -1821,21 +1821,19 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory; padding-bottom: 2px;
   }
-  .finance-sticky {
-    top: 0;
-    padding-top: 8px;
-  }
+  .finance-sticky { top: 0; }
   .finance-sticky::before {
     left: -16px;
     right: -16px;
-    top: -90px;
-    height: 94px;
+    top: -120px;
+    height: 124px;
   }
-  body.route-finance .sidebar-toggle,
-  body.route-finance #btn-home-back { display: none !important; }
-  body.route-finance .main-content { padding-top: 10px; }
-  body.route-finance .finance-menu-button { display: inline-flex; }
-  body.route-finance .finance-sticky .page-header { padding-left: 0; }
+  body.route-finance .main-content { padding-top: 14px; }
+  body.route-finance .finance-sticky .page-header {
+    min-height: 36px;
+    padding-left: 54px;
+    padding-right: 46px;
+  }
   body.route-finance .finance-sticky .page-header h2 { font-size: 1.2rem; }
   .finance-data-table { max-height: calc(100dvh - 330px); }
   .diario-tab {
