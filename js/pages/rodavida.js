@@ -364,7 +364,7 @@ PCF.Pages = PCF.Pages || {};
         rvNav.insertBefore(todayBtn, newBtn || null);
         const header = container.querySelector('.rv-topbar');
         const subtitle = header?.querySelector('.subtitle');
-        if (subtitle) header.after(subtitle);
+        if (subtitle) rvNav.after(subtitle);
       }
       PCF.App.applyStandardHeader?.(container, '#roda-vida');
 

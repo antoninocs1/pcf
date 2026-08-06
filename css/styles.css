@@ -1757,9 +1757,6 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .rv-page .app-tab-controls {
   margin-top: 6px;
 }
-.rv-page > .subtitle {
-  margin: 6px 0 8px;
-}
 .app-pre-controls {
   position: relative;
   z-index: 1;
