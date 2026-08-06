@@ -652,7 +652,7 @@ PCF.App = (() => {
       : { texto: 'Que este dia seja repleto de sabedoria e paz.', autor: '' };
 
     const modules = [
-      { icon: 'wallet',       label: 'Financeiro',       hash: '#dashboard', color: '#16a34a' },
+      { icon: 'wallet',       label: 'Financeiro',       hash: '#base',      color: '#16a34a' },
       { icon: 'brain',        label: 'Emoções',           hash: '#emocoes',   color: '#8b5cf6' },
       { icon: 'check-square', label: 'Hábitos',           hash: '#habitos',   color: '#f59e0b' },
       { icon: 'book-open',    label: 'Diário',            hash: '#diario',    color: '#3b82f6' },

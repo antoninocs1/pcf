@@ -1701,6 +1701,7 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
 
       if (window.lucide) lucide.createIcons();
+      container.querySelector('.gb-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 
       /* ---- Troca de abas ---- */
       container.querySelectorAll('.gb-tab').forEach(btn => {

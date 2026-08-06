@@ -1665,12 +1665,18 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 .diario-tab-content.active { display: flex; flex-direction: column; gap: 4px; }
 
 /* ==================== GERENCIAR BASES ==================== */
-.gb-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.gb-tabs {
+  display: flex; gap: 4px; flex-wrap: nowrap; margin-bottom: 20px;
+  border-bottom: 1px solid var(--border); overflow-x: auto;
+  -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
 .gb-tab {
-  padding: 8px 16px; border: none; background: transparent;
+  flex: 0 0 auto; padding: 8px 16px; border: none; background: transparent;
   color: var(--text-muted); font-size: .9rem; cursor: pointer;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  transition: .15s; font-family: inherit;
+  transition: .15s; font-family: inherit; white-space: nowrap;
+  min-height: 44px; scroll-snap-align: start;
 }
 .gb-tab:hover { background: rgba(255,255,255,.05); color: var(--text); }
 .gb-tab.active { background: var(--accent); color: #fff; }
@@ -1738,6 +1744,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   .diario-question-item {
     padding: 10px 12px; font-size: .9rem; min-height: 44px;
     display: flex; align-items: center; line-height: 1.4;
+  }
+  .gb-tabs {
+    margin-left: -12px; margin-right: -12px; padding: 0 12px 2px;
+  }
+  .gb-tab {
+    padding: 10px 14px; font-size: .86rem;
   }
 
   /* Editor */
