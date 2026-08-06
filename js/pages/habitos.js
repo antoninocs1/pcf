@@ -142,8 +142,10 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2>🌱 Hábitos Diários</h2>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <input type="date" id="hab-data" value="${selectedDate}" style="width:auto">
+            <div class="date-nav-controls">
+              <button class="btn btn-secondary btn-sm" id="btn-hab-prev" title="Dia anterior"><i data-lucide="chevron-left"></i></button>
+              <input type="date" id="hab-data" value="${selectedDate}">
+              <button class="btn btn-secondary btn-sm" id="btn-hab-next" title="Próximo dia" ${selectedDate >= H.hoje() ? 'disabled' : ''}><i data-lucide="chevron-right"></i></button>
               <button class="btn btn-secondary btn-sm" id="btn-hab-hoje">Hoje</button>
             </div>
           </div>
@@ -311,6 +313,21 @@ PCF.Pages = PCF.Pages || {};
 
       document.getElementById('hab-data').onchange = function () { selectedDate = this.value; render(); };
       const _btnHoje = document.getElementById('btn-hab-hoje'); if (_btnHoje) _btnHoje.onclick = () => { selectedDate = H.hoje(); render(); };
+      const _btnPrev = document.getElementById('btn-hab-prev'); if (_btnPrev) _btnPrev.onclick = () => {
+        const d = new Date(selectedDate + 'T12:00:00');
+        d.setDate(d.getDate() - 1);
+        selectedDate = d.toISOString().slice(0, 10);
+        render();
+      };
+      const _btnNext = document.getElementById('btn-hab-next'); if (_btnNext) _btnNext.onclick = () => {
+        const d = new Date(selectedDate + 'T12:00:00');
+        d.setDate(d.getDate() + 1);
+        const next = d.toISOString().slice(0, 10);
+        if (next <= H.hoje()) {
+          selectedDate = next;
+          render();
+        }
+      };
 
       container.querySelectorAll('[data-controls-toggle]').forEach(btn => {
         btn.onclick = () => {
