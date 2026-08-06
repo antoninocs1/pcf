@@ -1754,15 +1754,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   align-items: center;
   justify-content: flex-start;
 }
-.rv-page .app-tab-controls { margin-top: 8px; }
+.rv-page .app-tab-controls { margin-top: 4px; }
 .rv-page .app-tab-controls .date-nav-controls,
 .rv-page .app-tab-controls .page-actions {
   margin-top: 0;
 }
-.rv-page .app-tab-controls .date-nav-controls .btn,
-.rv-page .app-tab-controls .date-nav-controls input[type="date"] {
-  min-height: 52px;
-}
+.rv-page .app-sticky { margin-bottom: 8px; }
 .app-pre-controls {
   position: relative;
   z-index: 1;
