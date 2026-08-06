@@ -343,6 +343,28 @@ PCF.Pages = PCF.Pages || {};
           </div>
         </div>`;
 
+      const rvNav = container.querySelector('.rv-nav-area');
+      const rvBadge = container.querySelector('.rv-date-badge');
+      if (rvNav && rvBadge) {
+        const dateInput = document.createElement('input');
+        dateInput.type = 'date';
+        dateInput.id = 'rv-date';
+        dateInput.className = 'rv-date-input';
+        dateInput.value = curDate;
+
+        const todayBtn = document.createElement('button');
+        todayBtn.type = 'button';
+        todayBtn.id = 'rv-hoje';
+        todayBtn.className = 'btn btn-secondary btn-sm';
+        todayBtn.textContent = 'Hoje';
+
+        rvNav.classList.add('date-nav-controls');
+        rvBadge.replaceWith(dateInput);
+        const newBtn = rvNav.querySelector('#rv-nova');
+        rvNav.insertBefore(todayBtn, newBtn || null);
+      }
+      PCF.App.applyStandardHeader?.(container, '#roda-vida');
+
       /* desenha a roda */
       const redrawWheel = () => _desenharRoda('rv-canvas', config, _scoresFromSliders());
       setTimeout(redrawWheel, 20);
@@ -368,6 +390,13 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('rv-next').onclick = () => {
         const d = _getSorted()[_getSorted().indexOf(curDate) + 1];
         if (d) { curDate = d; render(); }
+      };
+      document.getElementById('rv-date').onchange = (e) => {
+        if (e.target.value) { curDate = e.target.value; render(); }
+      };
+      document.getElementById('rv-hoje').onclick = () => {
+        curDate = new Date().toISOString().split('T')[0];
+        render();
       };
       document.getElementById('rv-nova').onclick = () => {
         curDate = new Date().toISOString().split('T')[0];
