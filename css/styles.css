@@ -1754,6 +1754,11 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   align-items: center;
   justify-content: flex-start;
 }
+.app-pre-controls {
+  position: relative;
+  z-index: 1;
+  margin: 10px 0 0;
+}
 .finance-tab-controls.page-actions,
 .finance-tab-controls.categorias-actions {
   justify-content: flex-start;

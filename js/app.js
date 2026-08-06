@@ -1035,6 +1035,11 @@ PCF.App = (() => {
       title.innerHTML = `<i data-lucide="${routeItem.icon}"></i> ${H.esc(routeItem.label)}`;
     }
     const headerSubtitles = [...header.querySelectorAll('.subtitle')];
+    const preControlBlocks = [];
+    const nextBlock = header.nextElementSibling;
+    if (nextBlock?.classList.contains('hab-frase-dia')) {
+      preControlBlocks.push(nextBlock);
+    }
 
     const sticky = document.createElement('div');
     sticky.className = 'app-sticky';
@@ -1057,6 +1062,10 @@ PCF.App = (() => {
     sticky.appendChild(header);
     const tabs = renderGroupTabs(group, hash);
     if (tabs) sticky.insertAdjacentHTML('beforeend', tabs);
+    preControlBlocks.forEach(block => {
+      block.classList.add('app-pre-controls');
+      sticky.appendChild(block);
+    });
     if (controls.children.length) sticky.appendChild(controls);
     headerSubtitles.reverse().forEach(subtitle => {
       sticky.after(subtitle);
