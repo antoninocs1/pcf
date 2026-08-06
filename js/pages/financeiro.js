@@ -28,13 +28,21 @@ PCF.Pages = PCF.Pages || {};
 
   PCF.activateFinanceTabs = (container) => {
     container.querySelector('.finance-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    container.querySelectorAll('.finance-menu-button').forEach(btn => {
+      btn.onclick = () => { document.getElementById('sidebar-toggle')?.click(); };
+    });
     container.querySelectorAll('.finance-home-button').forEach(btn => {
       btn.onclick = () => { location.hash = '#home'; };
     });
   };
 
+  const financeMenuButton = () => `
+    <button type="button" class="finance-header-button finance-menu-button" title="Abrir menu" aria-label="Abrir menu">
+      <i data-lucide="menu"></i>
+    </button>`;
+
   const financeHomeButton = () => `
-    <button type="button" class="btn-home-back finance-home-button" title="Tela Inicial" aria-label="Tela Inicial">
+    <button type="button" class="finance-header-button finance-home-button" title="Tela Inicial" aria-label="Tela Inicial">
       <i data-lucide="home"></i>
     </button>`;
 
@@ -75,6 +83,7 @@ PCF.Pages = PCF.Pages || {};
       <div class="page">
         <div class="finance-sticky">
           <div class="page-header">
+            ${financeMenuButton()}
             <h2>Painel financeiro</h2>
             ${financeHomeButton()}
           </div>
@@ -149,6 +158,7 @@ PCF.Pages = PCF.Pages || {};
       <div class="page">
         <div class="finance-sticky finance-sticky-compact">
           <div class="page-header">
+            ${financeMenuButton()}
             <h2>Inserir Transação Financeira</h2>
             ${financeHomeButton()}
           </div>
@@ -274,6 +284,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="finance-sticky">
             <div class="page-header">
+              ${financeMenuButton()}
               <h2>Base de Dados Financeira</h2>
               ${financeHomeButton()}
             </div>
@@ -468,6 +479,7 @@ PCF.Pages = PCF.Pages || {};
       <div class="page">
         <div class="finance-sticky">
           <div class="page-header">
+            ${financeMenuButton()}
             <h2>Relatório Financeiro</h2>
             ${financeHomeButton()}
           </div>
@@ -608,6 +620,7 @@ PCF.Pages = PCF.Pages || {};
       <div class="page">
         <div class="finance-sticky">
           <div class="page-header">
+            ${financeMenuButton()}
             <h2>4 Forças do Dinheiro</h2>
             ${financeHomeButton()}
           </div>

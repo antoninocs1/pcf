@@ -19,8 +19,11 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="finance-sticky">
             <div class="page-header">
+              <button type="button" class="finance-header-button finance-menu-button" title="Abrir menu" aria-label="Abrir menu">
+                <i data-lucide="menu"></i>
+              </button>
               <h2>Configuração de categorias</h2>
-              <button type="button" class="btn-home-back finance-home-button" title="Tela Inicial" aria-label="Tela Inicial">
+              <button type="button" class="finance-header-button finance-home-button" title="Tela Inicial" aria-label="Tela Inicial">
                 <i data-lucide="home"></i>
               </button>
             </div>
@@ -54,6 +57,9 @@ PCF.Pages = PCF.Pages || {};
 
       if (window.lucide) lucide.createIcons();
       if (PCF.activateFinanceTabs) PCF.activateFinanceTabs(container);
+      container.querySelectorAll('.finance-menu-button').forEach(btn => {
+        btn.onclick = () => { document.getElementById('sidebar-toggle')?.click(); };
+      });
       container.querySelectorAll('.finance-home-button').forEach(btn => {
         btn.onclick = () => { location.hash = '#home'; };
       });
