@@ -2505,8 +2505,39 @@ PCF.Store = (() => {
   const addJogoPalavra = (item) => { const all = getJogoPalavras(); all.push({ id: _uid(), ativo: true, ...item }); saveJogoPalavras(all); return all; };
   const updateJogoPalavra = (id, data) => { const all = getJogoPalavras(); const i = all.findIndex(p => p.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveJogoPalavras(all); } return all; };
   const deleteJogoPalavra = (id) => { const all = getJogoPalavras().filter(p => p.id !== id); saveJogoPalavras(all); return all; };
-  const getJogoPalavrasEstado = () => _get(_jpwStateU()) || null;
-  const saveJogoPalavrasEstado = (state) => _set(_jpwStateU(), state || null);
+  const _normalizeJogoPalavrasEstado = (state) => {
+    if (!state) return null;
+    const copy = { ...state };
+    if (Array.isArray(copy.gridRows)) copy.grid = copy.gridRows.map(row => String(row).split(''));
+    if (Array.isArray(copy.words)) {
+      copy.words = copy.words.map(word => ({
+        ...word,
+        cells: Array.isArray(word.cells) ? word.cells : String(word.cellsText || '').split('|').filter(Boolean),
+      }));
+    }
+    return copy;
+  };
+  const _serializeJogoPalavrasEstado = (state) => {
+    if (!state) return null;
+    const copy = { ...state };
+    if (Array.isArray(copy.grid)) {
+      copy.gridRows = copy.grid.map(row => Array.isArray(row) ? row.join('') : String(row || ''));
+      delete copy.grid;
+    }
+    if (Array.isArray(copy.words)) {
+      copy.words = copy.words.map(word => {
+        const item = { ...word };
+        if (Array.isArray(item.cells)) {
+          item.cellsText = item.cells.join('|');
+          delete item.cells;
+        }
+        return item;
+      });
+    }
+    return copy;
+  };
+  const getJogoPalavrasEstado = () => _normalizeJogoPalavrasEstado(_get(_jpwStateU()));
+  const saveJogoPalavrasEstado = (state) => _set(_jpwStateU(), _serializeJogoPalavrasEstado(state));
 
   /* ---------- VIRTUDES REGISTROS ---------- */
   const _vrU = () => `pcf_virtudes_reg_${currentUserId()}`;
