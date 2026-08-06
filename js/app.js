@@ -1192,6 +1192,8 @@ PCF.App = (() => {
 
   const updateActiveNav = () => {
     const hash = location.hash || '#home';
+    const financeHashes = new Set(['#dashboard', '#inserir', '#base', '#relatorios', '#ciclo', '#categorias']);
+    document.body.classList.toggle('route-finance', financeHashes.has(hash));
     document.querySelectorAll('.nav-link').forEach(a => {
       const isActive = a.dataset.hash === hash;
       a.classList.toggle('active', isActive);
@@ -1207,7 +1209,6 @@ PCF.App = (() => {
     });
     const backBtn = document.getElementById('btn-home-back');
     if (backBtn) {
-      const financeHashes = new Set(['#dashboard', '#inserir', '#base', '#relatorios', '#ciclo', '#categorias']);
       backBtn.style.display = hash === '#home' || financeHashes.has(hash) ? 'none' : '';
     }
   };
