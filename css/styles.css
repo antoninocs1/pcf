@@ -1761,12 +1761,20 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   margin: -4px 0 12px;
   align-items: center;
 }
+.app-tab-controls {
+  position: relative;
+  z-index: 1;
+  margin: 10px 0 0;
+  align-items: center;
+  justify-content: flex-start;
+}
 .finance-tab-controls.page-actions,
 .finance-tab-controls.categorias-actions {
   justify-content: flex-start;
 }
 .finance-tabs,
 .app-tabs,
+.app-tab-controls,
 .finance-tab-controls,
 .finance-sticky #base-msg {
   position: relative;

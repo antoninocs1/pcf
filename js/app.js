@@ -1022,9 +1022,18 @@ PCF.App = (() => {
     const sticky = document.createElement('div');
     sticky.className = 'app-sticky';
     page.insertBefore(sticky, header);
+
+    const title = header.querySelector('h2');
+    const controls = document.createElement('div');
+    controls.className = 'app-tab-controls page-actions';
+    [...header.children].forEach(child => {
+      if (child !== title) controls.appendChild(child);
+    });
+
     sticky.appendChild(header);
     const tabs = renderGroupTabs(getRouteGroup(hash), hash);
     if (tabs) sticky.insertAdjacentHTML('beforeend', tabs);
+    if (controls.children.length) sticky.appendChild(controls);
     sticky.querySelector('.gb-tab.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (window.lucide) lucide.createIcons();
   };
