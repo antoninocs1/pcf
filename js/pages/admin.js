@@ -1139,11 +1139,11 @@ PCF.Pages = PCF.Pages || {};
         <div class="page">
           <div class="page-header">
             <h2><i data-lucide="book-open"></i> Meu Diário</h2>
-            <div class="diario-header-controls">
+            <div class="date-nav-controls">
               <button class="btn btn-secondary btn-sm" id="btn-diario-prev" title="Dia anterior"><i data-lucide="chevron-left"></i></button>
               <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
-              <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
               <button class="btn btn-secondary btn-sm" id="btn-diario-next" title="Próximo dia" ${selectedDate >= today ? 'disabled' : ''}><i data-lucide="chevron-right"></i></button>
+              <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
             </div>
           </div>
 

@@ -139,7 +139,7 @@ PCF.Pages = PCF.Pages || {};
 
           ${htmlVidaFelizBanner(vidaFeliz)}
 
-          <div class="virtudes-date-bar">
+          <div class="virtudes-date-bar date-nav-controls">
             <button id="virt-prev-day" class="btn btn-ghost btn-sm" title="Dia anterior"><i data-lucide="chevron-left"></i></button>
             <input type="date" id="virt-date" class="form-control-inline" value="${selectedDate}" max="${hoje}">
             <button id="virt-today" class="btn btn-secondary btn-sm">Hoje</button>
