@@ -68,10 +68,12 @@ PCF.Pages = PCF.Pages || {};
         <div class="page-header">
           <h2>Painel financeiro</h2>
         </div>
-        ${PCF.renderFinanceTabs('#dashboard')}
-        <div class="finance-tab-controls filters">
-          <select id="dash-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
-          <select id="dash-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+        <div class="finance-sticky">
+          ${PCF.renderFinanceTabs('#dashboard')}
+          <div class="finance-tab-controls filters">
+            <select id="dash-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
+            <select id="dash-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+          </div>
         </div>
         <div class="cards-grid" id="dash-cards"></div>
         <div class="charts-grid">
@@ -137,7 +139,9 @@ PCF.Pages = PCF.Pages || {};
     container.innerHTML = `
       <div class="page">
         <h2>Inserir Transação Financeira</h2><br>
-        ${PCF.renderFinanceTabs('#inserir')}
+        <div class="finance-sticky">
+          ${PCF.renderFinanceTabs('#inserir')}
+        </div>
         <div id="inserir-msg"></div>
         <form id="form-inserir" class="form" novalidate>
           <div class="form-group"><label>Tipo de Operação</label>
@@ -259,6 +263,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>Base de Dados Financeira</h2>
           </div>
+          <div class="finance-sticky">
           ${PCF.renderFinanceTabs('#base')}
           <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
           <div class="finance-tab-controls page-actions">
@@ -272,6 +277,7 @@ PCF.Pages = PCF.Pages || {};
             <select id="base-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
             <select id="base-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
             <select id="base-cat"><option value="">Todas as Categorias</option>${categorias.map(c => `<option value="${H.esc(c)}">${H.esc(c)}</option>`).join('')}</select>
+          </div>
           </div>
           <div class="table-container"><table class="table">
             <thead><tr><th>Data</th><th class="col-hide-mobile">Dia</th><th class="col-hide-mobile">Mês</th><th class="col-hide-mobile">Ano</th><th>Tipo</th><th>Categoria</th><th class="col-hide-mobile">Subcategoria</th><th class="col-hide-mobile">Item</th><th>Valor</th><th class="col-hide-mobile">Forma de pagamento</th><th class="col-hide-mobile">Fixo/variável</th><th style="width:80px">Ações</th></tr></thead>
@@ -450,10 +456,12 @@ PCF.Pages = PCF.Pages || {};
         <div class="page-header">
           <h2>Relatório Financeiro</h2>
         </div>
-        ${PCF.renderFinanceTabs('#relatorios')}
-        <div class="finance-tab-controls filters">
-          <select id="rel-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
-          <select id="rel-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+        <div class="finance-sticky">
+          ${PCF.renderFinanceTabs('#relatorios')}
+          <div class="finance-tab-controls filters">
+            <select id="rel-ano"><option value="">Todos os Anos</option>${anos.map(a => `<option value="${a}">${a}</option>`).join('')}</select>
+            <select id="rel-mes"><option value="">Todos os Meses</option>${H.MESES.map(m => `<option value="${m}">${m.charAt(0).toUpperCase() + m.slice(1)}</option>`).join('')}</select>
+          </div>
         </div>
         <div class="charts-grid">
           <div class="chart-container"><h3>Receitas por Categoria</h3><canvas id="rel-pie-rec"></canvas><div id="rel-tab-rec" class="chart-table"></div></div>
@@ -585,7 +593,9 @@ PCF.Pages = PCF.Pages || {};
     container.innerHTML = `
       <div class="page">
         <h2>4 Forças do Dinheiro</h2><br>
-        ${PCF.renderFinanceTabs('#ciclo')}
+        <div class="finance-sticky">
+          ${PCF.renderFinanceTabs('#ciclo')}
+        </div>
         <p class="subtitle">Ciclo do Dinheiro — Visão geral das entradas, saídas, investimentos e saldo.</p>
 
         <div class="farol-banner" style="border-color:${farolCor}; background:${farolCor}15">

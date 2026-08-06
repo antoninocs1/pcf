@@ -20,16 +20,18 @@ PCF.Pages = PCF.Pages || {};
           <div class="page-header">
             <h2>Configuração de categorias</h2>
           </div>
-          ${PCF.renderFinanceTabs ? PCF.renderFinanceTabs('#categorias') : ''}
-          <div class="finance-tab-controls categorias-actions">
-            <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
-            <button id="btn-add-cat" class="btn btn-primary">+ Nova categoria</button>
-            <select id="cat-filtro-tipo" class="cat-filter-select">
-              <option value="">Todos os Tipos</option>
-              <option value="RECEITA" ${filtroTipo === 'RECEITA' ? 'selected' : ''}>Receita</option>
-              <option value="DESPESA" ${filtroTipo === 'DESPESA' ? 'selected' : ''}>Despesa</option>
-              <option value="INVESTIMENTO" ${filtroTipo === 'INVESTIMENTO' ? 'selected' : ''}>Investimento</option>
-            </select>
+          <div class="finance-sticky">
+            ${PCF.renderFinanceTabs ? PCF.renderFinanceTabs('#categorias') : ''}
+            <div class="finance-tab-controls categorias-actions">
+              <button id="btn-restaurar-cats" class="btn btn-outline"><i data-lucide="rotate-ccw"></i> Restaurar padrões</button>
+              <button id="btn-add-cat" class="btn btn-primary">+ Nova categoria</button>
+              <select id="cat-filtro-tipo" class="cat-filter-select">
+                <option value="">Todos os Tipos</option>
+                <option value="RECEITA" ${filtroTipo === 'RECEITA' ? 'selected' : ''}>Receita</option>
+                <option value="DESPESA" ${filtroTipo === 'DESPESA' ? 'selected' : ''}>Despesa</option>
+                <option value="INVESTIMENTO" ${filtroTipo === 'INVESTIMENTO' ? 'selected' : ''}>Investimento</option>
+              </select>
+            </div>
           </div>
           <div class="table-container"><table class="table">
             <thead><tr><th>Tipo de operação</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>

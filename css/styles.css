@@ -1673,11 +1673,19 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .gb-tab:hover { background: rgba(255,255,255,.04); color: var(--text); }
 .gb-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(59,130,246,.06); }
+.finance-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 35;
+  margin-bottom: 14px;
+  padding: 4px 0 1px;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 88%, rgba(15,23,42,0) 100%);
+}
 .finance-tabs { margin-top: -4px; }
 .finance-tab { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
 .finance-tab svg { width: 17px; height: 17px; flex-shrink: 0; }
 .finance-tab-controls {
-  margin: -4px 0 14px;
+  margin: -4px 0 12px;
   align-items: center;
 }
 .finance-tab-controls.page-actions,
@@ -1740,6 +1748,7 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
     flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory; padding-bottom: 2px;
   }
+  .finance-sticky { top: 50px; }
   .diario-tab {
     flex: 0 0 auto; padding: 10px 14px; font-size: .82rem;
     scroll-snap-align: start; min-height: 44px;
