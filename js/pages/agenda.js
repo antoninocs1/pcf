@@ -11,7 +11,7 @@ const checkAndShowAlerts = () => {};
   const H = PCF.Helpers;
 
   const STATUS_OPTS = ['Pendente', 'Concluído', 'Cancelado'];
-  const STATUS_COLORS = { 'Pendente': '#f59e0b', 'Concluído': '#16a34a', 'Cancelado': '#dc2626' };
+  const STATUS_COLORS = { 'Pendente': '#f59e0b', 'Concluído': '#16a34a', 'Realizado': '#16a34a', 'Cancelado': '#dc2626' };
   const CALENDAR_WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
   const WEEKEND_INDEXES = new Set([0, 6]);
   const MONTH_LABEL = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
@@ -52,10 +52,17 @@ const checkAndShowAlerts = () => {};
       .filter(acao => acao.agendaAtivo && acao.whenDate)
       .sort((a, b) => a.whenDate.localeCompare(b.whenDate) || (a.whenTime || '').localeCompare(b.whenTime || ''));
 
-    const getCombinedMonthCounts = (compromissos, acoesVinculadas) => {
+    const getSaudeEventosVinculados = () => (S.getSaudeEventos ? S.getSaudeEventos() : [])
+      .filter(evento => evento.agendaAtivo && evento.data)
+      .sort((a, b) => a.data.localeCompare(b.data) || (a.hora || '').localeCompare(b.hora || ''));
+
+    const getCombinedMonthCounts = (compromissos, acoesVinculadas, saudeVinculados) => {
       const counts = getMonthCounts(compromissos);
       acoesVinculadas.forEach(acao => {
         counts[acao.whenDate] = (counts[acao.whenDate] || 0) + 1;
+      });
+      saudeVinculados.forEach(evento => {
+        counts[evento.data] = (counts[evento.data] || 0) + 1;
       });
       return counts;
     };
@@ -88,6 +95,7 @@ const checkAndShowAlerts = () => {};
     const checkAlertas = () => {
       const compromissos = S.getCompromissos();
       const acoesVinculadas = getPlanoAcoesVinculadas();
+      const saudeVinculados = getSaudeEventosVinculados();
       const agora = new Date();
       const hj = agora.toISOString().split('T')[0];
       const alertas = [];
@@ -144,6 +152,25 @@ const checkAndShowAlerts = () => {};
             comp: { compromisso: `[Plano] ${acao.what}`, data: acao.whenDate, hora: acao.whenTime }
           });
         }
+      });
+      saudeVinculados.forEach(evento => {
+        if (evento.status !== 'Pendente') return;
+        const comp = {
+          compromisso: `[Saúde] ${evento.tipo || 'Registro'} - ${evento.descricao || ''}`,
+          data: evento.data,
+          hora: evento.hora,
+        };
+        if (evento.hora) {
+          const eventoDateTime = new Date(`${evento.data}T${evento.hora}`);
+          const diffMs = eventoDateTime - agora;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          if (evento.data === hj && diffHours <= 1 && diffHours > -1) {
+            alertas.push({ tipo: 'agora', comp });
+            return;
+          }
+        }
+        if (evento.data < hj) alertas.push({ tipo: 'atrasado', comp });
+        else if (evento.data === hj) alertas.push({ tipo: 'hoje', comp });
       });
       return alertas;
     };
@@ -214,7 +241,8 @@ const checkAndShowAlerts = () => {};
         return (a.hora || '').localeCompare(b.hora || '');
       });
       const acoesVinculadas = getPlanoAcoesVinculadas();
-      const countsByDate = getCombinedMonthCounts(compromissos, acoesVinculadas);
+      const saudeVinculados = getSaudeEventosVinculados();
+      const countsByDate = getCombinedMonthCounts(compromissos, acoesVinculadas, saudeVinculados);
       const calendarCells = buildCalendarGrid(currentMonth, countsByDate);
       const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
       const alertas = checkAlertas();
@@ -429,6 +457,36 @@ const checkAndShowAlerts = () => {};
                       <td>${H.esc(contato?.nome || '—')}</td>
                       <td><span class="status-badge" style="background:${statusCor}">${acao.status}</span></td>
                       <td><a href="#plano-acao" class="btn-link">Plano de Ação</a></td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>`}
+          </div>
+
+          <div class="card" style="margin-top:1rem">
+            <h3>Saúde vinculada na Agenda (${saudeVinculados.length})</h3>
+            ${saudeVinculados.length === 0 ? '<p class="empty-text">Nenhuma consulta, exame ou procedimento vinculado à Agenda</p>' : `
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Registro</th>
+                    <th>Quando</th>
+                    <th>Local</th>
+                    <th>Status</th>
+                    <th>Origem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${saudeVinculados.map(evento => {
+                    const statusCor = STATUS_COLORS[evento.status] || '#6b7280';
+                    return `<tr>
+                      <td>${H.esc(evento.tipo || 'Saúde')} - ${H.esc(evento.descricao || '')}</td>
+                      <td>${H.formatarData(evento.data)} ${evento.hora || ''}</td>
+                      <td>${H.esc(evento.local || '—')}</td>
+                      <td><span class="status-badge" style="background:${statusCor}">${H.esc(evento.status || 'Pendente')}</span></td>
+                      <td><a href="#saude-consultas" class="btn-link">Saúde</a></td>
                     </tr>`;
                   }).join('')}
                 </tbody>

@@ -158,6 +158,176 @@ PCF.Pages = PCF.Pages || {};
     }
   };
 
+  /* ==================== CONSULTAS E EXAMES ==================== */
+  PCF.Pages.saudeConsultas = (container) => {
+    const TIPOS = ['Consultas médicas', 'Consultas odontológicas', 'Exames', 'Procedimento', 'Retorno/Revisão', 'Vacinação', 'Outros'];
+    const STATUS = ['Pendente', 'Realizado', 'Cancelado'];
+    const STATUS_COLORS = { 'Pendente': '#f59e0b', 'Realizado': '#16a34a', 'Cancelado': '#dc2626' };
+    let editingId = null;
+
+    const render = () => {
+      const eventos = (S.getSaudeEventos ? S.getSaudeEventos() : [])
+        .sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
+      const pendentes = eventos.filter(e => e.status === 'Pendente').length;
+      const realizados = eventos.filter(e => e.status === 'Realizado').length;
+      const vinculados = eventos.filter(e => e.agendaAtivo && e.data).length;
+
+      container.innerHTML = `
+        <div class="page saude-page">
+          <div class="page-header">
+            <div>
+              <h2>Saúde - Consultas e Exames</h2>
+              <p class="subtitle">Organize consultas, exames, procedimentos e revisões de saúde com vínculo opcional na Agenda.</p>
+            </div>
+          </div>
+
+          <div class="cards-grid">
+            <div class="card"><div class="card-label">Pendentes</div><div class="card-value">${pendentes}</div></div>
+            <div class="card"><div class="card-label">Realizados</div><div class="card-value">${realizados}</div></div>
+            <div class="card"><div class="card-label">Na Agenda</div><div class="card-value">${vinculados}</div></div>
+          </div>
+
+          <div class="card plano-acao-card">
+            <h3 id="saude-form-title">Novo registro</h3>
+            <form id="saude-evento-form" class="plano-acao-form">
+              <div class="form-group">
+                <label>Tipo</label>
+                <select id="se-tipo" required>${TIPOS.map(t => `<option value="${H.esc(t)}">${H.esc(t)}</option>`).join('')}</select>
+              </div>
+              <div class="form-group">
+                <label>Descrição</label>
+                <input type="text" id="se-descricao" placeholder="Ex: Cardiologista, check-up anual, exame de sangue" required>
+              </div>
+              <div class="form-group">
+                <label>Profissional / Clínica / Laboratório</label>
+                <input type="text" id="se-local" placeholder="Nome do profissional, clínica ou laboratório">
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="se-status">${STATUS.map(s => `<option value="${s}">${s}</option>`).join('')}</select>
+              </div>
+              <fieldset class="plano-acao-when plano-acao-form-span-2">
+                <legend>Data e horário</legend>
+                <div class="plano-acao-when-fields">
+                  <div class="form-group"><label>Data</label><input type="date" id="se-data" value="${H.hoje()}"></div>
+                  <div class="form-group"><label>Hora</label><input type="time" id="se-hora"></div>
+                  <div class="form-group"><label>Próxima revisão</label><input type="date" id="se-revisao"></div>
+                </div>
+                <small class="form-hint">Use a próxima revisão para lembrar retornos, repetição de exames ou acompanhamento periódico.</small>
+              </fieldset>
+              <div class="form-group plano-acao-form-span-2">
+                <label>Observações / Resultado</label>
+                <textarea id="se-observacoes" rows="3" placeholder="Resultado do exame, orientação recebida, preparo, endereço ou documentos necessários"></textarea>
+              </div>
+              <div class="form-group plano-acao-checkbox-group plano-acao-form-span-2">
+                <label class="plano-acao-checkbox">
+                  <input type="checkbox" id="se-agenda-ativo" checked>
+                  <span>Vincular na Agenda e gerar lembrete</span>
+                </label>
+              </div>
+              <div class="form-group plano-acao-form-actions plano-acao-form-span-2">
+                <button type="submit" class="btn btn-primary" id="se-submit">Salvar registro</button>
+                <button type="button" class="btn btn-secondary" id="se-cancel" style="display:none">Cancelar edição</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card plano-acao-card plano-acao-table-card">
+            <h3>Registros de saúde (${eventos.length})</h3>
+            ${eventos.length === 0 ? '<p class="empty-text">Nenhuma consulta, exame ou procedimento registrado.</p>' : `
+              <div class="table-container">
+                <table class="table">
+                  <thead><tr><th>Tipo</th><th>Descrição</th><th>Data</th><th>Revisão</th><th>Status</th><th>Agenda</th><th style="width:104px">Ações</th></tr></thead>
+                  <tbody>${eventos.map(e => `
+                    <tr>
+                      <td>${H.esc(e.tipo || 'Outros')}</td>
+                      <td><strong>${H.esc(e.descricao || '')}</strong>${e.local ? `<br><small>${H.esc(e.local)}</small>` : ''}</td>
+                      <td>${e.data ? H.formatarData(e.data) : '—'} ${e.hora || ''}</td>
+                      <td>${e.proximaRevisao ? H.formatarData(e.proximaRevisao) : '—'}</td>
+                      <td><span class="status-badge" style="background:${STATUS_COLORS[e.status] || '#6b7280'}">${H.esc(e.status || 'Pendente')}</span></td>
+                      <td>${e.agendaAtivo ? '<span class="badge badge-info">Sim</span>' : '<span class="badge badge-neutral">Não</span>'}</td>
+                      <td class="actions-cell">
+                        ${e.status !== 'Realizado' ? `<button class="btn-icon" data-ok-se="${e.id}" title="Marcar como realizado"><i data-lucide="check"></i></button>` : ''}
+                        <button class="btn-icon" data-edit-se="${e.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                        <button class="btn-icon btn-danger" data-del-se="${e.id}" title="Remover"><i data-lucide="trash-2"></i></button>
+                      </td>
+                    </tr>`).join('')}</tbody>
+                </table>
+              </div>`}
+          </div>
+        </div>`;
+
+      if (window.lucide) lucide.createIcons();
+
+      const resetForm = () => {
+        editingId = null;
+        document.getElementById('saude-form-title').textContent = 'Novo registro';
+        document.getElementById('se-submit').textContent = 'Salvar registro';
+        document.getElementById('se-cancel').style.display = 'none';
+        document.getElementById('saude-evento-form').reset();
+        document.getElementById('se-data').value = H.hoje();
+        document.getElementById('se-agenda-ativo').checked = true;
+      };
+
+      document.getElementById('se-cancel').onclick = resetForm;
+      document.getElementById('saude-evento-form').onsubmit = (e) => {
+        e.preventDefault();
+        const data = {
+          tipo: document.getElementById('se-tipo').value,
+          descricao: document.getElementById('se-descricao').value.trim(),
+          local: document.getElementById('se-local').value.trim(),
+          status: document.getElementById('se-status').value,
+          data: document.getElementById('se-data').value,
+          hora: document.getElementById('se-hora').value,
+          proximaRevisao: document.getElementById('se-revisao').value,
+          observacoes: document.getElementById('se-observacoes').value.trim(),
+          agendaAtivo: document.getElementById('se-agenda-ativo').checked,
+        };
+        if (!data.descricao) { alert('Informe a descrição do registro.'); return; }
+        if (data.agendaAtivo && !data.data) { alert('Para vincular na Agenda, informe uma data.'); return; }
+        if (editingId) S.updateSaudeEvento(editingId, data);
+        else S.addSaudeEvento(data);
+        render();
+      };
+
+      container.querySelector('.plano-acao-table-card')?.addEventListener('click', (e) => {
+        const okBtn = e.target.closest('[data-ok-se]');
+        if (okBtn) {
+          S.updateSaudeEvento(okBtn.dataset.okSe, { status: 'Realizado' });
+          render();
+          return;
+        }
+        const editBtn = e.target.closest('[data-edit-se]');
+        if (editBtn) {
+          const item = eventos.find(ev => ev.id === editBtn.dataset.editSe);
+          if (!item) return;
+          editingId = item.id;
+          document.getElementById('saude-form-title').textContent = 'Editando registro';
+          document.getElementById('se-submit').textContent = 'Salvar alterações';
+          document.getElementById('se-cancel').style.display = '';
+          document.getElementById('se-tipo').value = item.tipo || TIPOS[0];
+          document.getElementById('se-descricao').value = item.descricao || '';
+          document.getElementById('se-local').value = item.local || '';
+          document.getElementById('se-status').value = item.status || 'Pendente';
+          document.getElementById('se-data').value = item.data || '';
+          document.getElementById('se-hora').value = item.hora || '';
+          document.getElementById('se-revisao').value = item.proximaRevisao || '';
+          document.getElementById('se-observacoes').value = item.observacoes || '';
+          document.getElementById('se-agenda-ativo').checked = !!item.agendaAtivo;
+          document.getElementById('saude-evento-form').scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+        const delBtn = e.target.closest('[data-del-se]');
+        if (delBtn && confirm('Remover este registro de saúde?')) {
+          S.deleteSaudeEvento(delBtn.dataset.delSe);
+          render();
+        }
+      });
+    };
+
+    render();
+  };
+
   /* ==================== EMOÇÕES (REGISTRO) ==================== */
 
   const EMOCAO_ICONS = {

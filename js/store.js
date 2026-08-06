@@ -16,7 +16,7 @@ PCF.Store = (() => {
   const DATA_COLS = [
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
-    'rodavida_reg', 'rodavida_config', 'plano_acao',
+    'rodavida_reg', 'rodavida_config', 'plano_acao', 'saude_eventos',
     'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades',
     'jogo_palavras_estado'
   ];
@@ -559,6 +559,41 @@ PCF.Store = (() => {
   const deleteCompromisso = (id) => {
     const all = getCompromissos().filter(c => c.id !== id);
     saveCompromissos(all);
+    return all;
+  };
+
+  /* ---------- SAUDE / CONSULTAS E EXAMES ---------- */
+  const _seU = () => `pcf_saude_eventos_${currentUserId()}`;
+  const getSaudeEventos = () => _get(_seU()) || [];
+  const saveSaudeEventos = (eventos) => {
+    _set(_seU(), eventos || []);
+    _emitAgendaChange('saude-save', { eventos });
+  };
+  const addSaudeEvento = (evento) => {
+    const novo = {
+      id: _uid(),
+      dataCadastro: new Date().toISOString().split('T')[0],
+      status: 'Pendente',
+      agendaAtivo: false,
+      ...evento,
+    };
+    const all = getSaudeEventos();
+    all.push(novo);
+    saveSaudeEventos(all);
+    return all;
+  };
+  const updateSaudeEvento = (id, data) => {
+    const all = getSaudeEventos();
+    const i = all.findIndex(e => e.id === id);
+    if (i >= 0) {
+      all[i] = { ...all[i], ...data };
+      saveSaudeEventos(all);
+    }
+    return all;
+  };
+  const deleteSaudeEvento = (id) => {
+    const all = getSaudeEventos().filter(e => e.id !== id);
+    saveSaudeEventos(all);
     return all;
   };
 
@@ -2563,6 +2598,7 @@ PCF.Store = (() => {
       emocoes: ((_get(`pcf_emocoes_${uid}`) || []).map(_normalizeEmocao)),
       emocoes_config: _get(`pcf_emocoes_config_${uid}`) || [],
       imc: _get(`pcf_imc_${uid}`) || { peso: 0, altura: 0 },
+      saude_eventos: _get(`pcf_saude_eventos_${uid}`) || [],
       habitos: _get(`pcf_habitos_${uid}`) || [],
       reg_habitos: _get(`pcf_reg_habitos_${uid}`) || [],
       frases: _get(`pcf_frases_${uid}`) || [],
@@ -2593,6 +2629,7 @@ PCF.Store = (() => {
     getAtividadesUsuario, registrarAtividade,
     getUsoFuncionalidades, saveUsoFuncionalidades, registrarUsoFuncionalidade, getRelatorioUsoFuncionalidades,
     getAgendaConfig, saveAgendaConfig,
+    getSaudeEventos, saveSaudeEventos, addSaudeEvento, updateSaudeEvento, deleteSaudeEvento,
     getCompromissos, saveCompromissos, addCompromisso, updateCompromisso, deleteCompromisso,
     getPlanoAcoes, savePlanoAcoes, addPlanoAcao, updatePlanoAcao, deletePlanoAcao,
     getHabitos, saveHabitos, addHabito, updateHabito, deleteHabito,

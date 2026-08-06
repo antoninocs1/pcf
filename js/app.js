@@ -855,7 +855,13 @@ PCF.App = (() => {
       ]
     },
     { standalone: true, hash: '#agenda',       icon: 'calendar',  label: 'Agenda' },
-    { standalone: true, hash: '#imc',          icon: 'heart',     label: 'IMC' },
+    {
+      id: 'saude', label: 'Saúde', icon: 'heart-pulse',
+      items: [
+        { hash: '#imc', icon: 'heart', label: 'IMC' },
+        { hash: '#saude-consultas', icon: 'clipboard-plus', label: 'Consultas e Exames' },
+      ]
+    },
     { standalone: true, hash: '#contatos',     icon: 'user',      label: 'Contatos Pessoais' },
     { standalone: true, adminOnly: true, hash: '#usuarios',       icon: 'users',    label: 'Configuração de usuários' },
     { standalone: true, adminOnly: true, hash: '#gerenciar-bases', icon: 'database', label: 'Gerenciar Bases de Dados' },
@@ -899,6 +905,7 @@ PCF.App = (() => {
     '#plano-acao': { label: 'Plano de Ação 5W2H', grupo: 'Plano de Ação' },
     '#agenda': { label: 'Agenda', grupo: 'Agenda' },
     '#imc': { label: 'IMC', grupo: 'Saúde' },
+    '#saude-consultas': { label: 'Consultas e Exames', grupo: 'Saúde' },
     '#contatos': { label: 'Contatos Pessoais', grupo: 'Contatos' },
     '#linha-tempo': { label: 'Linha do Tempo', grupo: 'Linha do Tempo' },
     '#usuarios': { label: 'Configuração de usuários', grupo: 'Administração' },
@@ -1353,6 +1360,7 @@ PCF.App = (() => {
       '#relatorios': pages.relatorios,
       '#ciclo': pages.ciclo,
       '#imc': pages.imc,
+      '#saude-consultas': pages.saudeConsultas,
       '#emocoes': pages.emocoes,
       '#emocoes-relatorios': pages.emocoesRelatorios,
       '#agenda': pages.agenda,

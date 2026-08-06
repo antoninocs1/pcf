@@ -3719,6 +3719,17 @@ body.privacy-modal-open { overflow: hidden; }
   background: var(--word-cell-found-bg, rgba(34,197,94,.18));
   color: var(--word-cell-found-text, #15803d);
 }
+[data-theme="light"] .word-cell {
+  --word-cell-bg: #f8fafc;
+  --word-cell-border: #d6dee8;
+  --word-cell-text: #111827;
+  --word-cell-selected-bg: #dbeafe;
+  --word-cell-found-bg: #bbf7d0;
+  --word-cell-found-text: #052e16;
+}
+[data-theme="light"] .word-cell.found {
+  border-color: #16a34a;
+}
 [data-theme="dark"] .word-cell,
 body:not([data-theme="light"]) .word-cell {
   --word-cell-bg: rgba(30,41,59,.92);
@@ -3777,6 +3788,13 @@ body:not([data-theme="light"]) .word-game-intro-icon {
 .word-token.found span {
   color: #15803d;
   text-decoration: line-through;
+}
+[data-theme="light"] .word-token.found {
+  border-color: #16a34a;
+  background: #dcfce7;
+}
+[data-theme="light"] .word-token.found span {
+  color: #14532d;
 }
 .word-modal {
   max-width: 460px;
