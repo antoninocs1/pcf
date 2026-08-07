@@ -652,18 +652,18 @@ PCF.App = (() => {
       : { texto: 'Que este dia seja repleto de sabedoria e paz.', autor: '' };
 
     const modules = [
-      { icon: 'wallet',       label: 'Financeiro',       hash: '#base',      color: '#16a34a' },
-      { icon: 'brain',        label: 'Emoções',           hash: '#emocoes',   color: '#8b5cf6' },
-      { icon: 'check-square', label: 'Hábitos',           hash: '#habitos',   color: '#f59e0b' },
-      { icon: 'book-open',    label: 'Diário',            hash: '#diario',    color: '#3b82f6' },
-      { icon: 'milestone',    label: 'Linha do Tempo',     hash: '#linha-tempo', color: '#d97706' },
-      { icon: 'list-todo',    label: 'Plano de Ação',     hash: '#plano-acao', color: '#0f766e' },
-      { icon: 'calendar',     label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
-      { icon: 'target',       label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
-      { icon: 'sparkles',     label: 'Caça-Palavras',     hash: '#caca-palavras', color: '#2563eb' },
-      { icon: 'gem',          label: 'Virtudes',          hash: '#virtudes',  color: '#7c3aed' },
-      { icon: 'heart',        label: 'IMC',               hash: '#imc',       color: '#dc2626' },
-      { icon: 'users',        label: 'Contatos Pessoais', hash: '#contatos',  color: '#64748b' },
+      { icon: 'wallet',         label: 'Financeiro',        hash: '#base',      color: '#16a34a' },
+      { icon: 'brain',          label: 'Emoções',           hash: '#emocoes',   color: '#8b5cf6' },
+      { icon: 'check-square',   label: 'Hábitos',           hash: '#habitos',   color: '#f59e0b' },
+      { icon: 'book-open',      label: 'Diário',            hash: '#diario',    color: '#3b82f6' },
+      { icon: 'milestone',      label: 'Linha do Tempo',    hash: '#linha-tempo', color: '#d97706' },
+      { icon: 'list-todo',      label: 'Plano de Ação',     hash: '#plano-acao', color: '#0f766e' },
+      { icon: 'calendar',       label: 'Agenda',            hash: '#agenda',    color: '#06b6d4' },
+      { icon: 'target',         label: 'Roda da Vida',      hash: '#roda-vida', color: '#ec4899' },
+      { icon: 'sparkles',       label: 'Entretenimento',    hash: '#caca-palavras', color: '#2563eb' },
+      { icon: 'gem',            label: 'Virtudes',          hash: '#virtudes',  color: '#7c3aed' },
+      { icon: 'heart-pulse',    label: 'Saúde',             hash: '#saude-consultas', color: '#dc2626' },
+      { icon: 'users',          label: 'Contatos Pessoais', hash: '#contatos',  color: '#64748b' },
     ];
 
     const dateStr = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
