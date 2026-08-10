@@ -56,13 +56,107 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Alegria', titulo: 'Alegria', tipo: 'Emoção', descricao: 'Energia positiva que nasce do contato com algo significativo, belo ou satisfatório.' },
     { palavra: 'Confianca', titulo: 'Confiança', tipo: 'Sentimento', descricao: 'Sensação de segurança que fortalece escolhas, vínculos e continuidade.' },
     { palavra: 'Generosidade', titulo: 'Generosidade', tipo: 'Virtude', descricao: 'Disposição de compartilhar tempo, atenção, conhecimento ou recursos com boa vontade.' },
-    { palavra: 'Perdao', titulo: 'Perdão', tipo: 'Virtude', descricao: 'Libertar-se do peso da mágoa, sem negar aprendizados ou limites saudáveis.' },
+    { palavra: 'Perdao', titulo: 'Perdão', tipo: 'Virtude', descricao: 'Libertar-se do peso da mágoa, sem negar aprendizados ou limites saudáveis. Tem o objetivo de curar o teu ódio, a tua mágoa, o teu ressentimento que podem te distriuir mais do que o mal que lhe foi feito. É uma dádiva para quem foi ofendido.' },
     { palavra: 'Equilibrio', titulo: 'Equilíbrio', tipo: 'Virtude', descricao: 'Harmonizar razão, emoção e ação para viver com mais clareza.' },
     { palavra: 'Responsabilidade', titulo: 'Responsabilidade', tipo: 'Virtude', descricao: 'Assumir deveres, escolhas e consequências com consciência, cuidado e compromisso.' },
     { palavra: 'Amor', titulo: 'Amor', tipo: 'Sentimento', descricao: 'Força de cuidado, vínculo e responsabilidade que amplia o sentido da vida.' },
     { palavra: 'Paz', titulo: 'Paz', tipo: 'Sentimento', descricao: 'Quietude interior que nasce da coerência entre valores, escolhas e atitudes.' },
     { palavra: 'Amizade', titulo: 'Amizade', tipo: 'Sentimento', descricao: 'Vínculo de confiança, presença e cuidado recíproco que fortalece a caminhada da vida.' },
     { palavra: 'Entusiasmo', titulo: 'Entusiasmo', tipo: 'Emoção', descricao: 'Ânimo vivo para participar, criar e investir energia em algo que faz sentido.' },
+    { palavra: 'Altruismo', titulo: 'Altruísmo', tipo: 'Virtude', descricao: 'Disposição para agir desinteressadamente em prol do bem-estar dos outros, priorizando o próximo.' },
+    { palavra: 'Magnanimidade', titulo: 'Magnanimidade', tipo: 'Virtude', descricao: 'Grandeza de alma e nobreza de espírito que inclina a pessoa a praticar atos generosos e a superar pequenas ofensas.' },
+    { palavra: 'Sinceridade', titulo: 'Sinceridade', tipo: 'Virtude', descricao: 'Capacidade de se expressar com verdade, transparência e sem fingimento nas palavras e atitudes.' },
+    { palavra: 'Lealdade', titulo: 'Lealdade', tipo: 'Virtude', descricao: 'Compromisso e fidelidade constantes em relação a princípios, causas ou aos laços com outras pessoas.' },
+    { palavra: 'Temperanca', titulo: 'Temperança', tipo: 'Virtude', descricao: 'Capacidade de exercer a moderação e o equilíbrio diante dos desejos, prazeres e impulsos.' },
+    { palavra: 'Sabedoria', titulo: 'Sabedoria', tipo: 'Virtude', descricao: 'Aplicação do conhecimento, discernimento e experiência de vida para tomar decisões sensatas e éticas.' },
+    { palavra: 'Acolhimento', titulo: 'Acolhimento', tipo: 'Virtude', descricao: 'Capacidade de receber o outro com abertura, consideração e sem julgamentos prévios.' },
+    { palavra: 'Cuidado', titulo: 'Cuidado', tipo: 'Virtude', descricao: 'Atenção dedicada e permanente à preservação, integridade e bem-estar de si mesmo, do outro e do ambiente.' },
+    { palavra: 'Autenticidade', titulo: 'Autenticidade', tipo: 'Virtude', descricao: 'Capacidade de viver e se expressar em alinhamento constante com a própria essência e valores profundos.' },
+    { palavra: 'Gratificacao', titulo: 'Gratificação', tipo: 'Sentimento', descricao: 'Sensação interior de realização e contentamento pelo dever cumprido ou por um objetivo alcançado.' },
+    { palavra: 'Encantamento', titulo: 'Encantamento', tipo: 'Sentimento', descricao: 'Estado de admiração e deslumbre diante da beleza, da novidade ou da profundidade da vida.' },
+    { palavra: 'Otimismo', titulo: 'Otimismo', tipo: 'Sentimento', descricao: 'Disposição mental e emocional para focar nos aspectos favoráveis das situações e esperar bons resultados.' },
+    { palavra: 'Complicidade', titulo: 'Complicidade', tipo: 'Sentimento', descricao: 'Sensação de conexão profunda, alinhamento e entendimento mútuo sem a necessidade de muitas palavras.' },
+    { palavra: 'Pertencimento', titulo: 'Pertencimento', tipo: 'Sentimento', descricao: 'Sensação acolhedora de fazer parte de um grupo, comunidade ou propósito maior.' },
+    { palavra: 'Ternura', titulo: 'Ternura', tipo: 'Sentimento', descricao: 'Afeto suave e delicado que se manifesta no cuidado, no carinho e na proteção com o outro.' },
+    { palavra: 'Admiracao', titulo: 'Admiração', tipo: 'Sentimento', descricao: 'Sentimento de apreço e reconhecimento diante das qualidades, atitudes, capacidades ou realizações de alguém, inspirando respeito e valorização.' },
+    { palavra: 'Afeto', titulo: 'Afeto', tipo: 'Sentimento', descricao: 'Sentimento de carinho e proximidade que fortalece vínculos e favorece relações de cuidado e confiança.' },
+    { palavra: 'Contentamento', titulo: 'Contentamento', tipo: 'Sentimento', descricao: 'Sensação tranquila de satisfação com aquilo que se vive, possui ou alcança, sem depender da busca constante por mais.' },
+    { palavra: 'Satisfacao', titulo: 'Satisfação', tipo: 'Sentimento', descricao: 'Sensação positiva experimentada quando uma necessidade, expectativa, esforço ou objetivo encontra realização.' },
+    { palavra: 'Realizacao', titulo: 'Realização', tipo: 'Sentimento', descricao: 'Sensação de plenitude decorrente de reconhecer que esforços, escolhas ou capacidades produziram algo significativo.' },
+    { palavra: 'Alivio', titulo: 'Alívio', tipo: 'Sentimento', descricao: 'Sensação de tranquilidade que surge quando uma preocupação, tensão, dificuldade ou ameaça diminui ou desaparece.' },
+    { palavra: 'Seguranca', titulo: 'Segurança', tipo: 'Sentimento', descricao: 'Sensação de estabilidade e proteção que permite agir, relacionar-se e tomar decisões com maior tranquilidade.' },
+    { palavra: 'Afeicao', titulo: 'Afeição', tipo: 'Sentimento', descricao: 'Sentimento de estima, carinho e ligação emocional que aproxima pessoas e favorece relações cuidadosas.' },
+    { palavra: 'Inspiracao', titulo: 'Inspiração', tipo: 'Sentimento', descricao: 'Estado interior de entusiasmo e elevação que desperta vontade de criar, aprender, agir ou buscar algo significativo.' },
+    { palavra: 'Interesse', titulo: 'Interesse', tipo: 'Emoção', descricao: 'Estado de atenção e envolvimento que desperta vontade de conhecer, compreender ou explorar algo.' },
+    { palavra: 'Amabilidade', titulo: 'Amabilidade', tipo: 'Virtude', descricao: 'Disposição para tratar as pessoas de maneira cordial, respeitosa e acolhedora, contribuindo para relações harmoniosas.' },
+    { palavra: 'Cortesia', titulo: 'Cortesia', tipo: 'Virtude', descricao: 'Prática de demonstrar consideração e respeito por meio de palavras, gestos e atitudes educadas.' },
+    { palavra: 'Cordialidade', titulo: 'Cordialidade', tipo: 'Virtude', descricao: 'Capacidade de se relacionar com simpatia, respeito e disposição amistosa.' },
+    { palavra: 'Delicadeza', titulo: 'Delicadeza', tipo: 'Virtude', descricao: 'Capacidade de agir e se comunicar com sensibilidade, atenção e respeito aos sentimentos e limites das pessoas.' },
+    { palavra: 'Sensibilidade', titulo: 'Sensibilidade', tipo: 'Virtude', descricao: 'Capacidade de perceber com atenção sentimentos, necessidades, sutilezas e situações que exigem compreensão e cuidado.' },
+    { palavra: 'Disponibilidade', titulo: 'Disponibilidade', tipo: 'Virtude', descricao: 'Disposição sincera para oferecer presença, atenção, tempo ou ajuda quando necessário.' },
+    { palavra: 'Cooperacao', titulo: 'Cooperação', tipo: 'Virtude', descricao: 'Disposição para trabalhar e agir juntamente com outras pessoas na construção de objetivos e benefícios compartilhados.' },
+    { palavra: 'Companheirismo', titulo: 'Companheirismo', tipo: 'Virtude', descricao: 'Disposição para permanecer presente, colaborar e oferecer apoio nas experiências, desafios e conquistas compartilhadas.' },
+    { palavra: 'Fraternidade', titulo: 'Fraternidade', tipo: 'Virtude', descricao: 'Atitude de reconhecer o outro como semelhante, promovendo união, respeito, cuidado e ajuda mútua.' },
+    { palavra: 'Hospitalidade', titulo: 'Hospitalidade', tipo: 'Virtude', descricao: 'Disposição para receber e acolher pessoas com atenção, respeito, generosidade e abertura.' },
+    { palavra: 'Compreensao', titulo: 'Compreensão', tipo: 'Virtude', descricao: 'Capacidade de buscar entender sentimentos, razões, dificuldades e perspectivas antes de julgar ou reagir.' },
+    { palavra: 'Escuta', titulo: 'Escuta', tipo: 'Virtude', descricao: 'Capacidade de oferecer atenção verdadeira ao que o outro comunica, procurando compreender antes de responder ou julgar.' },
+    { palavra: 'Assertividade', titulo: 'Assertividade', tipo: 'Virtude', descricao: 'Capacidade de expressar pensamentos, sentimentos, necessidades e limites com clareza e respeito, sem agressividade ou submissão.' },
+    { palavra: 'Discernimento', titulo: 'Discernimento', tipo: 'Virtude', descricao: 'Capacidade de analisar situações com clareza e distinguir aquilo que é adequado, verdadeiro ou necessário antes de decidir.' },
+    { palavra: 'Sensatez', titulo: 'Sensatez', tipo: 'Virtude', descricao: 'Capacidade de agir com equilíbrio, bom senso e consideração pelas circunstâncias e consequências.' },
+    { palavra: 'Coerencia', titulo: 'Coerência', tipo: 'Virtude', descricao: 'Capacidade de manter alinhamento entre valores, pensamentos, palavras, decisões e atitudes.' },
+    { palavra: 'Constancia', titulo: 'Constância', tipo: 'Virtude', descricao: 'Capacidade de permanecer firme em valores, compromissos e boas práticas ao longo do tempo.' },
+    { palavra: 'Determinacao', titulo: 'Determinação', tipo: 'Virtude', descricao: 'Disposição firme para perseguir objetivos e enfrentar dificuldades sem abandonar facilmente aquilo que possui valor.' },
+    { palavra: 'Dedicacao', titulo: 'Dedicação', tipo: 'Virtude', descricao: 'Disposição para investir atenção, esforço, tempo e cuidado naquilo que se considera importante.' },
+    { palavra: 'Comprometimento', titulo: 'Comprometimento', tipo: 'Virtude', descricao: 'Disposição para assumir e sustentar responsabilidades, objetivos e vínculos com seriedade e continuidade.' },
+    { palavra: 'Proatividade', titulo: 'Proatividade', tipo: 'Virtude', descricao: 'Disposição para tomar iniciativa e agir antecipadamente diante de necessidades, oportunidades ou dificuldades.' },
+    { palavra: 'Adaptabilidade', titulo: 'Adaptabilidade', tipo: 'Virtude', descricao: 'Capacidade de ajustar pensamentos, comportamentos e estratégias diante de mudanças sem perder os próprios valores essenciais.' },
+    { palavra: 'Flexibilidade', titulo: 'Flexibilidade', tipo: 'Virtude', descricao: 'Capacidade de reconsiderar posições, adaptar-se às circunstâncias e acolher diferentes possibilidades quando necessário.' },
+    { palavra: 'Autonomia', titulo: 'Autonomia', tipo: 'Virtude', descricao: 'Capacidade de tomar decisões e conduzir a própria vida com responsabilidade, consciência e respeito pelos outros.' },
+    { palavra: 'Autoconfianca', titulo: 'Autoconfiança', tipo: 'Virtude', descricao: 'Capacidade de reconhecer e confiar nas próprias habilidades e possibilidades sem ignorar limites ou a necessidade de aprender.' },
+    { palavra: 'Autoaceitacao', titulo: 'Autoaceitação', tipo: 'Virtude', descricao: 'Capacidade de reconhecer e acolher a própria história, qualidades e limitações, mantendo abertura para crescer e melhorar.' },
+    { palavra: 'Autocompaixao', titulo: 'Autocompaixão', tipo: 'Virtude', descricao: 'Capacidade de tratar a si mesmo com compreensão e cuidado diante de erros, limitações e dificuldades, sem abandonar a responsabilidade pessoal.' },
+    { palavra: 'Autoconhecimento', titulo: 'Autoconhecimento', tipo: 'Virtude', descricao: 'Capacidade de reconhecer os próprios sentimentos, pensamentos, valores, qualidades, limitações e motivações.' },
+    { palavra: 'Autorrespeito', titulo: 'Autorrespeito', tipo: 'Virtude', descricao: 'Capacidade de reconhecer a própria dignidade, estabelecer limites saudáveis e agir de acordo com valores pessoais.' },
+    { palavra: 'Desprendimento', titulo: 'Desprendimento', tipo: 'Virtude', descricao: 'Capacidade de não se prender excessivamente a bens, posições, resultados ou reconhecimento, sabendo compartilhar e abrir mão quando necessário.' },
+    { palavra: 'Abnegacao', titulo: 'Abnegação', tipo: 'Virtude', descricao: 'Capacidade de renunciar voluntariamente a interesses pessoais quando um bem maior ou a necessidade legítima de outra pessoa assim exigir.' },
+    { palavra: 'Nobreza', titulo: 'Nobreza', tipo: 'Virtude', descricao: 'Disposição para agir com dignidade, generosidade e elevação moral, inclusive diante de conflitos ou ofensas.' },
+    { palavra: 'Honradez', titulo: 'Honradez', tipo: 'Virtude', descricao: 'Qualidade de agir de maneira digna, correta e fiel aos princípios éticos, mesmo quando não há reconhecimento externo.' },
+    { palavra: 'Retidao', titulo: 'Retidão', tipo: 'Virtude', descricao: 'Firmeza em agir de acordo com princípios éticos e com aquilo que se reconhece como justo e correto.' },
+    { palavra: 'Imparcialidade', titulo: 'Imparcialidade', tipo: 'Virtude', descricao: 'Capacidade de avaliar pessoas e situações de maneira justa, evitando favorecer interesses ou preferências pessoais indevidamente.' },
+    { palavra: 'Equidade', titulo: 'Equidade', tipo: 'Virtude', descricao: 'Disposição para tratar cada pessoa de maneira justa, considerando suas circunstâncias e necessidades particulares.' },
+    { palavra: 'Confiabilidade', titulo: 'Confiabilidade', tipo: 'Virtude', descricao: 'Qualidade de quem inspira confiança por agir com responsabilidade, coerência e fidelidade aos compromissos assumidos.' },
+    { palavra: 'Pontualidade', titulo: 'Pontualidade', tipo: 'Virtude', descricao: 'Compromisso de respeitar horários e prazos, demonstrando consideração pelo próprio tempo e pelo tempo das outras pessoas.' },
+    { palavra: 'Diligencia', titulo: 'Diligência', tipo: 'Virtude', descricao: 'Disposição para realizar deveres e tarefas com atenção, empenho, responsabilidade e cuidado.' },
+    { palavra: 'Capricho', titulo: 'Capricho', tipo: 'Virtude', descricao: 'Disposição para realizar algo com atenção aos detalhes, cuidado e desejo de produzir um bom resultado.' },
+    { palavra: 'Ordem', titulo: 'Ordem', tipo: 'Virtude', descricao: 'Capacidade de organizar ações, recursos, ambientes e prioridades de maneira que favoreça clareza e equilíbrio.' },
+    { palavra: 'Moderacao', titulo: 'Moderação', tipo: 'Virtude', descricao: 'Capacidade de evitar excessos e buscar uma medida equilibrada nas escolhas, comportamentos e reações.' },
+    { palavra: 'Sobriedade', titulo: 'Sobriedade', tipo: 'Virtude', descricao: 'Capacidade de manter equilíbrio e lucidez diante de prazeres, emoções, desejos e circunstâncias favoráveis ou adversas.' },
+    { palavra: 'Cautela', titulo: 'Cautela', tipo: 'Virtude', descricao: 'Disposição para agir com atenção diante de riscos, evitando decisões precipitadas sem se deixar dominar pelo medo.' },
+    { palavra: 'Persistencia', titulo: 'Persistência', tipo: 'Virtude', descricao: 'Capacidade de continuar tentando e trabalhando por algo importante mesmo quando os resultados demoram a aparecer.' },
+    { palavra: 'Laboriosidade', titulo: 'Laboriosidade', tipo: 'Virtude', descricao: 'Disposição para o trabalho dedicado, produtivo e responsável, valorizando o esforço necessário para construir resultados.' },
+    { palavra: 'Reconhecimento', titulo: 'Reconhecimento', tipo: 'Sentimento', descricao: 'Experiência positiva de perceber e valorizar o mérito, a contribuição, o esforço ou a importância de alguém.' },
+    { palavra: 'Reverencia', titulo: 'Reverência', tipo: 'Sentimento', descricao: 'Sentimento profundo de respeito diante daquilo que se reconhece como digno, sagrado, grandioso ou especialmente valioso.' },
+    { palavra: 'Conexao', titulo: 'Conexão', tipo: 'Sentimento', descricao: 'Sensação de proximidade e vínculo significativo com outra pessoa, grupo, natureza, propósito ou experiência.' },
+    { palavra: 'Plenitude', titulo: 'Plenitude', tipo: 'Sentimento', descricao: 'Sensação profunda de inteireza e significado, na qual a pessoa percebe harmonia entre aquilo que vive, valoriza e realiza.' },
+    { palavra: 'Tranquilidade', titulo: 'Tranquilidade', tipo: 'Sentimento', descricao: 'Sensação de estabilidade emocional e ausência de agitação excessiva diante das circunstâncias.' },
+    { palavra: 'Conforto', titulo: 'Conforto', tipo: 'Sentimento', descricao: 'Sensação de bem-estar, proteção e acolhimento proporcionada por uma pessoa, ambiente, situação ou pensamento.' },
+    { palavra: 'Deleite', titulo: 'Deleite', tipo: 'Sentimento', descricao: 'Prazer sereno e profundo experimentado diante de algo belo, agradável ou significativo.' },
+    { palavra: 'Jubilo', titulo: 'Júbilo', tipo: 'Emoção', descricao: 'Alegria intensa e expansiva relacionada a uma conquista, celebração ou acontecimento de grande significado.' },
+    { palavra: 'Felicidade', titulo: 'Felicidade', tipo: 'Sentimento', descricao: 'Estado positivo de bem-estar e satisfação relacionado à percepção de sentido, vínculos, realizações e experiências valorizadas.' },
+    { palavra: 'Iniciativa', titulo: 'Iniciativa', tipo: 'Virtude', descricao: 'Disposição para agir espontaneamente diante de necessidades, oportunidades ou desafios, dando o primeiro passo com autonomia e responsabilidade, sem depender constantemente da orientação ou ação de outras pessoas. Disposição para colocar capacidades e recursos a serviço do bem das pessoas e da comunidade com responsabilidade e generosidade.' },
+    { palavra: 'Estima', titulo: 'Estima', tipo: 'Sentimento', descricao: 'Sentimento de consideração e valorização por alguém, baseado no reconhecimento de suas qualidades, caráter ou importância.' },
+    { palavra: 'Simpatia', titulo: 'Simpatia', tipo: 'Sentimento', descricao: 'Sentimento espontâneo de afinidade e receptividade que desperta agrado, proximidade e disposição positiva em relação a alguém.' },
+    { palavra: 'Carinho', titulo: 'Carinho', tipo: 'Sentimento', descricao: 'Manifestação afetuosa de cuidado, atenção e proximidade, expressa por palavras, gestos ou atitudes que demonstram consideração pelo outro.' },
+    { palavra: 'Bemquerer', titulo: 'Bem-querer', tipo: 'Sentimento', descricao: 'Sentimento sincero de desejar o bem, a felicidade e o desenvolvimento de outra pessoa, acompanhado de afeto e consideração.' },
+    { palavra: 'Apreco', titulo: 'Apreço', tipo: 'Sentimento', descricao: 'Sentimento de valorização e consideração por alguém ou por algo reconhecido como importante, significativo ou digno de respeito.' },
+    { palavra: 'Disposicao', titulo: 'Disposição', tipo: 'Virtude', descricao: 'Prontidão interior para agir, colaborar ou enfrentar uma tarefa ou situação com abertura, energia e boa vontade.' },
+    { palavra: 'Atencao', titulo: 'Atenção', tipo: 'Virtude', descricao: 'Capacidade de direcionar conscientemente a percepção e o interesse para uma pessoa, atividade ou situação, procurando compreender e responder de maneira cuidadosa.' },
+    { palavra: 'Motivacao', titulo: 'Motivação', tipo: 'Sentimento', descricao: 'Impulso interior que desperta, orienta e sustenta a vontade de agir em direção a uma necessidade, propósito ou objetivo.' },
+    { palavra: 'Empenho', titulo: 'Empenho', tipo: 'Virtude', descricao: 'Disposição para aplicar esforço, energia e persistência na realização de uma tarefa ou na conquista de um objetivo.' },
+    { palavra: 'Concentracao', titulo: 'Concentração', tipo: 'Virtude', descricao: 'Capacidade de manter a atenção direcionada a uma atividade, pensamento ou objetivo, reduzindo a influência de distrações.' },
+    { palavra: 'Foco', titulo: 'Foco', tipo: 'Virtude', descricao: 'Capacidade de direcionar e sustentar esforços, atenção e prioridades naquilo que é relevante para alcançar determinado propósito.' },
+    { palavra: 'Afinidade', titulo: 'Afinidade', tipo: 'Sentimento', descricao: 'Sensação de identificação, sintonia ou proximidade com alguém, ideia, atividade ou valor devido à existência de características ou interesses em comum.' },
+    { palavra: 'Animo', titulo: 'Ânimo', tipo: 'Sentimento', descricao: 'Estado interior de energia, coragem e disposição que favorece a ação e ajuda a enfrentar tarefas, desafios e experiências da vida.' },
   ];
 
   const SIZE = 13;
@@ -190,10 +284,23 @@ PCF.Pages = PCF.Pages || {};
     }
   };
 
-  const buildGameOnce = () => {
+  const getPreviousGameWords = (previousGame) => new Set((previousGame?.words || [])
+    .map(w => normalizeWord(w.word || w.palavra || w.titulo || ''))
+    .filter(Boolean));
+
+  const getGameCandidates = (previousGame) => {
+    const bank = getWordBank(true);
+    const previousWords = getPreviousGameWords(previousGame);
+    const fresh = bank.filter(entry => !previousWords.has(normalizeWord(entry.palavra || entry.titulo || '')));
+    return fresh.length >= WORDS_PER_GAME
+      ? fresh
+      : [...fresh, ...bank.filter(entry => previousWords.has(normalizeWord(entry.palavra || entry.titulo || '')))];
+  };
+
+  const buildGameOnce = (previousGame = null) => {
     const grid = Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => ''));
     const placed = [];
-    shuffle(getWordBank(true)).forEach(entry => {
+    shuffle(getGameCandidates(previousGame)).forEach(entry => {
       if (placed.length >= WORDS_PER_GAME) return;
       const item = placeWord(grid, entry);
       if (item) placed.push(item);
@@ -207,10 +314,10 @@ PCF.Pages = PCF.Pages || {};
     return { grid, words: placed, selected: null, message: 'Toque na primeira letra e depois na última letra da palavra.' };
   };
 
-  const buildGame = () => {
+  const buildGame = (previousGame = null) => {
     let fallback = null;
     for (let attempt = 0; attempt < 120; attempt++) {
-      const game = buildGameOnce();
+      const game = buildGameOnce(previousGame);
       if (!fallback || game.words.length > fallback.words.length) fallback = game;
       if (game.words.length === WORDS_PER_GAME && hasSingleOccurrencePerWord(game.grid, game.words)) return game;
     }
@@ -340,7 +447,7 @@ PCF.Pages = PCF.Pages || {};
       PCF.App.applyStandardHeader?.(container, '#caca-palavras');
 
       container.querySelector('#wg-new').onclick = () => {
-        game = buildGame();
+        game = buildGame(game);
         saveGame(game);
         render();
       };
@@ -371,7 +478,7 @@ PCF.Pages = PCF.Pages || {};
             const completed = game.words.every(w => w.found);
             showDefinition(found, completed ? () => {
               showCompletion(() => {
-                game = buildGame();
+                game = buildGame(game);
                 saveGame(game);
                 render();
               });
@@ -402,7 +509,7 @@ PCF.Pages = PCF.Pages || {};
         <div class="page word-base-page">
           <div class="page-header word-base-header">
             <div>
-              <h2><i data-lucide="database"></i> Base do Caça-Palavras</h2>
+              <h2><i data-lucide="database"></i> Base do Caça-Palavras <span class="title-count-badge">${all.length}</span></h2>
               <p class="subtitle">Gerencie as palavras, tipos e definições usadas no jogo.</p>
             </div>
             <div class="page-header-actions">
@@ -414,7 +521,7 @@ PCF.Pages = PCF.Pages || {};
 
           <div class="base-toolbar word-base-toolbar">
             <input type="search" id="wb-search" class="form-control" placeholder="Buscar palavra, tipo ou definição" value="${H.esc(filtro)}">
-            <span class="badge badge-neutral">${filtered.length} de ${all.length}</span>
+            <span class="badge badge-neutral">${filtered.length} exibida${filtered.length !== 1 ? 's' : ''}</span>
           </div>
 
           <div class="table-container word-base-table-wrap">

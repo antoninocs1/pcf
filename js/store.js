@@ -18,7 +18,7 @@ PCF.Store = (() => {
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
     'rodavida_reg', 'rodavida_config', 'plano_acao', 'saude_eventos',
     'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades',
-    'jogo_palavras_estado'
+    'jogo_palavras', 'jogo_palavras_estado'
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
