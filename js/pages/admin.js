@@ -39,7 +39,7 @@ PCF.Pages = PCF.Pages || {};
               </select>
             </div>
           </div>
-          <div class="table-container finance-data-table"><table class="table">
+          <div class="table-container finance-data-table finance-categories-table"><table class="table">
             <thead><tr><th>Tipo de operação</th><th>Categoria</th><th>Subcategorias</th><th style="width:120px">Ações</th></tr></thead>
             <tbody>${filtered.length === 0 ? '<tr><td colspan="4" class="empty-text">Nenhuma categoria</td></tr>' :
               filtered.map(c => `<tr>
@@ -379,7 +379,7 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>Gerenciar Usuários</h2>
+            <h2>Gerenciar Usuários <span class="title-count-badge">${users.length}</span></h2>
             <div class="contatos-search-wrap">
               <input type="text" id="usuarios-search" class="input-search" placeholder="Buscar por nome ou e-mail" value="${H.esc(_searchTerm)}">
               <button id="btn-usuarios-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>
@@ -1031,7 +1031,7 @@ PCF.Pages = PCF.Pages || {};
       container.innerHTML = `
         <div class="page">
           <div class="page-header">
-            <h2>Contatos Pessoais</h2>
+            <h2>Contatos Pessoais <span class="title-count-badge">${contatos.length}</span></h2>
             <div class="contatos-search-wrap">
               <input type="text" id="contatos-search" class="input-search" placeholder="Buscar por nome ou e-mail" value="${H.esc(_searchTerm)}">
               <button id="btn-contatos-search" class="btn btn-secondary" title="Buscar"><i data-lucide="search"></i></button>

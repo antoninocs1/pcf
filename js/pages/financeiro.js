@@ -79,6 +79,7 @@ PCF.Pages = PCF.Pages || {};
   PCF.Pages.dashboard = (container) => {
     const trans = S.getTransacoes();
     const anos = [...new Set(trans.map(t => t.ano))].sort();
+    const chartVisibility = { receitas: true, despesas: true, investimentos: true };
     container.innerHTML = `
       <div class="page">
         <div class="finance-sticky">
@@ -96,7 +97,17 @@ PCF.Pages = PCF.Pages || {};
         <div class="cards-grid" id="dash-cards"></div>
         <div class="charts-grid">
           <div class="chart-container"><h3>Despesas por Categoria</h3><canvas id="chart-pie-desp"></canvas></div>
-          <div class="chart-container"><h3>Receitas x Despesas por Mês</h3><canvas id="chart-bar-mes"></canvas></div>
+          <div class="chart-container">
+            <div class="chart-title-row">
+              <h3>Receitas x Despesas por Mês</h3>
+              <div class="chart-toggle-group" aria-label="Séries do gráfico mensal">
+                <label><input type="checkbox" id="dash-show-receitas" checked> Receitas</label>
+                <label><input type="checkbox" id="dash-show-despesas" checked> Despesas</label>
+                <label><input type="checkbox" id="dash-show-investimentos" checked> Investimentos</label>
+              </div>
+            </div>
+            <canvas id="chart-bar-mes"></canvas>
+          </div>
         </div>
       </div>`;
 
@@ -131,15 +142,16 @@ PCF.Pages = PCF.Pages || {};
       // gráfico barras por mês
       const porMes = H.agruparPorMes(f);
       if (porMes.length && document.getElementById('chart-bar-mes')) {
+        const datasets = [
+          chartVisibility.receitas ? { label: 'Receitas', data: porMes.map(m => m.receitas), backgroundColor: '#16a34a' } : null,
+          chartVisibility.despesas ? { label: 'Despesas', data: porMes.map(m => m.despesas), backgroundColor: '#dc2626' } : null,
+          chartVisibility.investimentos ? { label: 'Investimentos', data: porMes.map(m => m.investimentos), backgroundColor: '#2563eb' } : null,
+        ].filter(Boolean);
         reg(new Chart(document.getElementById('chart-bar-mes'), {
           type: 'bar',
           data: {
             labels: porMes.map(m => m.mes),
-            datasets: [
-              { label: 'Receitas', data: porMes.map(m => m.receitas), backgroundColor: '#16a34a' },
-              { label: 'Despesas', data: porMes.map(m => m.despesas), backgroundColor: '#dc2626' },
-              { label: 'Investimentos', data: porMes.map(m => m.investimentos), backgroundColor: '#2563eb' },
-            ],
+            datasets,
           },
           options: { responsive: true, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8', callback: v => 'R$' + (v/1000).toFixed(0) + 'k' } } }, plugins: { legend: { labels: { color: '#94a3b8' } }, datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, anchor: 'center', formatter: (val) => val > 0 ? H.formatarMoeda(val) : '', display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0 } } },
         }));
@@ -148,6 +160,16 @@ PCF.Pages = PCF.Pages || {};
 
     document.getElementById('dash-ano').onchange = refresh;
     document.getElementById('dash-mes').onchange = refresh;
+    [
+      ['dash-show-receitas', 'receitas'],
+      ['dash-show-despesas', 'despesas'],
+      ['dash-show-investimentos', 'investimentos'],
+    ].forEach(([id, key]) => {
+      document.getElementById(id).onchange = (e) => {
+        chartVisibility[key] = e.target.checked;
+        refresh();
+      };
+    });
     refresh();
   };
 
@@ -291,7 +313,8 @@ PCF.Pages = PCF.Pages || {};
             ${PCF.renderFinanceTabs('#base')}
             <div id="base-msg">${success ? `<div class="farol-banner farol-success"><span class="farol-icon">●</span><span class="farol-msg">${H.esc(success.message)}</span></div>` : ''}</div>
             <div class="finance-tab-controls page-actions">
-              <span class="badge" id="base-subtotal"></span>
+              <span class="badge finance-count-badge" id="base-count"></span>
+              <span class="badge finance-subtotal-badge" id="base-subtotal"></span>
               <button type="button" class="btn btn-primary" id="base-nova-transacao">
                 <i data-lucide="plus"></i> Nova transação financeira
               </button>
@@ -303,7 +326,7 @@ PCF.Pages = PCF.Pages || {};
               <select id="base-cat"><option value="">Todas as Categorias</option>${categorias.map(c => `<option value="${H.esc(c)}">${H.esc(c)}</option>`).join('')}</select>
             </div>
           </div>
-          <div class="table-container finance-data-table"><table class="table">
+          <div class="table-container finance-data-table finance-transactions-table"><table class="table">
             <thead><tr><th>Data</th><th class="col-hide-mobile">Dia</th><th class="col-hide-mobile">Mês</th><th class="col-hide-mobile">Ano</th><th>Tipo</th><th>Categoria</th><th class="col-hide-mobile">Subcategoria</th><th class="col-hide-mobile">Item</th><th>Valor</th><th class="col-hide-mobile">Forma de pagamento</th><th class="col-hide-mobile">Fixo/variável</th><th style="width:80px">Ações</th></tr></thead>
             <tbody id="base-tbody"></tbody>
           </table></div>
@@ -334,7 +357,10 @@ PCF.Pages = PCF.Pages || {};
             return a.data.localeCompare(b.data);
           });
         }
-        document.getElementById('base-subtotal').textContent = 'Subtotal: ' + H.formatarMoeda(f.reduce((s, t) => s + t.valor, 0));
+        const subtotal = f.reduce((s, t) => s + t.valor, 0);
+        const subtotalClass = subtotal < 0 ? 'negative' : subtotal > 0 ? 'positive' : '';
+        document.getElementById('base-count').textContent = 'Quant.: ' + f.length;
+        document.getElementById('base-subtotal').innerHTML = `Subtotal: <span class="subtotal-value ${subtotalClass}">${H.formatarMoeda(subtotal)}</span>`;
         document.getElementById('base-tbody').innerHTML = f.length === 0
           ? '<tr><td colspan="12" class="empty-text">Nenhuma transação encontrada</td></tr>'
           : f.map(t => `<tr class="${success?.transactionId === t.id ? 'highlight inserted-highlight' : ''}">
@@ -493,7 +519,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="chart-container"><h3>Receitas por Categoria</h3><canvas id="rel-pie-rec"></canvas><div id="rel-tab-rec" class="chart-table"></div></div>
           <div class="chart-container"><h3>Despesas por Categoria</h3><canvas id="rel-pie-desp"></canvas><div id="rel-tab-desp" class="chart-table"></div></div>
           <div class="chart-container"><h3>Top 10 Despesas por Subcategoria</h3><canvas id="rel-bar-sub"></canvas></div>
-          <div class="chart-container"><h3>Investimentos</h3><div id="rel-tab-inv" class="chart-table"></div></div>
+          <div class="chart-container"><h3>Investimentos</h3><canvas id="rel-pie-inv"></canvas><div id="rel-tab-inv" class="chart-table"></div></div>
           <div class="chart-container"><h3>Receitas por Mês</h3><canvas id="rel-bar-rec-mes"></canvas></div>
           <div class="chart-container"><h3>Despesas por Mês</h3><canvas id="rel-bar-desp-mes"></canvas></div>
         </div>
@@ -551,10 +577,24 @@ PCF.Pages = PCF.Pages || {};
       }
 
       // investimentos
-      const invCat = H.agruparPorCategoria(f, 'INVESTIMENTO');
-      const totalInv = invCat.reduce((s, d) => s + d.valor, 0);
-      document.getElementById('rel-tab-inv').innerHTML = invCat.map(i =>
-        `<div class="chart-table-row"><span>${H.esc(i.categoria)}</span><span>${H.formatarMoeda(i.valor)}</span></div>`
+      const invMap = {};
+      f.filter(t => t.tipoOperacao === 'INVESTIMENTO').forEach(t => {
+        const key = t.subcategoria ? `${t.categoria} - ${t.subcategoria}` : t.categoria;
+        invMap[key] = (invMap[key] || 0) + t.valor;
+      });
+      const invCatSub = Object.entries(invMap)
+        .map(([label, valor]) => ({ label, valor }))
+        .sort((a, b) => b.valor - a.valor);
+      const totalInv = invCatSub.reduce((s, d) => s + d.valor, 0);
+      if (invCatSub.length && document.getElementById('rel-pie-inv')) {
+        reg(new Chart(document.getElementById('rel-pie-inv'), {
+          type: 'doughnut',
+          data: { labels: invCatSub.map(i => i.label), datasets: [{ data: invCatSub.map(i => i.valor), backgroundColor: colors }] },
+          options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } }, tooltip: { callbacks: { label: (c) => `${c.label}: ${H.formatarMoeda(c.raw)}` } }, datalabels: { color: '#fff', font: { weight: 'bold', size: 12 }, formatter: (val, ctx) => { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); return total ? ((val / total) * 100).toFixed(1) + '%' : ''; }, display: (ctx) => { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); return total ? (ctx.dataset.data[ctx.dataIndex] / total) > 0.04 : false; } } } },
+        }));
+      }
+      document.getElementById('rel-tab-inv').innerHTML = invCatSub.map(i =>
+        `<div class="chart-table-row"><span>${H.esc(i.label)}</span><span>${H.formatarMoeda(i.valor)}</span></div>`
       ).join('') + (totalInv ? `<div class="chart-table-row total"><span>Total</span><span>${H.formatarMoeda(totalInv)}</span></div>` : '<div class="empty-text">Sem dados</div>');
 
       // receitas por mês

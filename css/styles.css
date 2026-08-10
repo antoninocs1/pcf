@@ -284,6 +284,34 @@ a:hover { text-decoration: underline; }
 }
 .chart-container canvas { max-width: 100%; }
 .chart-container h3 { font-size: 1rem; margin-bottom: 12px; color: var(--text-muted); }
+.chart-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.chart-title-row h3 { margin-bottom: 0; }
+.chart-toggle-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+.chart-toggle-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chart-toggle-group input {
+  accent-color: var(--accent);
+}
 .chart-table { margin-top: 12px; }
 .chart-table-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: .88rem; }
 .chart-table-row.total { font-weight: 700; border-top: 2px solid var(--border); color: var(--accent); }
@@ -448,6 +476,27 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   font-size: .82rem; font-weight: 600; background: var(--bg-card);
   border: 1px solid var(--border); color: var(--accent);
 }
+.title-count-badge,
+.finance-count-badge {
+  background: #fff;
+  border-color: #dbe3ef;
+  color: var(--accent);
+}
+.title-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  min-height: 24px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: middle;
+}
+.finance-subtotal-badge .subtotal-value.negative { color: var(--danger); }
+.finance-subtotal-badge .subtotal-value.positive { color: var(--success); }
 
 /* ==================== CHIPS ==================== */
 .chip {
@@ -1822,10 +1871,12 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
 }
 .finance-header-button { display: none; }
 .finance-data-table {
-  max-height: calc(100dvh - 290px);
+  max-height: calc(100dvh - 240px);
   overflow: auto;
   border-radius: var(--radius);
 }
+.finance-transactions-table { max-height: calc(100dvh - 255px); }
+.finance-categories-table { max-height: calc(100dvh - 210px); }
 .finance-data-table .table thead th {
   position: sticky;
   top: 0;
@@ -1961,7 +2012,9 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   }
   body.route-finance .finance-sticky .page-header h2,
   .app-sticky .page-header h2 { font-size: 1.2rem; }
-  .finance-data-table { max-height: calc(100dvh - 330px); }
+  .finance-data-table { max-height: calc(100dvh - 270px); }
+  .finance-transactions-table { max-height: calc(100dvh - 285px); }
+  .finance-categories-table { max-height: calc(100dvh - 230px); }
   .diario-tab {
     flex: 0 0 auto; padding: 10px 14px; font-size: .82rem;
     scroll-snap-align: start; min-height: 44px;

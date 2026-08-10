@@ -372,7 +372,26 @@ PCF.Store = (() => {
 
   /* ---------- CATEGORIAS ---------- */
   const _ckU = () => `pcf_categorias_${currentUserId()}`;
-  const _normalizarCategoriaConfig = (c) => ({ ...c, categoria: _normalizarCategoriaFinanceira(c?.categoria) });
+  const _normalizarCategoriaConfig = (c) => {
+    const normalizada = { ...c, categoria: _normalizarCategoriaFinanceira(c?.categoria) };
+    if (normalizada.tipoOperacao === 'INVESTIMENTO' && normalizada.categoria === 'Investimentos') {
+      const subcategorias = normalizada.subcategorias || [];
+      const temAcoes = subcategorias.some(s => (typeof s === 'string' ? s : s?.nome) === 'Ações');
+      const comAcoes = temAcoes ? subcategorias : [...subcategorias, { nome: 'Ações', tipo: 'Variável' }];
+      const ordemFinal = ['Ações', 'Poupança', 'Outros'];
+      normalizada.subcategorias = [...comAcoes].sort((a, b) => {
+        const nomeA = typeof a === 'string' ? a : a?.nome;
+        const nomeB = typeof b === 'string' ? b : b?.nome;
+        const idxA = ordemFinal.indexOf(nomeA);
+        const idxB = ordemFinal.indexOf(nomeB);
+        if (idxA >= 0 && idxB >= 0) return idxA - idxB;
+        if (idxA >= 0) return 1;
+        if (idxB >= 0) return -1;
+        return 0;
+      });
+    }
+    return normalizada;
+  };
   const getCategorias = () => {
     const raw = _get(_ckU()) || [];
     const normalizadas = raw.map(_normalizarCategoriaConfig);
@@ -687,6 +706,7 @@ PCF.Store = (() => {
         { nome: 'Aposentadoria / Previdência Oficial (INSS)', tipo: 'Fixo' },
         { nome: 'Previdência Privada', tipo: 'Fixo' },
         { nome: 'Aplicação em fundos / CDB', tipo: 'Variável' },
+        { nome: 'Ações', tipo: 'Variável' },
         { nome: 'Poupança', tipo: 'Variável' },
         { nome: 'Outros', tipo: 'Variável' },
       ] },

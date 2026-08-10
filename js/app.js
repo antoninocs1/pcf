@@ -1038,8 +1038,9 @@ PCF.App = (() => {
     title.removeAttribute('style');
     const titleBreak = title.nextSibling;
     if (titleBreak && titleBreak.nodeName === 'BR') titleBreak.remove();
+    const existingTitleCount = title.querySelector('.title-count-badge')?.outerHTML || '';
     if (routeItem?.icon) {
-      title.innerHTML = `<i data-lucide="${routeItem.icon}"></i> ${H.esc(routeItem.label)}`;
+      title.innerHTML = `<i data-lucide="${routeItem.icon}"></i> ${H.esc(routeItem.label)}${existingTitleCount ? ' ' + existingTitleCount : ''}`;
     }
     const headerSubtitles = [...header.querySelectorAll('.subtitle')];
     const preControlBlocks = [];

@@ -131,7 +131,66 @@ PCF.Pages = PCF.Pages || {};
     return null;
   };
 
-  const buildGame = () => {
+  const getLineCells = (row, col, dir, length) => {
+    const cells = [];
+    for (let i = 0; i < length; i++) {
+      const r = row + dir.dr * i;
+      const c = col + dir.dc * i;
+      if (r < 0 || c < 0 || r >= SIZE || c >= SIZE) return null;
+      cells.push(`${r}-${c}`);
+    }
+    return cells;
+  };
+
+  const countWordOccurrences = (grid, word) => {
+    const normalized = normalizeWord(word);
+    if (!normalized) return [];
+    const found = [];
+    const seen = new Set();
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        DIRECTIONS.forEach(dir => {
+          const cells = getLineCells(r, c, dir, normalized.length);
+          if (!cells) return;
+          const letters = cells.map(key => {
+            const [rr, cc] = key.split('-').map(Number);
+            return grid[rr]?.[cc] || '';
+          }).join('');
+          if (letters !== normalized) return;
+          const key = cells.join('|');
+          const reverseKey = [...cells].reverse().join('|');
+          const canonical = key < reverseKey ? key : reverseKey;
+          if (!seen.has(canonical)) {
+            seen.add(canonical);
+            found.push(cells);
+          }
+        });
+      }
+    }
+    return found;
+  };
+
+  const hasSingleOccurrencePerWord = (grid, words) =>
+    words.every(w => countWordOccurrences(grid, w.word || w.palavra).length === 1);
+
+  const repairExtraOccurrences = (grid, words) => {
+    const protectedCells = new Set(words.flatMap(w => w.cells || []));
+    for (let attempt = 0; attempt < 800 && !hasSingleOccurrencePerWord(grid, words); attempt++) {
+      const word = words.find(w => countWordOccurrences(grid, w.word || w.palavra).length > 1);
+      if (!word) return;
+      const official = (word.cells || []).join('|');
+      const extra = countWordOccurrences(grid, word.word || word.palavra)
+        .find(cells => cells.join('|') !== official && [...cells].reverse().join('|') !== official);
+      const editable = extra?.find(cell => !protectedCells.has(cell));
+      if (!editable) continue;
+      const [r, c] = editable.split('-').map(Number);
+      let next = grid[r][c];
+      for (let tries = 0; tries < 12 && next === grid[r][c]; tries++) next = randomLetter();
+      grid[r][c] = next;
+    }
+  };
+
+  const buildGameOnce = () => {
     const grid = Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => ''));
     const placed = [];
     shuffle(getWordBank(true)).forEach(entry => {
@@ -144,7 +203,18 @@ PCF.Pages = PCF.Pages || {};
         if (!grid[r][c]) grid[r][c] = randomLetter();
       }
     }
+    repairExtraOccurrences(grid, placed);
     return { grid, words: placed, selected: null, message: 'Toque na primeira letra e depois na última letra da palavra.' };
+  };
+
+  const buildGame = () => {
+    let fallback = null;
+    for (let attempt = 0; attempt < 120; attempt++) {
+      const game = buildGameOnce();
+      if (!fallback || game.words.length > fallback.words.length) fallback = game;
+      if (game.words.length === WORDS_PER_GAME && hasSingleOccurrencePerWord(game.grid, game.words)) return game;
+    }
+    return fallback;
   };
 
   const isValidGame = (game) => {
@@ -152,7 +222,7 @@ PCF.Pages = PCF.Pages || {};
     if (game.grid.length !== SIZE || game.grid.some(row => !Array.isArray(row) || row.length !== SIZE)) return false;
     return game.words.length > 0 && game.words.every(w =>
       w && Array.isArray(w.cells) && w.cells.length && typeof w.word === 'string' && typeof w.titulo === 'string'
-    );
+    ) && hasSingleOccurrencePerWord(game.grid, game.words);
   };
 
   const loadSavedGame = () => {
