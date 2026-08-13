@@ -364,6 +364,190 @@ PCF.Pages = PCF.Pages || {};
     render();
   };
 
+  /* ==================== MEDICAMENTOS / POSOLOGIA ==================== */
+  PCF.Pages.saudeMedicamentos = (container) => {
+    const STATUS = ['Em uso', 'Pausado', 'Finalizado'];
+    const STATUS_COLORS = { 'Em uso': '#16a34a', 'Pausado': '#f59e0b', 'Finalizado': '#64748b' };
+    const FREQUENCIAS = ['Uso continuo', 'Diario', 'A cada 6 horas', 'A cada 8 horas', 'A cada 12 horas', 'Semanal', 'Conforme necessidade', 'Outro'];
+    let editingId = null;
+
+    const render = () => {
+      const medicamentos = (S.getSaudeMedicamentos ? S.getSaudeMedicamentos() : [])
+        .sort((a, b) => (a.status || '').localeCompare(b.status || '') || (a.nome || '').localeCompare(b.nome || ''));
+      const contatos = S.getContatos ? S.getContatos() : [];
+      const contatoMap = Object.fromEntries(contatos.map(c => [c.id, c]));
+      const responsavelNome = (med) => med.responsavelContatoId
+        ? (contatoMap[med.responsavelContatoId]?.nome || 'Contato removido')
+        : 'Propria pessoa';
+      const emUso = medicamentos.filter(m => m.status === 'Em uso').length;
+      const pausados = medicamentos.filter(m => m.status === 'Pausado').length;
+      const naAgenda = medicamentos.filter(m => m.agendaAtivo && m.dataInicio).length;
+
+      container.innerHTML = `
+        <div class="page saude-page">
+          <div class="page-header">
+            <div>
+              <h2>Saude - Medicamentos e Posologia</h2>
+              <p class="subtitle">Registre medicamentos, doses, horarios, periodo de uso e lembretes vinculados a Agenda.</p>
+            </div>
+          </div>
+
+          <div class="cards-grid">
+            <div class="card"><div class="card-label">Em uso</div><div class="card-value">${emUso}</div></div>
+            <div class="card"><div class="card-label">Pausados</div><div class="card-value">${pausados}</div></div>
+            <div class="card"><div class="card-label">Na Agenda</div><div class="card-value">${naAgenda}</div></div>
+          </div>
+
+          <div class="card plano-acao-card">
+            <h3 id="sm-form-title">Novo medicamento</h3>
+            <form id="saude-medicamento-form" class="plano-acao-form">
+              <div class="form-group"><label>Medicamento</label><input type="text" id="sm-nome" placeholder="Ex: Losartana, vitamina D, antibiotico" required></div>
+              <div class="form-group"><label>Dose</label><input type="text" id="sm-dose" placeholder="Ex: 50 mg, 1 comprimido, 20 gotas" required></div>
+              <div class="form-group">
+                <label>Frequencia</label>
+                <select id="sm-frequencia">${FREQUENCIAS.map(f => `<option value="${H.esc(f)}">${H.esc(f)}</option>`).join('')}</select>
+              </div>
+              <div class="form-group"><label>Horarios</label><input type="text" id="sm-horarios" placeholder="Ex: 08:00 e 20:00; apos almoco"></div>
+              <div class="form-group">
+                <label>Para quem?</label>
+                <select id="sm-responsavel">
+                  <option value="">Propria pessoa</option>
+                  ${contatos.map(c => `<option value="${H.esc(c.id)}">${H.esc(c.nome)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="sm-status">${STATUS.map(s => `<option value="${s}">${s}</option>`).join('')}</select>
+              </div>
+              <fieldset class="plano-acao-when plano-acao-form-span-2">
+                <legend>Periodo de uso</legend>
+                <div class="plano-acao-when-fields">
+                  <div class="form-group"><label>Inicio</label><input type="date" id="sm-inicio" value="${H.hoje()}"></div>
+                  <div class="form-group"><label>Fim previsto</label><input type="date" id="sm-fim"></div>
+                </div>
+              </fieldset>
+              <div class="form-group plano-acao-form-span-2">
+                <label>Posologia / Orientacoes</label>
+                <textarea id="sm-posologia" rows="3" placeholder="Ex: tomar com alimento, evitar leite, completar 7 dias, observacoes do medico"></textarea>
+              </div>
+              <div class="form-group plano-acao-checkbox-group plano-acao-form-span-2">
+                <label class="plano-acao-checkbox">
+                  <input type="checkbox" id="sm-agenda-ativo" checked>
+                  <span>Vincular na Agenda e gerar lembrete</span>
+                </label>
+              </div>
+              <div class="form-group plano-acao-form-actions plano-acao-form-span-2">
+                <button type="submit" class="btn btn-primary" id="sm-submit">Salvar medicamento</button>
+                <button type="button" class="btn btn-secondary" id="sm-cancel" style="display:none">Cancelar edicao</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card plano-acao-card plano-acao-table-card">
+            <h3>Medicamentos (${medicamentos.length})</h3>
+            ${medicamentos.length === 0 ? '<p class="empty-text">Nenhum medicamento registrado.</p>' : `
+              <div class="table-container">
+                <table class="table">
+                  <thead><tr><th>Medicamento</th><th>Dose</th><th>Frequencia</th><th>Para quem</th><th>Periodo</th><th>Status</th><th>Agenda</th><th style="width:104px">Acoes</th></tr></thead>
+                  <tbody>${medicamentos.map(m => `
+                    <tr>
+                      <td><strong>${H.esc(m.nome || '')}</strong>${m.posologia ? `<br><small>${H.esc(m.posologia)}</small>` : ''}</td>
+                      <td>${H.esc(m.dose || '')}</td>
+                      <td>${H.esc(m.frequencia || '')}${m.horarios ? `<br><small>${H.esc(m.horarios)}</small>` : ''}</td>
+                      <td>${H.esc(responsavelNome(m))}</td>
+                      <td>${m.dataInicio ? H.formatarData(m.dataInicio) : '-'}${m.dataFim ? '<br><small>ate ' + H.formatarData(m.dataFim) + '</small>' : ''}</td>
+                      <td><span class="status-badge" style="background:${STATUS_COLORS[m.status] || '#6b7280'}">${H.esc(m.status || 'Em uso')}</span></td>
+                      <td>${m.agendaAtivo ? '<span class="badge badge-info">Sim</span>' : '<span class="badge badge-neutral">Nao</span>'}</td>
+                      <td class="actions-cell">
+                        ${m.status !== 'Finalizado' ? `<button class="btn-icon" data-finish-sm="${m.id}" title="Marcar como finalizado"><i data-lucide="check"></i></button>` : ''}
+                        <button class="btn-icon" data-edit-sm="${m.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                        <button class="btn-icon btn-danger" data-del-sm="${m.id}" title="Remover"><i data-lucide="trash-2"></i></button>
+                      </td>
+                    </tr>`).join('')}</tbody>
+                </table>
+              </div>`}
+          </div>
+        </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#saude-medicamentos');
+
+      const resetForm = () => {
+        editingId = null;
+        document.getElementById('sm-form-title').textContent = 'Novo medicamento';
+        document.getElementById('sm-submit').textContent = 'Salvar medicamento';
+        document.getElementById('sm-cancel').style.display = 'none';
+        document.getElementById('saude-medicamento-form').reset();
+        document.getElementById('sm-inicio').value = H.hoje();
+        document.getElementById('sm-agenda-ativo').checked = true;
+        syncFimMin();
+      };
+
+      const syncFimMin = () => {
+        const inicio = document.getElementById('sm-inicio').value;
+        const fimEl = document.getElementById('sm-fim');
+        fimEl.min = inicio || '';
+        if (inicio && fimEl.value && fimEl.value < inicio) fimEl.value = '';
+      };
+
+      document.getElementById('sm-cancel').onclick = resetForm;
+      document.getElementById('sm-inicio').onchange = syncFimMin;
+      syncFimMin();
+      document.getElementById('saude-medicamento-form').onsubmit = (e) => {
+        e.preventDefault();
+        const data = {
+          nome: document.getElementById('sm-nome').value.trim(),
+          dose: document.getElementById('sm-dose').value.trim(),
+          frequencia: document.getElementById('sm-frequencia').value,
+          horarios: document.getElementById('sm-horarios').value.trim(),
+          responsavelContatoId: document.getElementById('sm-responsavel').value,
+          status: document.getElementById('sm-status').value,
+          dataInicio: document.getElementById('sm-inicio').value,
+          dataFim: document.getElementById('sm-fim').value,
+          posologia: document.getElementById('sm-posologia').value.trim(),
+          agendaAtivo: document.getElementById('sm-agenda-ativo').checked,
+        };
+        if (!data.nome || !data.dose) { alert('Informe medicamento e dose.'); return; }
+        if (data.agendaAtivo && !data.dataInicio) { alert('Para vincular na Agenda, informe a data de inicio.'); return; }
+        if (data.dataInicio && data.dataFim && data.dataFim < data.dataInicio) { alert('O fim previsto nao pode ser anterior ao inicio.'); return; }
+        if (editingId) S.updateSaudeMedicamento(editingId, data);
+        else S.addSaudeMedicamento(data);
+        render();
+      };
+
+      container.querySelector('.plano-acao-table-card')?.addEventListener('click', (e) => {
+        const finishBtn = e.target.closest('[data-finish-sm]');
+        if (finishBtn) { S.updateSaudeMedicamento(finishBtn.dataset.finishSm, { status: 'Finalizado' }); render(); return; }
+        const editBtn = e.target.closest('[data-edit-sm]');
+        if (editBtn) {
+          const item = medicamentos.find(m => m.id === editBtn.dataset.editSm);
+          if (!item) return;
+          editingId = item.id;
+          document.getElementById('sm-form-title').textContent = 'Editando medicamento';
+          document.getElementById('sm-submit').textContent = 'Salvar alteracoes';
+          document.getElementById('sm-cancel').style.display = '';
+          document.getElementById('sm-nome').value = item.nome || '';
+          document.getElementById('sm-dose').value = item.dose || '';
+          document.getElementById('sm-frequencia').value = item.frequencia || FREQUENCIAS[0];
+          document.getElementById('sm-horarios').value = item.horarios || '';
+          document.getElementById('sm-responsavel').value = item.responsavelContatoId || '';
+          document.getElementById('sm-status').value = item.status || 'Em uso';
+          document.getElementById('sm-inicio').value = item.dataInicio || '';
+          document.getElementById('sm-fim').value = item.dataFim || '';
+          document.getElementById('sm-posologia').value = item.posologia || '';
+          document.getElementById('sm-agenda-ativo').checked = !!item.agendaAtivo;
+          syncFimMin();
+          document.getElementById('saude-medicamento-form').scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+        const delBtn = e.target.closest('[data-del-sm]');
+        if (delBtn && confirm('Remover este medicamento?')) { S.deleteSaudeMedicamento(delBtn.dataset.delSm); render(); }
+      });
+    };
+
+    render();
+  };
+
   /* ==================== EMOÇÕES (REGISTRO) ==================== */
 
   const EMOCAO_ICONS = {

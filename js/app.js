@@ -852,6 +852,7 @@ PCF.App = (() => {
       id: 'saude', label: 'Saúde', icon: 'heart-pulse',
       items: [
         { hash: '#saude-consultas', icon: 'clipboard-plus', label: 'Consultas e Exames' },
+        { hash: '#saude-medicamentos', icon: 'pill', label: 'Medicamentos / Posologia' },
         { hash: '#imc', icon: 'heart', label: 'IMC' },
       ]
     },
@@ -906,6 +907,7 @@ PCF.App = (() => {
     '#agenda': { label: 'Agenda', grupo: 'Agenda' },
     '#imc': { label: 'IMC', grupo: 'Saúde' },
     '#saude-consultas': { label: 'Consultas e Exames', grupo: 'Saúde' },
+    '#saude-medicamentos': { label: 'Medicamentos / Posologia', grupo: 'Saúde' },
     '#contatos': { label: 'Contatos Pessoais', grupo: 'Contatos' },
     '#linha-tempo': { label: 'Linha do Tempo', grupo: 'Linha do Tempo' },
     '#usuarios': { label: 'Configuração de usuários', grupo: 'Administração' },
@@ -1362,6 +1364,7 @@ PCF.App = (() => {
       '#ciclo': pages.ciclo,
       '#imc': pages.imc,
       '#saude-consultas': pages.saudeConsultas,
+      '#saude-medicamentos': pages.saudeMedicamentos,
       '#emocoes': pages.emocoes,
       '#emocoes-relatorios': pages.emocoesRelatorios,
       '#agenda': pages.agenda,
