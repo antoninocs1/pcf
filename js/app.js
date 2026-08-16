@@ -1586,13 +1586,26 @@ PCF.App = (() => {
       const adiadoAte = new Date(med.adiadoAte);
       if (!Number.isNaN(adiadoAte.getTime()) && adiadoAte > agora) return [];
     }
+
     const hoje = agora.toISOString().split('T')[0];
     if (med.dataInicio > hoje) return [];
     if (med.dataFim && med.dataFim < hoje) return [];
-    return extrairHorariosMedicamento(med)
+
+    const ultimaDoseNotificada = (() => {
+      if (!med.ultimoAvisoChave) return null;
+      const partes = String(med.ultimoAvisoChave).split('|');
+      if (partes.length < 3) return null;
+      const [, data, hora] = partes;
+      if (!data || !hora) return null;
+      const dt = new Date(`${data}T${hora}:00`);
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    })();
+
+    const doses = extrairHorariosMedicamento(med)
       .map(hora => {
         const doseDateTime = new Date(`${hoje}T${hora}:00`);
         if (Number.isNaN(doseDateTime.getTime()) || doseDateTime > agora) return null;
+        if (ultimaDoseNotificada && doseDateTime <= ultimaDoseNotificada) return null;
         return {
           med,
           data: hoje,
@@ -1603,6 +1616,10 @@ PCF.App = (() => {
         };
       })
       .filter(Boolean);
+
+    if (doses.length === 0) return [];
+
+    return doses.sort((a, b) => b.sort - a.sort).slice(0, 1);
   };
 
   const markMedicamentoAlertShown = (dose) => {
@@ -1660,8 +1677,11 @@ PCF.App = (() => {
     }
   };
 
+  const hasActiveGlobalAlert = () => !!document.querySelector('.compromisso-modal');
+
   const checkGlobalAlerts = () => {
     if (!S.getSession()) return;
+    if (hasActiveGlobalAlert()) return;
     
     try {
       const compromissos = S.getCompromissos();
@@ -1733,6 +1753,8 @@ PCF.App = (() => {
   };
 
   const showCompromissoModalGlobal = (compromisso, tipo) => {
+    if (hasActiveGlobalAlert()) return;
+
     // Remove modais existentes
     const existingModals = document.querySelectorAll('.compromisso-modal');
     existingModals.forEach(modal => modal.remove());
@@ -1779,6 +1801,8 @@ PCF.App = (() => {
   };
 
   const showPlanoAcaoModalGlobal = (acao, tipo) => {
+    if (hasActiveGlobalAlert()) return;
+
     const existingModals = document.querySelectorAll('.compromisso-modal');
     existingModals.forEach(modal => modal.remove());
 
@@ -1821,6 +1845,8 @@ PCF.App = (() => {
   };
 
   const showSaudeEventoModalGlobal = (evento, tipo) => {
+    if (hasActiveGlobalAlert()) return;
+
     const existingModals = document.querySelectorAll('.compromisso-modal');
     existingModals.forEach(modal => modal.remove());
 
@@ -1862,6 +1888,8 @@ PCF.App = (() => {
   };
 
   const showMedicamentoModalGlobal = (dose) => {
+    if (hasActiveGlobalAlert()) return;
+
     const existingModals = document.querySelectorAll('.compromisso-modal');
     existingModals.forEach(modal => modal.remove());
 
@@ -1892,13 +1920,14 @@ PCF.App = (() => {
     playCompromissoAlertSound();
 
     document.getElementById('medicamento-ok').onclick = () => {
+      S.updateSaudeMedicamento(med.id, { ultimoAvisoChave: dose.chave, adiadoAte: null });
       overlay.remove();
       setTimeout(checkGlobalAlerts, 200);
     };
     document.getElementById('medicamento-adiar').onclick = () => {
       S.updateSaudeMedicamento(med.id, { ultimoAvisoChave: null, adiadoAte: new Date(Date.now() + 10 * 60 * 1000).toISOString() });
       overlay.remove();
-      setTimeout(checkGlobalAlerts, 10 * 60 * 1000);
+      setTimeout(checkGlobalAlerts, 200);
     };
     overlay.onclick = (e) => {
       if (e.target === overlay) overlay.remove();
