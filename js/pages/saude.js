@@ -371,6 +371,8 @@ PCF.Pages = PCF.Pages || {};
     const FREQUENCIAS = ['Uso continuo', 'Diario', 'A cada 6 horas', 'A cada 8 horas', 'A cada 12 horas', 'Semanal', 'Conforme necessidade', 'Outro'];
     let editingId = null;
 
+    const extrairHorarios = (texto) => H.extrairHorarios ? H.extrairHorarios(texto) : [];
+
     const render = () => {
       const medicamentos = (S.getSaudeMedicamentos ? S.getSaudeMedicamentos() : [])
         .sort((a, b) => (a.status || '').localeCompare(b.status || '') || (a.nome || '').localeCompare(b.nome || ''));
@@ -404,10 +406,14 @@ PCF.Pages = PCF.Pages || {};
               <div class="form-group"><label>Medicamento</label><input type="text" id="sm-nome" placeholder="Ex: Losartana, vitamina D, antibiotico" required></div>
               <div class="form-group"><label>Dose</label><input type="text" id="sm-dose" placeholder="Ex: 50 mg, 1 comprimido, 20 gotas" required></div>
               <div class="form-group">
-                <label>Frequencia</label>
+                <label>Frequência</label>
                 <select id="sm-frequencia">${FREQUENCIAS.map(f => `<option value="${H.esc(f)}">${H.esc(f)}</option>`).join('')}</select>
               </div>
-              <div class="form-group"><label>Horarios</label><input type="text" id="sm-horarios" placeholder="Ex: 08:00 e 20:00; apos almoco"></div>
+              <div class="form-group">
+                <label>Horários</label>
+                <input type="text" id="sm-horarios" placeholder="Ex: 08:00, 13:00, 1 PM, 8h30">
+                <small class="form-hint">Use 24h para evitar dúvidas: 13:00 é tarde, 01:00 é madrugada. Também aceita AM/PM.</small>
+              </div>
               <div class="form-group">
                 <label>Para quem?</label>
                 <select id="sm-responsavel">
@@ -420,15 +426,15 @@ PCF.Pages = PCF.Pages || {};
                 <select id="sm-status">${STATUS.map(s => `<option value="${s}">${s}</option>`).join('')}</select>
               </div>
               <fieldset class="plano-acao-when plano-acao-form-span-2">
-                <legend>Periodo de uso</legend>
+                <legend>Período de uso</legend>
                 <div class="plano-acao-when-fields">
                   <div class="form-group"><label>Inicio</label><input type="date" id="sm-inicio" value="${H.hoje()}"></div>
                   <div class="form-group"><label>Fim previsto</label><input type="date" id="sm-fim"></div>
                 </div>
               </fieldset>
               <div class="form-group plano-acao-form-span-2">
-                <label>Posologia / Orientacoes</label>
-                <textarea id="sm-posologia" rows="3" placeholder="Ex: tomar com alimento, evitar leite, completar 7 dias, observacoes do medico"></textarea>
+                <label>Posologia / Orientações</label>
+                <textarea id="sm-posologia" rows="3" placeholder="Ex: tomar com alimento, evitar leite, completar 7 dias, observações do médico"></textarea>
               </div>
               <div class="form-group plano-acao-checkbox-group plano-acao-form-span-2">
                 <label class="plano-acao-checkbox">
@@ -453,7 +459,7 @@ PCF.Pages = PCF.Pages || {};
                     <tr>
                       <td><strong>${H.esc(m.nome || '')}</strong>${m.posologia ? `<br><small>${H.esc(m.posologia)}</small>` : ''}</td>
                       <td>${H.esc(m.dose || '')}</td>
-                      <td>${H.esc(m.frequencia || '')}${m.horarios ? `<br><small>${H.esc(m.horarios)}</small>` : ''}</td>
+                      <td>${H.esc(m.frequencia || '')}${m.horarios ? `<br><small>${H.esc(m.horarios)}</small>` : ''}${m.horariosParsed?.length ? `<br><small>${m.horariosParsed.join(', ')}</small>` : ''}</td>
                       <td>${H.esc(responsavelNome(m))}</td>
                       <td>${m.dataInicio ? H.formatarData(m.dataInicio) : '-'}${m.dataFim ? '<br><small>ate ' + H.formatarData(m.dataFim) + '</small>' : ''}</td>
                       <td><span class="status-badge" style="background:${STATUS_COLORS[m.status] || '#6b7280'}">${H.esc(m.status || 'Em uso')}</span></td>
@@ -507,8 +513,10 @@ PCF.Pages = PCF.Pages || {};
           posologia: document.getElementById('sm-posologia').value.trim(),
           agendaAtivo: document.getElementById('sm-agenda-ativo').checked,
         };
+        data.horariosParsed = extrairHorarios(data.horarios);
         if (!data.nome || !data.dose) { alert('Informe medicamento e dose.'); return; }
         if (data.agendaAtivo && !data.dataInicio) { alert('Para vincular na Agenda, informe a data de inicio.'); return; }
+        if (data.agendaAtivo && !data.horariosParsed.length) { alert('Para avisar por horário, informe pelo menos um horário válido, como 08:00, 13:00 ou 1 PM.'); return; }
         if (data.dataInicio && data.dataFim && data.dataFim < data.dataInicio) { alert('O fim previsto nao pode ser anterior ao inicio.'); return; }
         if (editingId) S.updateSaudeMedicamento(editingId, data);
         else S.addSaudeMedicamento(data);

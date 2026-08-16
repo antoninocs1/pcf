@@ -243,6 +243,24 @@ PCF.Helpers = (() => {
     return s;
   };
 
+  const normalizarHora = (raw) => {
+    const s = String(raw || '').trim().toLowerCase();
+    const m = s.match(/^([01]?\d|2[0-3])(?:\s*(?::|h|\.)\s*([0-5]\d))?\s*([ap]\.?\s*m\.?|am|pm)?$/i);
+    if (!m) return '';
+    let hora = parseInt(m[1], 10);
+    const minuto = m[2] || '00';
+    const periodo = (m[3] || '').replace(/[\s.]/g, '').toLowerCase();
+    if (periodo === 'pm' && hora < 12) hora += 12;
+    if (periodo === 'am' && hora === 12) hora = 0;
+    if (hora > 23) return '';
+    return `${String(hora).padStart(2, '0')}:${minuto}`;
+  };
+
+  const extrairHorarios = (texto) => {
+    const matches = String(texto || '').match(/\b(?:[01]?\d|2[0-3])(?:\s*(?::|h|\.)\s*[0-5]\d)?\s*(?:[ap]\.?\s*m\.?|am|pm)?\b/gi) || [];
+    return [...new Set(matches.map(normalizarHora).filter(Boolean))].sort();
+  };
+
   /* ---- Leitura de arquivo com fallback de encoding ---- */
   const readFileAutoEncoding = (file, callback) => {
     const reader = new FileReader();
@@ -314,7 +332,7 @@ PCF.Helpers = (() => {
     formatarMoeda, formatarData, extrairInfoData, hoje, horaAtual,
     hashSenha, formatarCPF, formatarTelefone,
     calcularResumo, agruparPorCategoria, agruparPorMes, calcularIMC, IMC_CLASS,
-    toCSV, parseCSV, downloadCSV, parseValorBR, parseDateBR, readFileAutoEncoding, esc,
+    toCSV, parseCSV, downloadCSV, parseValorBR, parseDateBR, normalizarHora, extrairHorarios, readFileAutoEncoding, esc,
     makeTableResizable, initResizableTables,
   };
 })();

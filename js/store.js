@@ -594,6 +594,7 @@ PCF.Store = (() => {
       dataCadastro: new Date().toISOString().split('T')[0],
       status: 'Pendente',
       agendaAtivo: false,
+      ultimoAvisoChave: null,
       ...evento,
     };
     const all = getSaudeEventos();
@@ -605,7 +606,15 @@ PCF.Store = (() => {
     const all = getSaudeEventos();
     const i = all.findIndex(e => e.id === id);
     if (i >= 0) {
+      const anterior = all[i];
       all[i] = { ...all[i], ...data };
+      const mudouAgenda =
+        anterior.agendaAtivo !== all[i].agendaAtivo ||
+        anterior.data !== all[i].data ||
+        anterior.hora !== all[i].hora;
+      const virouPendente = anterior.status !== 'Pendente' && all[i].status === 'Pendente';
+      if (mudouAgenda || virouPendente) all[i].ultimoAvisoChave = null;
+      if (all[i].status !== 'Pendente' || !all[i].agendaAtivo) all[i].ultimoAvisoChave = null;
       saveSaudeEventos(all);
     }
     return all;
@@ -629,6 +638,7 @@ PCF.Store = (() => {
       dataCadastro: new Date().toISOString().split('T')[0],
       status: 'Em uso',
       agendaAtivo: false,
+      ultimoAvisoChave: null,
       ...medicamento,
     };
     const all = getSaudeMedicamentos();
@@ -640,7 +650,17 @@ PCF.Store = (() => {
     const all = getSaudeMedicamentos();
     const i = all.findIndex(m => m.id === id);
     if (i >= 0) {
+      const anterior = all[i];
       all[i] = { ...all[i], ...data };
+      const mudouAgenda =
+        anterior.agendaAtivo !== all[i].agendaAtivo ||
+        anterior.dataInicio !== all[i].dataInicio ||
+        anterior.dataFim !== all[i].dataFim ||
+        anterior.horarios !== all[i].horarios ||
+        anterior.frequencia !== all[i].frequencia;
+      const voltouUso = anterior.status !== 'Em uso' && all[i].status === 'Em uso';
+      if (mudouAgenda || voltouUso) all[i].ultimoAvisoChave = null;
+      if (all[i].status !== 'Em uso' || !all[i].agendaAtivo) all[i].ultimoAvisoChave = null;
       saveSaudeMedicamentos(all);
     }
     return all;

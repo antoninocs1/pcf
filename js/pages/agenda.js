@@ -67,6 +67,13 @@ const checkAndShowAlerts = () => {};
       .filter(med => med.agendaAtivo && med.dataInicio)
       .sort((a, b) => a.dataInicio.localeCompare(b.dataInicio) || (a.nome || '').localeCompare(b.nome || ''));
 
+    const extrairHorariosMedicamento = (med) => {
+      if (Array.isArray(med.horariosParsed) && med.horariosParsed.length) {
+        return [...new Set(med.horariosParsed.map(h => H.normalizarHora ? H.normalizarHora(h) : h).filter(Boolean))].sort();
+      }
+      return H.extrairHorarios ? H.extrairHorarios(med.horarios) : [];
+    };
+
     const getCombinedMonthCounts = (compromissos, acoesVinculadas, saudeVinculados, medicamentosVinculados = []) => {
       const counts = getMonthCounts(compromissos);
       acoesVinculadas.forEach(acao => {
@@ -189,13 +196,17 @@ const checkAndShowAlerts = () => {};
       });
       medicamentosVinculados.forEach(med => {
         if (med.status !== 'Em uso') return;
-        const comp = {
-          compromisso: `[Medicamento] ${med.nome || 'Medicamento'} - ${med.dose || ''}`,
-          data: med.dataInicio,
-          hora: '',
-        };
-        if (med.dataInicio < hj) alertas.push({ tipo: 'atrasado', comp });
-        else if (med.dataInicio === hj) alertas.push({ tipo: 'hoje', comp });
+        if (med.dataFim && med.dataFim < hj) return;
+        if (med.dataInicio > hj) return;
+        extrairHorariosMedicamento(med).forEach(hora => {
+          const comp = {
+            compromisso: `[Medicamento] ${med.nome || 'Medicamento'} - ${med.dose || ''}`,
+            data: hj,
+            hora,
+          };
+          const doseDateTime = new Date(`${hj}T${hora}:00`);
+          if (doseDateTime <= agora) alertas.push({ tipo: 'agora', comp });
+        });
       });
       return alertas;
     };
