@@ -16,7 +16,7 @@ PCF.Store = (() => {
   const DATA_COLS = [
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
-    'rodavida_reg', 'rodavida_config', 'plano_acao', 'saude_eventos',
+    'rodavida_reg', 'rodavida_config', 'plano_acao', 'saude_eventos', 'saude_medicamentos',
     'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades',
     'jogo_palavras', 'jogo_palavras_estado'
   ];
@@ -594,6 +594,7 @@ PCF.Store = (() => {
       dataCadastro: new Date().toISOString().split('T')[0],
       status: 'Pendente',
       agendaAtivo: false,
+      ultimoAvisoChave: null,
       ...evento,
     };
     const all = getSaudeEventos();
@@ -605,7 +606,15 @@ PCF.Store = (() => {
     const all = getSaudeEventos();
     const i = all.findIndex(e => e.id === id);
     if (i >= 0) {
+      const anterior = all[i];
       all[i] = { ...all[i], ...data };
+      const mudouAgenda =
+        anterior.agendaAtivo !== all[i].agendaAtivo ||
+        anterior.data !== all[i].data ||
+        anterior.hora !== all[i].hora;
+      const virouPendente = anterior.status !== 'Pendente' && all[i].status === 'Pendente';
+      if (mudouAgenda || virouPendente) all[i].ultimoAvisoChave = null;
+      if (all[i].status !== 'Pendente' || !all[i].agendaAtivo) all[i].ultimoAvisoChave = null;
       saveSaudeEventos(all);
     }
     return all;
@@ -613,6 +622,52 @@ PCF.Store = (() => {
   const deleteSaudeEvento = (id) => {
     const all = getSaudeEventos().filter(e => e.id !== id);
     saveSaudeEventos(all);
+    return all;
+  };
+
+  /* ---------- SAUDE / MEDICAMENTOS E POSOLOGIA ---------- */
+  const _smU = () => `pcf_saude_medicamentos_${currentUserId()}`;
+  const getSaudeMedicamentos = () => _get(_smU()) || [];
+  const saveSaudeMedicamentos = (medicamentos) => {
+    _set(_smU(), medicamentos || []);
+    _emitAgendaChange('saude-medicamentos-save', { medicamentos });
+  };
+  const addSaudeMedicamento = (medicamento) => {
+    const novo = {
+      id: _uid(),
+      dataCadastro: new Date().toISOString().split('T')[0],
+      status: 'Em uso',
+      agendaAtivo: false,
+      ultimoAvisoChave: null,
+      ...medicamento,
+    };
+    const all = getSaudeMedicamentos();
+    all.push(novo);
+    saveSaudeMedicamentos(all);
+    return all;
+  };
+  const updateSaudeMedicamento = (id, data) => {
+    const all = getSaudeMedicamentos();
+    const i = all.findIndex(m => m.id === id);
+    if (i >= 0) {
+      const anterior = all[i];
+      all[i] = { ...all[i], ...data };
+      const mudouAgenda =
+        anterior.agendaAtivo !== all[i].agendaAtivo ||
+        anterior.dataInicio !== all[i].dataInicio ||
+        anterior.dataFim !== all[i].dataFim ||
+        anterior.horarios !== all[i].horarios ||
+        anterior.frequencia !== all[i].frequencia;
+      const voltouUso = anterior.status !== 'Em uso' && all[i].status === 'Em uso';
+      if (mudouAgenda || voltouUso) all[i].ultimoAvisoChave = null;
+      if (all[i].status !== 'Em uso' || !all[i].agendaAtivo) all[i].ultimoAvisoChave = null;
+      saveSaudeMedicamentos(all);
+    }
+    return all;
+  };
+  const deleteSaudeMedicamento = (id) => {
+    const all = getSaudeMedicamentos().filter(m => m.id !== id);
+    saveSaudeMedicamentos(all);
     return all;
   };
 
@@ -2619,6 +2674,7 @@ PCF.Store = (() => {
       emocoes_config: _get(`pcf_emocoes_config_${uid}`) || [],
       imc: _get(`pcf_imc_${uid}`) || { peso: 0, altura: 0 },
       saude_eventos: _get(`pcf_saude_eventos_${uid}`) || [],
+      saude_medicamentos: _get(`pcf_saude_medicamentos_${uid}`) || [],
       habitos: _get(`pcf_habitos_${uid}`) || [],
       reg_habitos: _get(`pcf_reg_habitos_${uid}`) || [],
       frases: _get(`pcf_frases_${uid}`) || [],
@@ -2650,6 +2706,7 @@ PCF.Store = (() => {
     getUsoFuncionalidades, saveUsoFuncionalidades, registrarUsoFuncionalidade, getRelatorioUsoFuncionalidades,
     getAgendaConfig, saveAgendaConfig,
     getSaudeEventos, saveSaudeEventos, addSaudeEvento, updateSaudeEvento, deleteSaudeEvento,
+    getSaudeMedicamentos, saveSaudeMedicamentos, addSaudeMedicamento, updateSaudeMedicamento, deleteSaudeMedicamento,
     getCompromissos, saveCompromissos, addCompromisso, updateCompromisso, deleteCompromisso,
     getPlanoAcoes, savePlanoAcoes, addPlanoAcao, updatePlanoAcao, deletePlanoAcao,
     getHabitos, saveHabitos, addHabito, updateHabito, deleteHabito,

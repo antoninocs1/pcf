@@ -3,7 +3,7 @@
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
-PCF.APP_VERSION = '1.004';
+PCF.APP_VERSION = '1.005';
 
 PCF.App = (() => {
   const S = PCF.Store;
@@ -852,6 +852,7 @@ PCF.App = (() => {
       id: 'saude', label: 'Saúde', icon: 'heart-pulse',
       items: [
         { hash: '#saude-consultas', icon: 'clipboard-plus', label: 'Consultas e Exames' },
+        { hash: '#saude-medicamentos', icon: 'pill', label: 'Medicamentos / Posologia' },
         { hash: '#imc', icon: 'heart', label: 'IMC' },
       ]
     },
@@ -906,6 +907,7 @@ PCF.App = (() => {
     '#agenda': { label: 'Agenda', grupo: 'Agenda' },
     '#imc': { label: 'IMC', grupo: 'Saúde' },
     '#saude-consultas': { label: 'Consultas e Exames', grupo: 'Saúde' },
+    '#saude-medicamentos': { label: 'Medicamentos / Posologia', grupo: 'Saúde' },
     '#contatos': { label: 'Contatos Pessoais', grupo: 'Contatos' },
     '#linha-tempo': { label: 'Linha do Tempo', grupo: 'Linha do Tempo' },
     '#usuarios': { label: 'Configuração de usuários', grupo: 'Administração' },
@@ -1214,6 +1216,31 @@ PCF.App = (() => {
     };
   };
 
+  const limparCookiesERecarregar = async () => {
+    if (!confirm('Limpar cookies/cache deste navegador e recarregar a versão atual?')) return;
+    try {
+      document.cookie.split(';').forEach(cookie => {
+        const nome = cookie.split('=')[0].trim();
+        if (!nome) return;
+        document.cookie = `${nome}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      });
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(key => caches.delete(key)));
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(reg => reg.unregister()));
+      }
+    } catch (err) {
+      console.warn('[PCF] Falha ao limpar cache/cookies:', err);
+    } finally {
+      const url = new URL(window.location.href);
+      url.searchParams.set('refresh', Date.now().toString());
+      window.location.replace(url.toString());
+    }
+  };
+
   const renderShell = () => {
     const session = S.getSession();
     const user = S.getUserById(session.userId);
@@ -1241,6 +1268,7 @@ PCF.App = (() => {
             <div class="user-info">
               <span class="user-name">${H.esc(user?.nome || session.login)}</span>
               <button id="btn-meu-perfil" class="btn-link btn-gear" title="Editar meu perfil"><i data-lucide="settings"></i></button>
+              <button id="btn-refresh-cache" class="btn-link btn-gear" title="Limpar cookies/cache e carregar versão atual"><i data-lucide="refresh-cw"></i></button>
               <button id="btn-logout" class="btn-link" title="Sair"><i data-lucide="log-out"></i> Sair</button>
             </div>
           </div>
@@ -1260,6 +1288,8 @@ PCF.App = (() => {
     // onAuthStateChanged cuidará do renderLogin após signOut
     const gearBtn = document.getElementById('btn-meu-perfil');
     if (gearBtn) gearBtn.onclick = openMeuPerfil;
+    const refreshCacheBtn = document.getElementById('btn-refresh-cache');
+    if (refreshCacheBtn) refreshCacheBtn.onclick = limparCookiesERecarregar;
     // Toggle do efeito lanterna
     const partBtn = document.getElementById('particle-toggle-button');
     if (partBtn) {
@@ -1362,6 +1392,7 @@ PCF.App = (() => {
       '#ciclo': pages.ciclo,
       '#imc': pages.imc,
       '#saude-consultas': pages.saudeConsultas,
+      '#saude-medicamentos': pages.saudeMedicamentos,
       '#emocoes': pages.emocoes,
       '#emocoes-relatorios': pages.emocoesRelatorios,
       '#agenda': pages.agenda,
@@ -1503,6 +1534,100 @@ PCF.App = (() => {
     S.updatePlanoAcao(acao.id, { ultimoAvisoChave: chave });
   };
 
+  const getSaudeEventoAvisoChave = (evento) =>
+    `${evento.id}|${evento.data || ''}|${evento.hora || ''}|${evento.agendaAtivo ? '1' : '0'}`;
+
+  const getSaudeEventoDateTime = (evento) => {
+    if (!evento.data) return null;
+    if (!evento.hora) return new Date(`${evento.data}T00:00:00`);
+    const hora = evento.hora.length === 5 ? `${evento.hora}:00` : evento.hora;
+    return new Date(`${evento.data}T${hora}`);
+  };
+
+  const getSaudeEventoSortValue = (evento) => {
+    const dateTime = getSaudeEventoDateTime(evento);
+    if (!dateTime || Number.isNaN(dateTime.getTime())) return Number.MAX_SAFE_INTEGER;
+    return dateTime.getTime();
+  };
+
+  const getSaudeEventoUrgente = (evento, agora = new Date()) => {
+    if (evento.status !== 'Pendente' || !evento.agendaAtivo || !evento.data) return null;
+    const hj = agora.toISOString().split('T')[0];
+    if (evento.hora) {
+      const eventoDateTime = getSaudeEventoDateTime(evento);
+      if (!eventoDateTime || Number.isNaN(eventoDateTime.getTime())) return null;
+      if (eventoDateTime <= agora) return 'agora';
+      return null;
+    }
+    if (evento.data < hj) return 'atrasado';
+    return null;
+  };
+
+  const markSaudeEventoAlertShown = (evento) => {
+    const chave = getSaudeEventoAvisoChave(evento);
+    const atual = S.getSaudeEventos().find(e => e.id === evento.id);
+    if (!atual || atual.ultimoAvisoChave === chave) return;
+    S.updateSaudeEvento(evento.id, { ultimoAvisoChave: chave });
+  };
+
+  const extrairHorariosMedicamento = (med) => {
+    if (Array.isArray(med.horariosParsed) && med.horariosParsed.length) {
+      return [...new Set(med.horariosParsed.map(h => H.normalizarHora ? H.normalizarHora(h) : h).filter(Boolean))].sort();
+    }
+    return H.extrairHorarios ? H.extrairHorarios(med.horarios) : [];
+  };
+
+  const getMedicamentoDoseAvisoChave = (med, data, hora) =>
+    `${med.id}|${data || ''}|${hora || ''}|${med.agendaAtivo ? '1' : '0'}`;
+
+  const getMedicamentoDosesUrgentes = (med, agora = new Date()) => {
+    if (med.status !== 'Em uso' || !med.agendaAtivo || !med.dataInicio) return [];
+    if (med.adiadoAte) {
+      const adiadoAte = new Date(med.adiadoAte);
+      if (!Number.isNaN(adiadoAte.getTime()) && adiadoAte > agora) return [];
+    }
+
+    const hoje = agora.toISOString().split('T')[0];
+    if (med.dataInicio > hoje) return [];
+    if (med.dataFim && med.dataFim < hoje) return [];
+
+    const ultimaDoseNotificada = (() => {
+      if (!med.ultimoAvisoChave) return null;
+      const partes = String(med.ultimoAvisoChave).split('|');
+      if (partes.length < 3) return null;
+      const [, data, hora] = partes;
+      if (!data || !hora) return null;
+      const dt = new Date(`${data}T${hora}:00`);
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    })();
+
+    const doses = extrairHorariosMedicamento(med)
+      .map(hora => {
+        const doseDateTime = new Date(`${hoje}T${hora}:00`);
+        if (Number.isNaN(doseDateTime.getTime()) || doseDateTime > agora) return null;
+        if (ultimaDoseNotificada && doseDateTime <= ultimaDoseNotificada) return null;
+        return {
+          med,
+          data: hoje,
+          hora,
+          sort: doseDateTime.getTime(),
+          chave: getMedicamentoDoseAvisoChave(med, hoje, hora),
+          tipo: 'agora',
+        };
+      })
+      .filter(Boolean);
+
+    if (doses.length === 0) return [];
+
+    return doses.sort((a, b) => b.sort - a.sort).slice(0, 1);
+  };
+
+  const markMedicamentoAlertShown = (dose) => {
+    const atual = S.getSaudeMedicamentos().find(m => m.id === dose.med.id);
+    if (!atual || atual.ultimoAvisoChave === dose.chave) return;
+    S.updateSaudeMedicamento(dose.med.id, { ultimoAvisoChave: dose.chave });
+  };
+
   const playCompromissoAlertSound = () => {
     try {
       const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
@@ -1552,13 +1677,18 @@ PCF.App = (() => {
     }
   };
 
+  const hasActiveGlobalAlert = () => !!document.querySelector('.compromisso-modal');
+
   const checkGlobalAlerts = () => {
     if (!S.getSession()) return;
+    if (hasActiveGlobalAlert()) return;
     
     try {
       const compromissos = S.getCompromissos();
       const planoAcoes = S.getPlanoAcoes ? S.getPlanoAcoes() : [];
-      if ((!compromissos || compromissos.length === 0) && (!planoAcoes || planoAcoes.length === 0)) return;
+      const saudeEventos = S.getSaudeEventos ? S.getSaudeEventos() : [];
+      const medicamentos = S.getSaudeMedicamentos ? S.getSaudeMedicamentos() : [];
+      if ((!compromissos || compromissos.length === 0) && (!planoAcoes || planoAcoes.length === 0) && (!saudeEventos || saudeEventos.length === 0) && (!medicamentos || medicamentos.length === 0)) return;
 
       const agora = new Date();
       const alertaCompromisso = compromissos
@@ -1577,14 +1707,41 @@ PCF.App = (() => {
           acao.ultimoAvisoChave !== getPlanoAcaoAvisoChave(acao)
         );
 
+      const alertaSaudeEvento = saudeEventos
+        .sort((a, b) => getSaudeEventoSortValue(a) - getSaudeEventoSortValue(b))
+        .map(evento => ({ evento, tipo: getSaudeEventoUrgente(evento, agora) }))
+        .find(({ evento, tipo }) =>
+          (tipo === 'agora' || tipo === 'atrasado') &&
+          evento.ultimoAvisoChave !== getSaudeEventoAvisoChave(evento)
+        );
+
+      const alertaMedicamento = medicamentos
+        .flatMap(med => getMedicamentoDosesUrgentes(med, agora))
+        .sort((a, b) => a.sort - b.sort)
+        .find(dose => dose.med.ultimoAvisoChave !== dose.chave);
+
       const compromissoSort = alertaCompromisso ? getCompromissoSortValue(alertaCompromisso.comp) : Number.MAX_SAFE_INTEGER;
       const planoSort = alertaPlanoAcao ? getPlanoAcaoSortValue(alertaPlanoAcao.acao) : Number.MAX_SAFE_INTEGER;
+      const saudeSort = alertaSaudeEvento ? getSaudeEventoSortValue(alertaSaudeEvento.evento) : Number.MAX_SAFE_INTEGER;
+      const medicamentoSort = alertaMedicamento ? alertaMedicamento.sort : Number.MAX_SAFE_INTEGER;
 
-      if (!alertaCompromisso && !alertaPlanoAcao) return;
+      if (!alertaCompromisso && !alertaPlanoAcao && !alertaSaudeEvento && !alertaMedicamento) return;
 
-      if (compromissoSort <= planoSort) {
+      if (compromissoSort <= planoSort && compromissoSort <= saudeSort && compromissoSort <= medicamentoSort) {
         markCompromissoAlertShown(alertaCompromisso.comp);
         showCompromissoModalGlobal(alertaCompromisso.comp, alertaCompromisso.tipo);
+        return;
+      }
+
+      if (saudeSort <= planoSort && saudeSort <= medicamentoSort) {
+        markSaudeEventoAlertShown(alertaSaudeEvento.evento);
+        showSaudeEventoModalGlobal(alertaSaudeEvento.evento, alertaSaudeEvento.tipo);
+        return;
+      }
+
+      if (medicamentoSort <= planoSort) {
+        markMedicamentoAlertShown(alertaMedicamento);
+        showMedicamentoModalGlobal(alertaMedicamento);
         return;
       }
 
@@ -1596,6 +1753,8 @@ PCF.App = (() => {
   };
 
   const showCompromissoModalGlobal = (compromisso, tipo) => {
+    if (hasActiveGlobalAlert()) return;
+
     // Remove modais existentes
     const existingModals = document.querySelectorAll('.compromisso-modal');
     existingModals.forEach(modal => modal.remove());
@@ -1642,6 +1801,8 @@ PCF.App = (() => {
   };
 
   const showPlanoAcaoModalGlobal = (acao, tipo) => {
+    if (hasActiveGlobalAlert()) return;
+
     const existingModals = document.querySelectorAll('.compromisso-modal');
     existingModals.forEach(modal => modal.remove());
 
@@ -1675,6 +1836,96 @@ PCF.App = (() => {
     };
     document.getElementById('planoacao-cancelar').onclick = () => {
       S.updatePlanoAcao(acao.id, { status: 'Cancelado' });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+    overlay.onclick = (e) => {
+      if (e.target === overlay) overlay.remove();
+    };
+  };
+
+  const showSaudeEventoModalGlobal = (evento, tipo) => {
+    if (hasActiveGlobalAlert()) return;
+
+    const existingModals = document.querySelectorAll('.compromisso-modal');
+    existingModals.forEach(modal => modal.remove());
+
+    const contato = evento.responsavelContatoId ? (S.getContatos ? S.getContatos() : []).find(c => c.id === evento.responsavelContatoId) : null;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay compromisso-modal';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h3>${tipo === 'atrasado' ? 'Aviso de saúde em atraso!' : 'Aviso de saúde!'}</h3>
+        <div class="modal-body">
+          <p><strong>Registro:</strong></p>
+          <p>${H.esc(evento.tipo || 'Saúde')} - ${H.esc(evento.descricao || '')}</p>
+          ${evento.local ? `<p><strong>Local:</strong></p><p>${H.esc(evento.local)}</p>` : ''}
+          ${contato ? `<p><strong>Para quem?</strong></p><p>${H.esc(contato.nome)}</p>` : ''}
+          <p><strong>Data - Hora:</strong></p>
+          <p>${H.formatarData(evento.data)} ${evento.hora || ''}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="saude-evento-cancelar">Cancelar</button>
+          <button class="btn btn-primary" id="saude-evento-ok">Realizado</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    playCompromissoAlertSound();
+
+    document.getElementById('saude-evento-ok').onclick = () => {
+      S.updateSaudeEvento(evento.id, { status: 'Realizado' });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+    document.getElementById('saude-evento-cancelar').onclick = () => {
+      S.updateSaudeEvento(evento.id, { status: 'Cancelado' });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+    overlay.onclick = (e) => {
+      if (e.target === overlay) overlay.remove();
+    };
+  };
+
+  const showMedicamentoModalGlobal = (dose) => {
+    if (hasActiveGlobalAlert()) return;
+
+    const existingModals = document.querySelectorAll('.compromisso-modal');
+    existingModals.forEach(modal => modal.remove());
+
+    const med = dose.med;
+    const contatos = S.getContatos ? S.getContatos() : [];
+    const contato = med.responsavelContatoId ? contatos.find(c => c.id === med.responsavelContatoId) : null;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay compromisso-modal';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h3>Hora de tomar medicamento</h3>
+        <div class="modal-body">
+          <p><strong>Medicamento:</strong></p>
+          <p>${H.esc(med.nome || 'Medicamento')}</p>
+          <p><strong>Dose:</strong></p>
+          <p>${H.esc(med.dose || '')}</p>
+          ${med.posologia ? `<p><strong>Posologia / orientações:</strong></p><p>${H.esc(med.posologia)}</p>` : ''}
+          ${contato ? `<p><strong>Para quem?</strong></p><p>${H.esc(contato.nome)}</p>` : ''}
+          <p><strong>Data - Hora:</strong></p>
+          <p>${H.formatarData(dose.data)} ${dose.hora}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="medicamento-adiar">Lembrar depois</button>
+          <button class="btn btn-primary" id="medicamento-ok">Tomado</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    playCompromissoAlertSound();
+
+    document.getElementById('medicamento-ok').onclick = () => {
+      S.updateSaudeMedicamento(med.id, { ultimoAvisoChave: dose.chave, adiadoAte: null });
+      overlay.remove();
+      setTimeout(checkGlobalAlerts, 200);
+    };
+    document.getElementById('medicamento-adiar').onclick = () => {
+      S.updateSaudeMedicamento(med.id, { ultimoAvisoChave: null, adiadoAte: new Date(Date.now() + 10 * 60 * 1000).toISOString() });
       overlay.remove();
       setTimeout(checkGlobalAlerts, 200);
     };

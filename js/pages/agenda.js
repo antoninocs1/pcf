@@ -63,13 +63,27 @@ const checkAndShowAlerts = () => {};
       .filter(evento => evento.agendaAtivo && evento.data)
       .sort((a, b) => a.data.localeCompare(b.data) || (a.hora || '').localeCompare(b.hora || ''));
 
-    const getCombinedMonthCounts = (compromissos, acoesVinculadas, saudeVinculados) => {
+    const getSaudeMedicamentosVinculados = () => (S.getSaudeMedicamentos ? S.getSaudeMedicamentos() : [])
+      .filter(med => med.agendaAtivo && med.dataInicio)
+      .sort((a, b) => a.dataInicio.localeCompare(b.dataInicio) || (a.nome || '').localeCompare(b.nome || ''));
+
+    const extrairHorariosMedicamento = (med) => {
+      if (Array.isArray(med.horariosParsed) && med.horariosParsed.length) {
+        return [...new Set(med.horariosParsed.map(h => H.normalizarHora ? H.normalizarHora(h) : h).filter(Boolean))].sort();
+      }
+      return H.extrairHorarios ? H.extrairHorarios(med.horarios) : [];
+    };
+
+    const getCombinedMonthCounts = (compromissos, acoesVinculadas, saudeVinculados, medicamentosVinculados = []) => {
       const counts = getMonthCounts(compromissos);
       acoesVinculadas.forEach(acao => {
         counts[acao.whenDate] = (counts[acao.whenDate] || 0) + 1;
       });
       saudeVinculados.forEach(evento => {
         counts[evento.data] = (counts[evento.data] || 0) + 1;
+      });
+      medicamentosVinculados.forEach(med => {
+        counts[med.dataInicio] = (counts[med.dataInicio] || 0) + 1;
       });
       return counts;
     };
@@ -103,6 +117,7 @@ const checkAndShowAlerts = () => {};
       const compromissos = S.getCompromissos();
       const acoesVinculadas = getPlanoAcoesVinculadas();
       const saudeVinculados = getSaudeEventosVinculados();
+      const medicamentosVinculados = getSaudeMedicamentosVinculados();
       const agora = new Date();
       const hj = agora.toISOString().split('T')[0];
       const alertas = [];
@@ -179,6 +194,20 @@ const checkAndShowAlerts = () => {};
         if (evento.data < hj) alertas.push({ tipo: 'atrasado', comp });
         else if (evento.data === hj) alertas.push({ tipo: 'hoje', comp });
       });
+      medicamentosVinculados.forEach(med => {
+        if (med.status !== 'Em uso') return;
+        if (med.dataFim && med.dataFim < hj) return;
+        if (med.dataInicio > hj) return;
+        extrairHorariosMedicamento(med).forEach(hora => {
+          const comp = {
+            compromisso: `[Medicamento] ${med.nome || 'Medicamento'} - ${med.dose || ''}`,
+            data: hj,
+            hora,
+          };
+          const doseDateTime = new Date(`${hj}T${hora}:00`);
+          if (doseDateTime <= agora) alertas.push({ tipo: 'agora', comp });
+        });
+      });
       return alertas;
     };
 
@@ -250,7 +279,8 @@ const checkAndShowAlerts = () => {};
       const contatosMap = Object.fromEntries((S.getContatos ? S.getContatos() : []).map(c => [c.id, c]));
       const acoesVinculadas = getPlanoAcoesVinculadas();
       const saudeVinculados = getSaudeEventosVinculados();
-      const countsByDate = getCombinedMonthCounts(compromissos, acoesVinculadas, saudeVinculados);
+      const medicamentosVinculados = getSaudeMedicamentosVinculados();
+      const countsByDate = getCombinedMonthCounts(compromissos, acoesVinculadas, saudeVinculados, medicamentosVinculados);
       const calendarCells = buildCalendarGrid(currentMonth, countsByDate);
       const agendaConfig = S.getAgendaConfig ? S.getAgendaConfig() : { avisoSonoroAtivo: true };
       const alertas = checkAlertas();
@@ -498,6 +528,39 @@ const checkAndShowAlerts = () => {};
                       <td>${H.esc(evento.local || '—')}</td>
                       <td><span class="status-badge" style="background:${statusCor}">${H.esc(evento.status || 'Pendente')}</span></td>
                       <td><a href="#saude-consultas" class="btn-link">Saúde</a></td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>`}
+          </div>
+
+          <div class="card" style="margin-top:1rem">
+            <h3>Medicamentos vinculados na Agenda (${medicamentosVinculados.length})</h3>
+            ${medicamentosVinculados.length === 0 ? '<p class="empty-text">Nenhum medicamento vinculado à Agenda</p>' : `
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Medicamento</th>
+                    <th>Posologia</th>
+                    <th>Para quem</th>
+                    <th>Inicio</th>
+                    <th>Status</th>
+                    <th>Origem</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${medicamentosVinculados.map(med => {
+                    const statusCor = STATUS_COLORS[med.status] || '#6b7280';
+                    const responsavel = med.responsavelContatoId ? (contatosMap[med.responsavelContatoId]?.nome || 'Contato removido') : 'Propria pessoa';
+                    return `<tr>
+                      <td><strong>${H.esc(med.nome || '')}</strong><br><small>${H.esc(med.dose || '')}</small></td>
+                      <td>${H.esc(med.frequencia || '')}${med.horarios ? `<br><small>${H.esc(med.horarios)}</small>` : ''}</td>
+                      <td>${H.esc(responsavel)}</td>
+                      <td>${H.formatarData(med.dataInicio)}</td>
+                      <td><span class="status-badge" style="background:${statusCor}">${H.esc(med.status || 'Em uso')}</span></td>
+                      <td><a href="#saude-medicamentos" class="btn-link">Medicamentos</a></td>
                     </tr>`;
                   }).join('')}
                 </tbody>

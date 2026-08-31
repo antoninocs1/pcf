@@ -1392,6 +1392,7 @@ PCF.Pages = PCF.Pages || {};
       { id: 'virtudes',  icon: '💎', label: 'Virtudes'     },
       { id: 'rodavida',  icon: '🎯', label: 'Roda da Vida' },
       { id: 'saudeeventos', icon: '🩺', label: 'Consultas e Exames' },
+      { id: 'saudemedicamentos', icon: '💊', label: 'Medicamentos / Posologia' },
       { id: 'agenda',    icon: '📅', label: 'Agenda'       },
       { id: 'planoacao', icon: '🗂', label: 'Plano de Ação' },
       { id: 'diario',    icon: '📖', label: 'Diário'       },
@@ -1779,7 +1780,48 @@ PCF.Pages = PCF.Pages || {};
         </div>`;
     };
 
-    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, saudeeventos: renderSaudeEventos, agenda: renderAgenda, planoacao: renderPlanoAcao, diario: renderDiario, linhatempo: renderLinhaTempo };
+    /* ---- Seção: Medicamentos / Posologia ---- */
+    const renderSaudeMedicamentos = () => {
+      const STATUS_COLORS_SM = { 'Em uso': '#16a34a', 'Pausado': '#f59e0b', 'Finalizado': '#64748b' };
+      const medicamentos = S.getSaudeMedicamentos ? [...S.getSaudeMedicamentos()].sort((a, b) =>
+        (a.status || '').localeCompare(b.status || '') || (a.nome || '').localeCompare(b.nome || '')
+      ) : [];
+      const contatosMap = Object.fromEntries((S.getContatos ? S.getContatos() : []).map(c => [c.id, c]));
+      return `
+        <div class="gb-section">
+          <div class="gb-section-header">
+            <h3>💊 Medicamentos / Posologia <span class="badge badge-neutral">${medicamentos.length}</span></h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="#saude-medicamentos" class="btn btn-secondary btn-sm">+ Novo / editar</a>
+              <button id="gb-clear-saudemedicamentos" class="btn btn-danger btn-sm"${medicamentos.length === 0 ? ' disabled' : ''}>🗑 Limpar Tudo</button>
+            </div>
+          </div>
+          ${medicamentos.length === 0 ? '<p class="empty-text">Nenhum medicamento registrado</p>' : `
+          <div class="table-wrapper">
+            <table class="table">
+              <thead><tr><th>Medicamento</th><th>Dose</th><th>Frequencia</th><th>Para quem</th><th>Periodo</th><th>Status</th><th class="col-hide-mobile">Agenda</th><th style="width:60px">Ações</th></tr></thead>
+              <tbody>
+                ${medicamentos.map(med => {
+                  const cor = STATUS_COLORS_SM[med.status] || '#6b7280';
+                  const responsavel = med.responsavelContatoId ? (contatosMap[med.responsavelContatoId]?.nome || 'Contato removido') : 'Propria pessoa';
+                  return `<tr>
+                    <td><strong>${H.esc(med.nome || '—')}</strong>${med.posologia ? `<br><small class="text-muted">${H.esc(med.posologia.slice(0, 70))}${med.posologia.length > 70 ? '…' : ''}</small>` : ''}</td>
+                    <td>${H.esc(med.dose || '—')}</td>
+                    <td>${H.esc(med.frequencia || '—')}${med.horarios ? `<br><small class="text-muted">${H.esc(med.horarios)}</small>` : ''}</td>
+                    <td>${H.esc(responsavel)}</td>
+                    <td>${med.dataInicio ? _fmtDate(med.dataInicio) : '—'}${med.dataFim ? '<br><small class="text-muted">até ' + _fmtDate(med.dataFim) + '</small>' : ''}</td>
+                    <td><span class="status-badge" style="background:${cor}">${H.esc(med.status || 'Em uso')}</span></td>
+                    <td class="col-hide-mobile">${med.agendaAtivo ? '<span class="badge badge-info">Sim</span>' : '<span class="badge badge-neutral">Não</span>'}</td>
+                    <td><button class="btn-icon btn-danger" data-gb-del-sm="${med.id}" title="Remover"><i data-lucide="trash-2"></i></button></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>`;
+    };
+
+    const RENDERERS = { emocoes: renderEmocoes, habitos: renderHabitos, virtudes: renderVirtudes, rodavida: renderRodaVida, saudeeventos: renderSaudeEventos, saudemedicamentos: renderSaudeMedicamentos, agenda: renderAgenda, planoacao: renderPlanoAcao, diario: renderDiario, linhatempo: renderLinhaTempo };
 
     /* ---- Render principal ---- */
     const render = () => {
@@ -1830,6 +1872,8 @@ PCF.Pages = PCF.Pages || {};
 
       if (q('gb-clear-saudeeventos')) q('gb-clear-saudeeventos').onclick = () =>
         confirmClear('Consultas e Exames', () => (S.getSaudeEventos ? S.getSaudeEventos().length : 0), () => S.saveSaudeEventos && S.saveSaudeEventos([]));
+      if (q('gb-clear-saudemedicamentos')) q('gb-clear-saudemedicamentos').onclick = () =>
+        confirmClear('Medicamentos / Posologia', () => (S.getSaudeMedicamentos ? S.getSaudeMedicamentos().length : 0), () => S.saveSaudeMedicamentos && S.saveSaudeMedicamentos([]));
 
       if (q('gb-add-agenda')) q('gb-add-agenda').onclick = () => showAgendaModal(null);
       if (q('gb-clear-agenda')) q('gb-clear-agenda').onclick = () =>
@@ -1879,6 +1923,8 @@ PCF.Pages = PCF.Pages || {};
         /* Consultas e Exames */
         const delSe = e.target.closest('[data-gb-del-se]');
         if (delSe && confirm('Remover este registro de consulta/exame?')) { S.deleteSaudeEvento && S.deleteSaudeEvento(delSe.dataset.gbDelSe); render(); return; }
+        const delSm = e.target.closest('[data-gb-del-sm]');
+        if (delSm && confirm('Remover este medicamento?')) { S.deleteSaudeMedicamento && S.deleteSaudeMedicamento(delSm.dataset.gbDelSm); render(); return; }
 
         /* Agenda */
         const editAg = e.target.closest('[data-gb-edit-ag]');
