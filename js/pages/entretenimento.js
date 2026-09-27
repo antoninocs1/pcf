@@ -1,4 +1,4 @@
-/*
+﻿/*
   PCF - pages/entretenimento.js
   Jogos leves de autoconhecimento.
 */
@@ -30,7 +30,7 @@ PCF.Pages = PCF.Pages || {};
     { palavra: 'Prudencia', titulo: 'Prudência', tipo: 'Virtude', descricao: 'Escolher com cuidado, avaliando consequências antes de agir.' },
     { palavra: 'Humildade', titulo: 'Humildade', tipo: 'Virtude', descricao: 'Reconhecer o próprio valor sem arrogância e aprender com pessoas, erros e circunstâncias.' },
     { palavra: 'Resiliencia', titulo: 'Resiliência', tipo: 'Virtude', descricao: 'Capacidade de se reorganizar depois de dificuldades, mantendo sentido e continuidade.' },
-    { palavra: 'Inteligencia', titulo: 'Inteligência Social', tipo: 'Virtude', descricao: 'Estar ciente dos próprios sentimentos e motivações, bem como dos outros.' },
+    { palavra: 'Inteligencia', titulo: 'Inteligência (Social)', tipo: 'Virtude', descricao: 'Estar ciente dos próprios sentimentos e motivações, bem como dos outros.' },
     //{ palavra: 'Equipe', titulo: 'Trabalho em Equipe', tipo: 'Virtude', descricao: 'Trabalhar bem como membro de um grupo; ser leal ao grupo.' },
     { palavra: 'Justica', titulo: 'Justiça', tipo: 'Virtude', descricao: 'Buscar equilíbrio, verdade e respeito aos direitos de cada pessoa nas escolhas e relações.' },
     //{ palavra: 'Imparcial', titulo: 'Imparcialidade', tipo: 'Virtude', descricao: 'Tratar todas as pessoas segundo noções de imparcialidade e justiça.' },
