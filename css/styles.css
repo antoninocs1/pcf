@@ -900,7 +900,10 @@ body.col-resizing * { cursor: col-resize !important; user-select: none !importan
   }
   /* Subcat row: empilha completamente em telas muito pequenas */
   .subcat-row { flex-direction: column; align-items: stretch; }
-  .subcat-row .subcat-tipo { width: 100%; }
+  /* Em coluna, flex-basis vira altura: zera a base de 110px herdada do desktop */
+  .subcat-row .subcat-nome,
+  .subcat-row .subcat-tipo { width: 100%; flex: 0 0 auto; }
+  .subcat-row .subcat-del { align-self: flex-end; }
   /* Cabeçalho de página: botões em wrap */
   .page-header > div { flex-wrap: wrap; gap: 6px; }
   .page-header { align-items: stretch; }

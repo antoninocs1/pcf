@@ -22,8 +22,11 @@ PCF.Store = (() => {
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
+  // Prefixos mais longos primeiro: evita que 'jogo_palavras_estado' caia em 'jogo_palavras',
+  // 'emocoes_config' em 'emocoes' e 'diario_tabs' em 'diario'.
+  const DATA_COLS_BY_PREFIX = [...DATA_COLS].sort((a, b) => b.length - a.length);
   const _parseKey = (key) => {
-    for (const col of DATA_COLS) {
+    for (const col of DATA_COLS_BY_PREFIX) {
       const prefix = `pcf_${col}_`;
       if (key.startsWith(prefix)) {
         const uid = key.slice(prefix.length);
