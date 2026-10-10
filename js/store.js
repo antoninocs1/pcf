@@ -18,7 +18,7 @@ PCF.Store = (() => {
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
     'rodavida_reg', 'rodavida_config', 'plano_acao', 'saude_eventos', 'saude_medicamentos',
     'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades',
-    'jogo_palavras', 'jogo_palavras_estado'
+    'jogo_palavras', 'jogo_palavras_estado', 'jogos_historico'
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
@@ -2373,7 +2373,7 @@ PCF.Store = (() => {
       {
         id: 'pessoal', label: 'Pessoal', cor: '#22c55e',
         categorias: [
-          { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',       icon: '❤️',  cor: '#4ade80', integracaoFonte: 'imc'           },
+          { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',       icon: '❤️',  cor: '#4ade80', integracaoFonte: 'saude_geral'   },
           { id: 'intelecto',   label: 'Intelecto – Conhecimento',           labelCurto: 'Intelecto',   icon: '🧠',  cor: '#22c55e', integracaoFonte: 'habitos_mente' },
           { id: 'emocoes_rv',  label: 'Emoções – Equilíbrio Emocional',     labelCurto: 'Emoções',     icon: '😊',  cor: '#166534', integracaoFonte: 'emocoes'       },
         ],
@@ -2381,7 +2381,7 @@ PCF.Store = (() => {
       {
         id: 'profissional', label: 'Profissional', cor: '#f97316',
         categorias: [
-          { id: 'carreira',     label: 'Carreira – Realização e Propósito', labelCurto: 'Carreira',    icon: '💼',  cor: '#0d9488', integracaoFonte: ''              },
+          { id: 'carreira',     label: 'Carreira – Realização e Propósito', labelCurto: 'Carreira',    icon: '💼',  cor: '#0d9488', integracaoFonte: 'plano_acao'    },
           { id: 'contribuicao', label: 'Contribuição Social',                labelCurto: 'Contribuição',icon: '🤝', cor: '#f472b6', integracaoFonte: ''              },
           { id: 'financas_rv',  label: 'Finanças – Recursos Financeiros',   labelCurto: 'Finanças',    icon: '💰',  cor: '#f97316', integracaoFonte: 'financas'      },
         ],
@@ -2397,7 +2397,7 @@ PCF.Store = (() => {
       {
         id: 'qualidade', label: 'Qualidade de Vida', cor: '#a78bfa',
         categorias: [
-          { id: 'lazer',           label: 'Lazer – Criatividade e Hobbies',    labelCurto: 'Lazer',     icon: '🎨', cor: '#bef264', integracaoFonte: '' },
+          { id: 'lazer',           label: 'Lazer – Criatividade e Hobbies',    labelCurto: 'Lazer',     icon: '🎨', cor: '#bef264', integracaoFonte: 'entretenimento' },
           { id: 'plenitude',       label: 'Conquista, Plenitude e Felicidade', labelCurto: 'Plenitude', icon: '🌟', cor: '#22d3ee', integracaoFonte: '' },
           { id: 'espiritualidade', label: 'Espiritualidade',                   labelCurto: 'Espirit.',  icon: '✨', cor: '#cbd5e1', integracaoFonte: '' },
         ],
@@ -2558,7 +2558,7 @@ PCF.Store = (() => {
     {
       id: 'pessoal', label: 'Pessoal', cor: '#22c55e',
       categorias: [
-        { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',      icon: '❤️',  cor: '#4ade80', integracaoFonte: 'imc'          },
+        { id: 'saude',       label: 'Saúde – Disposição e Bem-estar',    labelCurto: 'Saúde',      icon: '❤️',  cor: '#4ade80', integracaoFonte: 'saude_geral'  },
         { id: 'intelecto',   label: 'Intelecto – Conhecimento',           labelCurto: 'Intelecto',  icon: '🧠',  cor: '#22c55e', integracaoFonte: 'habitos_mente' },
         { id: 'emocoes_rv',  label: 'Emoções – Equilíbrio Emocional',     labelCurto: 'Emoções',    icon: '😊',  cor: '#166534', integracaoFonte: 'emocoes'       },
       ],
@@ -2566,7 +2566,7 @@ PCF.Store = (() => {
     {
       id: 'profissional', label: 'Profissional', cor: '#f97316',
       categorias: [
-        { id: 'carreira',    label: 'Carreira – Realização e Propósito',  labelCurto: 'Carreira',   icon: '💼',  cor: '#0d9488', integracaoFonte: '' },
+        { id: 'carreira',    label: 'Carreira – Realização e Propósito',  labelCurto: 'Carreira',   icon: '💼',  cor: '#0d9488', integracaoFonte: 'plano_acao' },
         { id: 'contribuicao',label: 'Contribuição Social',                labelCurto: 'Contribuição',icon: '🤝', cor: '#f472b6', integracaoFonte: '' },
         { id: 'financas_rv', label: 'Finanças – Recursos Financeiros',    labelCurto: 'Finanças',   icon: '💰',  cor: '#f97316', integracaoFonte: 'financas'      },
       ],
@@ -2582,7 +2582,7 @@ PCF.Store = (() => {
     {
       id: 'qualidade', label: 'Qualidade de Vida', cor: '#a78bfa',
       categorias: [
-        { id: 'lazer',       label: 'Lazer – Criatividade e Hobbies',     labelCurto: 'Lazer',      icon: '🎨',  cor: '#bef264', integracaoFonte: '' },
+        { id: 'lazer',       label: 'Lazer – Criatividade e Hobbies',     labelCurto: 'Lazer',      icon: '🎨',  cor: '#bef264', integracaoFonte: 'entretenimento' },
         { id: 'plenitude',   label: 'Conquista, Plenitude e Felicidade',  labelCurto: 'Plenitude',  icon: '🌟',  cor: '#22d3ee', integracaoFonte: '' },
         { id: 'espiritualidade', label: 'Espiritualidade',                labelCurto: 'Espirit.',   icon: '✨',  cor: '#cbd5e1', integracaoFonte: '' },
       ],
@@ -2649,6 +2649,16 @@ PCF.Store = (() => {
     }
     return copy;
   };
+  /* ---------- ENTRETENIMENTO: HISTÓRICO DE PARTIDAS ---------- */
+  const _jhU = () => `pcf_jogos_historico_${currentUserId()}`;
+  const JOGOS_HISTORICO_MAX = 500;
+  const getJogosHistorico = () => _get(_jhU()) || [];
+  const addJogoHistorico = (item) => {
+    const all = [...getJogosHistorico(), { id: _uid(), data: new Date().toISOString().split('T')[0], ...item }];
+    _set(_jhU(), all.slice(-JOGOS_HISTORICO_MAX));
+    return all;
+  };
+
   const getJogoPalavrasEstado = () => _normalizeJogoPalavrasEstado(_get(_jpwStateU()));
   const saveJogoPalavrasEstado = (state) => _set(_jpwStateU(), _serializeJogoPalavrasEstado(state));
 
@@ -2689,6 +2699,7 @@ PCF.Store = (() => {
       linha_tempo: _get(`pcf_linha_tempo_${uid}`) || [],
       uso_funcionalidades: _get(`pcf_uso_funcionalidades_${uid}`) || [],
       atividades: _get(`pcf_atividades_${uid}`) || [],
+      jogos_historico: _get(`pcf_jogos_historico_${uid}`) || [],
     };
   };
 
@@ -2723,6 +2734,7 @@ PCF.Store = (() => {
     getVirtudesConfig, saveVirtudesConfig, addVirtude, updateVirtude, deleteVirtude,
     getJogoPalavras, saveJogoPalavras, addJogoPalavra, updateJogoPalavra, deleteJogoPalavra,
     getJogoPalavrasEstado, saveJogoPalavrasEstado,
+    getJogosHistorico, addJogoHistorico,
     getVirtudesReg, saveVirtudesReg, toggleVirtude, deleteVirtudReg,
     exportData, importTransacoes, importCategorias,
     restoreDefaultCategorias, restoreDefaultEmocoesConfig, restoreDefaultHabitos, restoreDefaultFrases, restoreDefaultVirtudes,

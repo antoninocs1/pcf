@@ -11,6 +11,72 @@ PCF.Pages = PCF.Pages || {};
   /* ─────────────────────────────────────────────────────
      INTEGRAÇÃO: calcula sugestões automáticas de score
   ───────────────────────────────────────────────────── */
+  const _diasAtras = (dias) => {
+    const d = new Date(); d.setDate(d.getDate() - dias);
+    return d.toISOString().split('T')[0];
+  };
+  const _escala = (pct) => Math.max(1, Math.min(10, Math.round(pct * 9) + 1));
+
+  const _scoreIMC = () => {
+    const imc = S.getIMC();
+    if (!(imc.peso > 0 && imc.altura > 0)) return undefined;
+    const val = imc.peso / (imc.altura * imc.altura);
+    if      (val >= 18.5 && val < 25)  return 9;
+    else if ((val >= 17  && val < 18.5) || (val >= 25 && val < 27)) return 7;
+    else if (val >= 27   && val < 30)   return 5;
+    else if ((val >= 30  && val < 35)  || val < 17)  return 3;
+    return 1;
+  };
+
+  /* Consultas/exames dos últimos 12 meses: realizados × pendentes já vencidos */
+  const _scoreConsultas = () => {
+    if (!S.getSaudeEventos) return undefined;
+    const hoje = new Date().toISOString().split('T')[0];
+    const desde = _diasAtras(365);
+    const eventos = S.getSaudeEventos().filter(e => e.data && e.data >= desde && e.data <= hoje && e.status !== 'Cancelado');
+    const realizados = eventos.filter(e => e.status === 'Realizado').length;
+    const vencidos = eventos.filter(e => e.status === 'Pendente').length;
+    if (realizados + vencidos === 0) return undefined;
+    return _escala(realizados / (realizados + vencidos));
+  };
+
+  /* Medicamentos: penaliza tratamentos "Em uso" cujo fim previsto já passou sem atualização */
+  const _scoreMedicamentos = () => {
+    if (!S.getSaudeMedicamentos) return undefined;
+    const hoje = new Date().toISOString().split('T')[0];
+    const emUso = S.getSaudeMedicamentos().filter(m => m.status === 'Em uso');
+    if (!emUso.length) return undefined;
+    const emDia = emUso.filter(m => !m.dataFim || m.dataFim >= hoje).length;
+    return _escala(emDia / emUso.length);
+  };
+
+  const _media = (valores) => {
+    const v = valores.filter(n => n !== undefined);
+    return v.length ? Math.round(v.reduce((a, n) => a + n, 0) / v.length) : undefined;
+  };
+
+  /* Integrações adicionadas depois que as configurações já estavam salvas:
+     aplicadas uma única vez por categoria (marcada com integracaoRev). */
+  const INTEGRACAO_REV = 2;
+  const INTEGRACOES_NOVAS = {
+    saude:    { de: ['imc'],     para: 'saude_geral' },
+    carreira: { de: [''],        para: 'plano_acao' },
+    lazer:    { de: [''],        para: 'entretenimento' },
+  };
+  const _migrarIntegracoes = (config) => {
+    let mudou = false;
+    config.forEach(q => q.categorias.forEach(cat => {
+      if ((cat.integracaoRev || 0) >= INTEGRACAO_REV) return;
+      const regra = INTEGRACOES_NOVAS[cat.id];
+      if (regra && regra.de.includes(cat.integracaoFonte || '')) cat.integracaoFonte = regra.para;
+      cat.integracaoRev = INTEGRACAO_REV;
+      mudou = true;
+    }));
+    if (mudou) S.saveRodaVidaConfig(config);
+    return config;
+  };
+  const _getConfig = () => _migrarIntegracoes(JSON.parse(JSON.stringify(S.getRodaVidaConfig())));
+
   const _calcSugestoes = (config) => {
     const sug = {};
     const allCats = config.flatMap(q => q.categorias);
@@ -18,16 +84,35 @@ PCF.Pages = PCF.Pages || {};
     /* Saúde ← IMC */
     const catSaude = allCats.find(c => c.integracaoFonte === 'imc');
     if (catSaude) {
-      const imc = S.getIMC();
-      if (imc.peso > 0 && imc.altura > 0) {
-        const val = imc.peso / (imc.altura * imc.altura);
-        let v = 5;
-        if      (val >= 18.5 && val < 25)  v = 9;
-        else if ((val >= 17  && val < 18.5) || (val >= 25 && val < 27)) v = 7;
-        else if (val >= 27   && val < 30)   v = 5;
-        else if ((val >= 30  && val < 35)  || val < 17)  v = 3;
-        else    v = 1;
-        sug[catSaude.id] = v;
+      const v = _scoreIMC();
+      if (v !== undefined) sug[catSaude.id] = v;
+    }
+
+    /* Saúde ← IMC + consultas/exames + medicamentos */
+    const catSaudeGeral = allCats.find(c => c.integracaoFonte === 'saude_geral');
+    if (catSaudeGeral) {
+      const v = _media([_scoreIMC(), _scoreConsultas(), _scoreMedicamentos()]);
+      if (v !== undefined) sug[catSaudeGeral.id] = v;
+    }
+
+    /* Carreira ← Plano de Ação (ações concluídas × pendentes) */
+    const catPlano = allCats.find(c => c.integracaoFonte === 'plano_acao');
+    if (catPlano && S.getPlanoAcoes) {
+      const acoes = S.getPlanoAcoes().filter(a => a.status !== 'Cancelado');
+      if (acoes.length > 0) {
+        const concluidas = acoes.filter(a => a.status === 'Concluído').length;
+        sug[catPlano.id] = _escala(concluidas / acoes.length);
+      }
+    }
+
+    /* Lazer ← dias com partidas de Entretenimento (últimos 30 dias; 12 dias = 10) */
+    const catLazer = allCats.find(c => c.integracaoFonte === 'entretenimento');
+    if (catLazer && S.getJogosHistorico) {
+      const historico = S.getJogosHistorico();
+      if (historico.length > 0) {
+        const cutStr = _diasAtras(30);
+        const dias = new Set(historico.filter(j => j.data >= cutStr).map(j => j.data)).size;
+        sug[catLazer.id] = _escala(Math.min(1, dias / 12));
       }
     }
 
@@ -253,7 +338,7 @@ PCF.Pages = PCF.Pages || {};
      PAGE: RODA DA VIDA  (#roda-vida)
   ───────────────────────────────────────────────────── */
   PCF.Pages.rodaVida = (container) => {
-    const config   = S.getRodaVidaConfig();
+    const config   = _getConfig();
     const sugestoes = _calcSugestoes(config);
     let registros  = S.getRodaVidaRegistros();
     let curDate    = new Date().toISOString().split('T')[0];
@@ -302,7 +387,7 @@ PCF.Pages = PCF.Pages || {};
             </div>
           </div>
 
-          ${hasSugg ? `<div class="rv-sugg-info">💡 Alguns valores foram <strong>pré-preenchidos automaticamente</strong> com base nos seus dados de IMC, emoções, hábitos e finanças. Ajuste e salve quando quiser.</div>` : ''}
+          ${hasSugg ? `<div class="rv-sugg-info">💡 Alguns valores foram <strong>pré-preenchidos automaticamente</strong> com base nos seus dados de saúde (IMC, consultas e medicamentos), emoções, hábitos, finanças, plano de ação e jogos de entretenimento. Ajuste e salve quando quiser.</div>` : ''}
 
           <div class="rv-layout">
             <div class="rv-wheel-area">
@@ -443,15 +528,18 @@ PCF.Pages = PCF.Pages || {};
      PAGE: CONFIG. RODA DA VIDA  (#roda-vida-config)
   ───────────────────────────────────────────────────── */
   PCF.Pages.rodaVidaConfig = (container) => {
-    let config = S.getRodaVidaConfig();
+    let config = _getConfig();
 
     const INTEGRACAO_OPTS = [
       { value: '',              label: '—  Nenhuma'          },
-      { value: 'imc',           label: '❤️  IMC / Saúde'     },
+      { value: 'saude_geral',   label: '❤️  Saúde (IMC, consultas e medicamentos)' },
+      { value: 'imc',           label: '⚖️  Somente IMC'     },
       { value: 'emocoes',       label: '😊  Emoções recentes' },
       { value: 'financas',      label: '💰  Saldo financeiro' },
       { value: 'habitos_mente', label: '🧠  Hábitos de Mente' },
       { value: 'virtudes',      label: '💎  Virtudes'         },
+      { value: 'plano_acao',    label: '📋  Plano de Ação'    },
+      { value: 'entretenimento',label: '🎮  Jogos de Entretenimento' },
     ];
 
     const render = () => {
@@ -554,7 +642,7 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('rvc-restaurar').onclick = () => {
         if (!confirm('Restaurar configuração padrão? As alterações serão perdidas.')) return;
         S.saveRodaVidaConfig(null);  // null → getRodaVidaConfig retorna o padrão
-        config = S.getRodaVidaConfig();
+        config = _getConfig();
         render();
         _rvToast('Configuração restaurada ao padrão!');
       };
@@ -608,7 +696,7 @@ PCF.Pages = PCF.Pages || {};
         if (_cmCi >= 0) {
           q.categorias[_cmCi] = { ...q.categorias[_cmCi], icon, label, labelCurto: lcurto, cor, integracaoFonte: integ };
         } else {
-          q.categorias.push({ id: S._uid(), icon, label, labelCurto: lcurto, cor, integracaoFonte: integ });
+          q.categorias.push({ id: S._uid(), icon, label, labelCurto: lcurto, cor, integracaoFonte: integ, integracaoRev: INTEGRACAO_REV });
         }
         document.getElementById('rvc-cat-modal').style.display = 'none';
         _saveAndRender();

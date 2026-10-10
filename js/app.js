@@ -30,7 +30,7 @@ PCF.App = (() => {
     { icon: 'check-square',  title: 'Hábitos',        desc: 'Acompanhe hábitos diários, visualização mensal e relatórios de consistência.' },
     { icon: 'list-todo',     title: 'Plano de Ação',  desc: 'Organize ações em 5W2H, acompanhe status, vincule contatos e gere lembretes na agenda.' },
     { icon: 'target',        title: 'Roda da Vida',   desc: 'Avalie e visualize as principais áreas da sua vida em um gráfico radial interativo.' },
-    { icon: 'sparkles',      title: 'Entretenimento', desc: 'Jogos educativos de autoconhecimento, como o Caça-Palavras Interior com virtudes, emoções e definições.' },
+    { icon: 'sparkles',      title: 'Entretenimento', desc: 'Jogos educativos de autoconhecimento: Caça-Palavras Interior, Memória das Virtudes e Quiz das Definições.' },
     { icon: 'gem',           title: 'Virtudes',       desc: 'Cultive virtudes diariamente, acompanhe seu crescimento de caráter e receba sugestões integradas.' },
     { icon: 'book-open',     title: 'Diário',          desc: 'Diário pessoal para registrar reflexões, pensamentos e acompanhar sua evolução.' },
     { icon: 'calendar',      title: 'Agenda',          desc: 'Gerencie compromissos e eventos de forma prática em uma agenda interativa.' },
@@ -194,6 +194,10 @@ PCF.App = (() => {
                 <button class="auth-tab" data-tab="register">Cadastrar</button>
               </div>
               <div id="auth-content"></div>
+              <button type="button" id="pwa-install-btn" class="btn btn-outline pwa-install-btn" hidden>
+                <i data-lucide="download"></i> Instalar
+              </button>
+              <small class="pwa-install-hint">Instale o PCF no celular ou computador e acesse como um aplicativo.</small>
             </div>
           </div>
         </section>
@@ -373,6 +377,9 @@ PCF.App = (() => {
       };
     });
     renderLoginForm();
+
+    /* PWA: botão Instalar */
+    PCF.PWA?.bindInstallButton(document.getElementById('pwa-install-btn'));
 
     /* Lucide icons */
     if (window.lucide) lucide.createIcons();
@@ -838,6 +845,7 @@ PCF.App = (() => {
       id: 'entretenimento', label: 'Entretenimento', icon: 'sparkles',
       items: [
         { hash: '#caca-palavras', icon: 'puzzle', label: 'Caça-Palavras Interior' },
+        { hash: '#jogos-aprendizado', icon: 'gamepad-2', label: 'Jogos de Aprendizado' },
         { hash: '#caca-palavras-base', icon: 'database', label: 'Base do Caça-Palavras' },
       ]
     },
@@ -900,6 +908,7 @@ PCF.App = (() => {
     '#roda-vida': { label: 'Roda da Vida', grupo: 'Roda da Vida' },
     '#roda-vida-config': { label: 'Configuração da Roda da Vida', grupo: 'Roda da Vida' },
     '#caca-palavras': { label: 'Caça-Palavras Interior', grupo: 'Entretenimento' },
+    '#jogos-aprendizado': { label: 'Jogos de Aprendizado', grupo: 'Entretenimento' },
     '#caca-palavras-base': { label: 'Base do Caça-Palavras', grupo: 'Entretenimento' },
     '#diario': { label: 'Diário', grupo: 'Diário' },
     '#diario-config': { label: 'Configuração do diário', grupo: 'Diário' },
@@ -1407,6 +1416,7 @@ PCF.App = (() => {
       '#roda-vida':        pages.rodaVida,
       '#roda-vida-config': pages.rodaVidaConfig,
       '#caca-palavras': pages.cacaPalavras,
+      '#jogos-aprendizado': pages.jogosAprendizado,
       '#caca-palavras-base': pages.cacaPalavrasBase,
       '#virtudes':           pages.virtudes,
       '#virtudes-relatorio': pages.virtudesRelatorio,

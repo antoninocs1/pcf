@@ -3983,3 +3983,215 @@ html:not([data-theme]) .word-game-intro-icon {
 }
 
 
+
+/* ==================== PWA - BOTÃO INSTALAR ==================== */
+.pwa-install-btn {
+  width: 100%;
+  margin-top: 16px;
+  justify-content: center;
+  gap: 8px;
+  border-color: rgba(59,130,246,.55);
+  color: var(--accent);
+}
+.pwa-install-btn:hover { background: rgba(59,130,246,.12); }
+.pwa-install-btn svg { width: 18px; height: 18px; }
+.pwa-install-btn[hidden],
+.pwa-install-btn[hidden] + .pwa-install-hint { display: none; }
+.pwa-install-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-dim);
+  font-size: .78rem;
+}
+.pwa-modal { max-width: 440px; }
+.pwa-modal p { color: var(--text-muted); line-height: 1.5; }
+.pwa-steps {
+  margin: 12px 0 12px 20px;
+  display: grid;
+  gap: 6px;
+  line-height: 1.45;
+}
+
+/* ==================== ENTRETENIMENTO - JOGOS DE APRENDIZADO ==================== */
+.lg-switch {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+}
+.lg-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.lg-switch-btn svg { width: 16px; height: 16px; }
+.lg-switch-btn:hover { color: var(--text); }
+.lg-switch-btn.active { background: var(--accent); color: #fff; }
+.lg-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: .85rem;
+  line-height: 1.45;
+}
+.lg-summary svg { flex: 0 0 auto; width: 16px; height: 16px; color: var(--accent); margin-top: 1px; }
+.lg-result-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.lg-result-list .badge { font-size: .8rem; padding: 4px 10px; }
+
+/* Memória */
+.mem-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: min(100%, 640px);
+  margin: 0 auto;
+}
+.mem-card {
+  position: relative;
+  min-height: 118px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  perspective: 900px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.mem-card-inner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform .45s ease;
+}
+.mem-card.flipped .mem-card-inner,
+.mem-card.matched .mem-card-inner { transform: rotateY(180deg); }
+.mem-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  text-align: center;
+}
+.mem-back {
+  background: linear-gradient(135deg, #3b82f6, #7c3aed);
+  border: 1px solid rgba(255,255,255,.18);
+  font-size: 1.6rem;
+  box-shadow: var(--shadow);
+}
+.mem-card:hover .mem-back { filter: brightness(1.1); }
+.mem-front {
+  transform: rotateY(180deg);
+  background: var(--word-cell-bg, rgba(30,41,59,.92));
+  border: 1px solid rgba(59,130,246,.55);
+  color: var(--text);
+}
+.mem-front small {
+  color: var(--accent);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.mem-palavra .mem-front > span { font-size: 1.02rem; font-weight: 800; }
+.mem-definicao .mem-front > span { font-size: .74rem; line-height: 1.3; }
+.mem-card.matched .mem-front {
+  border-color: rgba(34,197,94,.65);
+  background: rgba(34,197,94,.16);
+}
+.mem-card.matched { cursor: default; }
+[data-theme="light"] .mem-front { background: #f8fafc; border-color: #93c5fd; }
+[data-theme="light"] .mem-card.matched .mem-front { background: #dcfce7; border-color: #16a34a; }
+.lg-learned {
+  align-items: flex-start;
+}
+.lg-learned p {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: .8rem;
+  line-height: 1.4;
+}
+.word-token.found.lg-learned span { text-decoration: none; }
+
+/* Quiz */
+.quiz-card { max-width: 760px; }
+.quiz-prompt {
+  margin: 10px 0 18px;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  font-weight: 500;
+}
+.quiz-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.quiz-option {
+  padding: 14px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(148,163,184,.07);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .2s, background .2s, transform .1s;
+}
+.quiz-option:not(:disabled):hover { border-color: var(--accent); background: rgba(59,130,246,.12); }
+.quiz-option:not(:disabled):active { transform: scale(.98); }
+.quiz-option:disabled { cursor: default; opacity: .7; }
+.quiz-option.correct { opacity: 1; border-color: #16a34a; background: rgba(34,197,94,.2); }
+.quiz-option.wrong { opacity: 1; border-color: var(--danger); background: rgba(220,38,38,.16); }
+.quiz-feedback {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  line-height: 1.45;
+}
+.quiz-feedback span { color: var(--text-muted); }
+.quiz-feedback.ok { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.4); }
+.quiz-feedback.nok { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.4); }
+.quiz-next { display: flex; justify-content: flex-end; margin-top: 14px; }
+.quiz-next .btn { gap: 6px; }
+
+@media (max-width: 560px) {
+  .lg-switch { display: flex; border-radius: 12px; }
+  .lg-switch-btn { flex: 1 1 auto; justify-content: center; border-radius: 9px; padding: 8px 10px; }
+  .mem-board { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .mem-card { min-height: 108px; }
+  .mem-palavra .mem-front > span { font-size: .88rem; }
+  .mem-definicao .mem-front > span { font-size: .66rem; }
+  .mem-face { padding: 6px; }
+  .quiz-prompt { font-size: 1rem; }
+  .quiz-options { grid-template-columns: 1fr; }
+  .quiz-next .btn { width: 100%; justify-content: center; }
+}

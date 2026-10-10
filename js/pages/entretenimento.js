@@ -1,6 +1,6 @@
 ﻿/*
   PCF - pages/entretenimento.js
-  Jogos leves de autoconhecimento.
+  Jogos leves de autoconhecimento: Caça-Palavras, Memória e Quiz.
 */
 PCF.Pages = PCF.Pages || {};
 
@@ -476,6 +476,7 @@ PCF.Pages = PCF.Pages || {};
             saveGame(game);
             render();
             const completed = game.words.every(w => w.found);
+            if (completed) S.addJogoHistorico?.({ jogo: 'caca-palavras', pontos: game.words.length, total: game.words.length });
             showDefinition(found, completed ? () => {
               showCompletion(() => {
                 game = buildGame(game);
@@ -642,6 +643,366 @@ PCF.Pages = PCF.Pages || {};
         close();
         render();
       };
+    };
+
+    render();
+  };
+
+  /* ==================== JOGOS DE APRENDIZADO ==================== */
+  const JOGOS_TAB_KEY = 'pcf_jogos_aprendizado_tab';
+  const MEMORY_PAIRS = 6;
+  const QUIZ_QUESTIONS = 8;
+  const QUIZ_OPTIONS = 4;
+
+  const readTab = () => { try { return localStorage.getItem(JOGOS_TAB_KEY) || 'memoria'; } catch (_) { return 'memoria'; } };
+  const writeTab = (tab) => { try { localStorage.setItem(JOGOS_TAB_KEY, tab); } catch (_) {} };
+
+  const uniqueByTitle = (entries) => {
+    const seen = new Set();
+    return entries.filter(e => {
+      const key = normalizeWord(e.titulo);
+      if (!key || seen.has(key) || !e.descricao) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  // Primeira frase da definição, cortada para caber na carta.
+  const shortDefinition = (text, max = 100) => {
+    const first = String(text || '').split(/\.\s/)[0].replace(/\.$/, '');
+    return first.length <= max ? first : `${first.slice(0, max).replace(/\s+\S*$/, '')}…`;
+  };
+
+  // Esconde a própria palavra quando ela aparece na definição.
+  const maskTitle = (text, titulo) => {
+    const base = String(titulo || '').split('(')[0].trim();
+    if (!base) return text;
+    const escaped = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return String(text || '').replace(new RegExp(escaped, 'gi'), '_____');
+  };
+
+  const recentGamesSummary = () => {
+    const hist = S.getJogosHistorico ? S.getJogosHistorico() : [];
+    const cut = new Date(); cut.setDate(cut.getDate() - 30);
+    const cutStr = cut.toISOString().split('T')[0];
+    const recent = hist.filter(j => j.data >= cutStr);
+    return { partidas: recent.length, dias: new Set(recent.map(j => j.data)).size };
+  };
+
+  const showGameResult = ({ kind, title, text, items = [], onNewGame }) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal word-modal">
+        <div class="word-modal-kind">${H.esc(kind)}</div>
+        <h3>${H.esc(title)}</h3>
+        <p>${H.esc(text)}</p>
+        ${items.length ? `<div class="lg-result-list">${items.map(i => `<span class="badge badge-neutral">${H.esc(i)}</span>`).join('')}</div>` : ''}
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="lg-close">Fechar</button>
+          <button type="button" class="btn btn-primary" id="lg-new">Jogar novamente</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.querySelector('#lg-close').onclick = close;
+    overlay.querySelector('#lg-new').onclick = () => { close(); onNewGame(); };
+    overlay.onclick = (e) => { if (e.target === overlay) close(); };
+  };
+
+  /* ---------- Memória das Virtudes: palavra ↔ definição ---------- */
+  const buildMemoryGame = () => {
+    const bank = uniqueByTitle(shuffle(getWordBank(true)));
+    const preferred = bank.filter(e => shortDefinition(e.descricao).length <= 90);
+    const chosen = [...preferred, ...bank.filter(e => !preferred.includes(e))].slice(0, MEMORY_PAIRS);
+    const cards = shuffle(chosen.flatMap((entry, pairId) => ([
+      { pairId, face: 'palavra', text: entry.titulo, tipo: entry.tipo },
+      { pairId, face: 'definicao', text: shortDefinition(maskTitle(entry.descricao, entry.titulo)), tipo: entry.tipo },
+    ])));
+    return { entries: chosen, cards, flipped: [], matched: [], moves: 0, locked: false, done: false };
+  };
+
+  const memoryStars = (moves, pairs) => (moves <= pairs + 3 ? 3 : moves <= pairs * 2 + 2 ? 2 : 1);
+
+  const renderMemory = (area, onPlayed) => {
+    let game = buildMemoryGame();
+    let unflipTimer = null;
+
+    const render = () => {
+      clearTimeout(unflipTimer);
+      const pairs = game.entries.length;
+      if (!pairs) {
+        area.innerHTML = '<p class="empty-text">Cadastre palavras na Base do Caça-Palavras para jogar a memória.</p>';
+        return;
+      }
+      area.innerHTML = `
+        <div class="word-game-intro">
+          <div class="word-game-intro-icon">🧠</div>
+          <div>
+            <strong>Memória das Virtudes</strong>
+            <span>Vire duas cartas por vez e forme o par entre a <b>palavra</b> e a sua <b>definição</b>. Cada par encontrado revela um conceito para refletir.</span>
+          </div>
+        </div>
+        <div class="word-game-summary">
+          <div class="word-game-score"><strong id="mem-found">${game.matched.length}</strong><span>de ${pairs} pares · <b id="mem-moves">${game.moves}</b> jogadas</span></div>
+          <div class="word-game-progress"><span id="mem-progress" style="width:${(game.matched.length / pairs) * 100}%"></span></div>
+        </div>
+        <div class="word-game-layout">
+          <section class="word-board-card">
+            <div class="mem-board" aria-label="Tabuleiro do jogo da memória">
+              ${game.cards.map((card, i) => `
+                <button type="button" class="mem-card mem-${card.face}" data-i="${i}" aria-label="Carta ${i + 1}">
+                  <span class="mem-card-inner">
+                    <span class="mem-face mem-back" aria-hidden="true">✨</span>
+                    <span class="mem-face mem-front">
+                      <small>${card.face === 'palavra' ? H.esc(card.tipo) : 'Definição'}</small>
+                      <span>${H.esc(card.text)}</span>
+                    </span>
+                  </span>
+                </button>`).join('')}
+            </div>
+            <p class="word-game-tip" id="mem-tip">Encontre os ${pairs} pares.</p>
+          </section>
+          <aside class="word-list-card">
+            <h3>Aprendizados da rodada</h3>
+            <div class="word-list" id="mem-learned"></div>
+          </aside>
+        </div>`;
+      area.querySelectorAll('.mem-card').forEach(btn => { btn.onclick = () => flip(Number(btn.dataset.i)); });
+      paintLearned();
+    };
+
+    const paintLearned = () => {
+      const list = area.querySelector('#mem-learned');
+      if (!list) return;
+      list.innerHTML = game.matched.length
+        ? game.matched.map(pairId => {
+            const e = game.entries[pairId];
+            return `<div class="word-token found lg-learned"><div><span>${H.esc(e.titulo)}</span><p>${H.esc(e.descricao)}</p></div><small>${H.esc(e.tipo)}</small></div>`;
+          }).join('')
+        : '<p class="text-muted">Os pares encontrados aparecem aqui com a definição completa.</p>';
+    };
+
+    const cardEl = (i) => area.querySelector(`.mem-card[data-i="${i}"]`);
+    const setTip = (msg) => { const el = area.querySelector('#mem-tip'); if (el) el.textContent = msg; };
+    const paintStats = () => {
+      const pairs = game.entries.length;
+      area.querySelector('#mem-found').textContent = game.matched.length;
+      area.querySelector('#mem-moves').textContent = game.moves;
+      area.querySelector('#mem-progress').style.width = `${(game.matched.length / pairs) * 100}%`;
+    };
+
+    const flip = (i) => {
+      const card = game.cards[i];
+      if (game.locked || game.done || game.flipped.includes(i) || game.matched.includes(card.pairId)) return;
+      game.flipped.push(i);
+      cardEl(i)?.classList.add('flipped');
+      if (game.flipped.length < 2) { setTip('Agora escolha a carta que completa o par.'); return; }
+
+      game.moves++;
+      const [a, b] = game.flipped.map(idx => game.cards[idx]);
+      if (a.pairId === b.pairId) {
+        game.matched.push(a.pairId);
+        game.flipped.forEach(idx => cardEl(idx)?.classList.add('matched'));
+        game.flipped = [];
+        paintStats();
+        paintLearned();
+        setTip(`Muito bem! Você formou o par de ${game.entries[a.pairId].titulo}.`);
+        if (game.matched.length === game.entries.length) finish();
+        return;
+      }
+
+      game.locked = true;
+      paintStats();
+      setTip('Ainda não formam um par. Observe bem e tente de novo.');
+      const current = game;
+      unflipTimer = setTimeout(() => {
+        current.flipped.forEach(idx => cardEl(idx)?.classList.remove('flipped'));
+        current.flipped = [];
+        current.locked = false;
+      }, 1100);
+    };
+
+    const finish = () => {
+      game.done = true;
+      const pairs = game.entries.length;
+      const stars = memoryStars(game.moves, pairs);
+      S.addJogoHistorico?.({ jogo: 'memoria', pontos: pairs, total: pairs, jogadas: game.moves, estrelas: stars });
+      onPlayed();
+      setTimeout(() => showGameResult({
+        kind: `${'★'.repeat(stars)}${'☆'.repeat(3 - stars)} · ${game.moves} jogadas`,
+        title: 'Parabéns, você completou a memória!',
+        text: 'Escolha uma das palavras abaixo e pense em uma atitude concreta para praticá-la hoje.',
+        items: game.entries.map(e => e.titulo),
+        onNewGame: () => { game = buildMemoryGame(); render(); },
+      }), 450);
+    };
+
+    render();
+    return () => { game = buildMemoryGame(); render(); };
+  };
+
+  /* ---------- Quiz das Definições: qual palavra corresponde? ---------- */
+  const buildQuiz = () => {
+    const bank = uniqueByTitle(getWordBank(true));
+    const chosen = shuffle(bank).slice(0, QUIZ_QUESTIONS);
+    const questions = chosen.map(entry => {
+      const sameType = shuffle(bank.filter(e => e.titulo !== entry.titulo && e.tipo === entry.tipo));
+      const others = shuffle(bank.filter(e => e.titulo !== entry.titulo && e.tipo !== entry.tipo));
+      const distractors = [...sameType, ...others].slice(0, QUIZ_OPTIONS - 1).map(e => e.titulo);
+      return {
+        entry,
+        prompt: maskTitle(entry.descricao, entry.titulo),
+        options: shuffle([entry.titulo, ...distractors]),
+      };
+    });
+    return { questions, index: 0, score: 0, streak: 0, bestStreak: 0, answered: null, missed: [] };
+  };
+
+  const renderQuiz = (area, onPlayed) => {
+    let quiz = buildQuiz();
+
+    const render = () => {
+      const total = quiz.questions.length;
+      if (!total) {
+        area.innerHTML = '<p class="empty-text">Cadastre palavras na Base do Caça-Palavras para jogar o quiz.</p>';
+        return;
+      }
+      const q = quiz.questions[quiz.index];
+      const answered = quiz.answered !== null;
+      const correct = answered && quiz.answered === q.entry.titulo;
+      area.innerHTML = `
+        <div class="word-game-intro">
+          <div class="word-game-intro-icon">💡</div>
+          <div>
+            <strong>Quiz das Definições</strong>
+            <span>Leia a definição e escolha a virtude, sentimento ou emoção correspondente. Acertos seguidos formam uma sequência!</span>
+          </div>
+        </div>
+        <div class="word-game-summary">
+          <div class="word-game-score"><strong>${quiz.score}</strong><span>acerto${quiz.score === 1 ? '' : 's'} · pergunta ${quiz.index + 1} de ${total}${quiz.streak > 1 ? ` · 🔥 ${quiz.streak} seguidos` : ''}</span></div>
+          <div class="word-game-progress"><span style="width:${((quiz.index + (answered ? 1 : 0)) / total) * 100}%"></span></div>
+        </div>
+        <section class="word-board-card quiz-card">
+          <div class="word-modal-kind">Definição · ${H.esc(q.entry.tipo)}</div>
+          <p class="quiz-prompt">“${H.esc(q.prompt)}”</p>
+          <div class="quiz-options">
+            ${q.options.map((opt, i) => {
+              let cls = '';
+              if (answered && opt === q.entry.titulo) cls = 'correct';
+              else if (answered && opt === quiz.answered) cls = 'wrong';
+              return `<button type="button" class="quiz-option ${cls}" data-opt="${i}" ${answered ? 'disabled' : ''}>${H.esc(opt)}</button>`;
+            }).join('')}
+          </div>
+          ${answered ? `
+            <div class="quiz-feedback ${correct ? 'ok' : 'nok'}">
+              <strong>${correct ? 'Correto! 🎉' : `A resposta era ${H.esc(q.entry.titulo)}.`}</strong>
+              <span>${H.esc(q.entry.descricao)}</span>
+            </div>
+            <div class="quiz-next">
+              <button type="button" class="btn btn-primary" id="quiz-next">${quiz.index + 1 < total ? 'Próxima pergunta' : 'Ver resultado'} <i data-lucide="arrow-right"></i></button>
+            </div>` : ''}
+        </section>`;
+      if (window.lucide) lucide.createIcons();
+
+      area.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.onclick = () => {
+          if (quiz.answered !== null) return;
+          quiz.answered = q.options[Number(btn.dataset.opt)];
+          if (quiz.answered === q.entry.titulo) {
+            quiz.score++;
+            quiz.streak++;
+            quiz.bestStreak = Math.max(quiz.bestStreak, quiz.streak);
+          } else {
+            quiz.streak = 0;
+            quiz.missed.push(q.entry.titulo);
+          }
+          render();
+        };
+      });
+      const next = area.querySelector('#quiz-next');
+      if (next) next.onclick = () => {
+        if (quiz.index + 1 < total) { quiz.index++; quiz.answered = null; render(); return; }
+        finish();
+      };
+    };
+
+    const finish = () => {
+      const total = quiz.questions.length;
+      S.addJogoHistorico?.({ jogo: 'quiz', pontos: quiz.score, total, melhorSequencia: quiz.bestStreak });
+      onPlayed();
+      const pct = quiz.score / total;
+      const title = pct === 1 ? 'Gabaritou! Que conhecimento!' : pct >= 0.6 ? 'Muito bem, ótimo resultado!' : 'Bom começo, continue praticando!';
+      const restartQuiz = () => { quiz = buildQuiz(); render(); };
+      showGameResult({
+        kind: `${quiz.score} de ${total} · melhor sequência ${quiz.bestStreak}`,
+        title,
+        text: quiz.missed.length
+          ? 'Vale revisar com carinho as palavras abaixo — conhecer bem um conceito ajuda a praticá-lo no dia a dia.'
+          : 'Você reconheceu todos os conceitos. Que tal escolher um deles para colocar em prática hoje?',
+        items: quiz.missed.length ? quiz.missed : quiz.questions.map(item => item.entry.titulo),
+        onNewGame: restartQuiz,
+      });
+      restartQuiz();
+    };
+
+    render();
+    return () => { quiz = buildQuiz(); render(); };
+  };
+
+  const LEARNING_GAMES = [
+    { id: 'memoria', icon: 'brain', label: 'Memória das Virtudes', mount: renderMemory },
+    { id: 'quiz', icon: 'lightbulb', label: 'Quiz das Definições', mount: renderQuiz },
+  ];
+
+  PCF.Pages.jogosAprendizado = (container) => {
+    let tab = LEARNING_GAMES.some(g => g.id === readTab()) ? readTab() : LEARNING_GAMES[0].id;
+    let restart = null;
+
+    const paintSummary = () => {
+      const el = container.querySelector('#lg-summary');
+      if (!el) return;
+      const { partidas, dias } = recentGamesSummary();
+      el.innerHTML = `<i data-lucide="target"></i> <span>${partidas} partida${partidas === 1 ? '' : 's'} em ${dias} dia${dias === 1 ? '' : 's'} nos últimos 30 dias — seus jogos ajudam a pré-preencher a área <b>Lazer</b> da Roda da Vida.</span>`;
+      if (window.lucide) lucide.createIcons();
+    };
+
+    const render = () => {
+      container.innerHTML = `
+        <div class="page word-game-page learning-games-page">
+          <div class="page-header word-game-header">
+            <div>
+              <h2>🎮 Jogos de Aprendizado</h2>
+              <p class="subtitle">Exercite a memória e o conhecimento sobre virtudes, sentimentos e emoções.</p>
+            </div>
+            <button type="button" class="btn btn-primary" id="lg-restart"><i data-lucide="refresh-cw"></i> Novo jogo</button>
+          </div>
+          <div class="lg-switch" role="tablist" aria-label="Escolha o jogo">
+            ${LEARNING_GAMES.map(g => `
+              <button type="button" role="tab" class="lg-switch-btn${g.id === tab ? ' active' : ''}" data-game="${g.id}" aria-selected="${g.id === tab}">
+                <i data-lucide="${g.icon}"></i> ${g.label}
+              </button>`).join('')}
+          </div>
+          <div id="lg-area"></div>
+          <p class="lg-summary" id="lg-summary"></p>
+        </div>`;
+
+      if (window.lucide) lucide.createIcons();
+      PCF.App.applyStandardHeader?.(container, '#jogos-aprendizado');
+
+      const game = LEARNING_GAMES.find(g => g.id === tab);
+      restart = game.mount(container.querySelector('#lg-area'), paintSummary);
+      paintSummary();
+
+      container.querySelector('#lg-restart').onclick = () => restart?.();
+      container.querySelectorAll('.lg-switch-btn').forEach(btn => {
+        btn.onclick = () => {
+          if (btn.dataset.game === tab) return;
+          tab = btn.dataset.game;
+          writeTab(tab);
+          render();
+        };
+      });
     };
 
     render();
