@@ -63,7 +63,7 @@ PCF.App = (() => {
             <div class="pcf-carousel-slide pcf-slide-1">
               <div class="pcf-slide-body">
                 <div class="pcf-slide-emoji">💰</div>
-                <h2 class="pcf-slide-title">Planejamento para o Sucesso Pessoal</h2>
+                <h2 class="pcf-slide-title">Planejamento para Controle Pessoal</h2>
                 <p class="pcf-slide-sub">Organize suas finanças, emoções, hábitos, jogos de autoconhecimento e projetos de vida em uma plataforma completa e integrada.</p>
                 <button class="pcf-cta-btn" id="pcf-cta-login">Começar agora →</button>
               </div>
@@ -152,8 +152,8 @@ PCF.App = (() => {
             <a class="landing-brand" href="#inicio-section">
               <img src="Img/logo-pcf.png" alt="" class="landing-brand-logo">
               <span>
-                <span class="landing-brand-name">PCF 💰</span>
-                <span class="landing-brand-sub">Planejamento para o Sucesso Pessoal</span>
+                <span class="landing-brand-name">PCF</span>
+                <span class="landing-brand-sub">Planejamento para Controle Pessoal</span>
               </span>
             </a>
             <nav class="landing-nav" id="landing-nav">
@@ -188,9 +188,8 @@ PCF.App = (() => {
           <div class="auth-container">
             <div class="auth-card">
               <img src="Img/logo-pcf.png" alt="Logotipo do PCF" class="pcf-logo-img">
-              <h1>PCF 💰</h1>
-              <h2>Planejamento para o Sucesso Pessoal</h2>
-              <p class="auth-desc">💰 Controle Financeiro Pessoal e muito mais</p>
+              <h2 class="auth-title">PCF - Planejamento para Controle Pessoal</h2>
+              <p class="auth-desc">Controle Financeiro Pessoal e muito mais</p>
               <div id="auth-tab-bar" class="auth-tabs">
                 <button class="auth-tab active" data-tab="login">Entrar</button>
                 <button class="auth-tab" data-tab="register">Cadastrar</button>
@@ -223,7 +222,7 @@ PCF.App = (() => {
               <h2 class="landing-section-title">Sobre o PCF</h2>
               <p class="landing-about-acronym">
                 <strong>PCF — Personal Control Function</strong><br>
-                <em>Em português: Planejamento para o Sucesso Pessoal</em>
+                <em>Em português: Planejamento para Controle Pessoal</em>
               </p>
               <p class="landing-about-text">
                 O <strong>PCF</strong> é uma aplicação web completa desenvolvida para ajudar no planejamento
@@ -267,7 +266,7 @@ PCF.App = (() => {
         </section>
 
         <footer class="landing-footer">
-          <p>© ${new Date().getFullYear()} PCF — Planejamento para o Sucesso Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
+          <p>© ${new Date().getFullYear()} PCF — Planejamento para Controle Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
           <div class="landing-footer-links">
             <span class="app-version">Versão ${PCF.APP_VERSION}</span>
             <a href="#politica-privacidade" class="privacy-link" data-open-privacy>Política de Privacidade</a>
@@ -290,7 +289,7 @@ PCF.App = (() => {
               </button>
             </header>
             <div class="privacy-dialog-content">
-              <p>Esta Política explica como o <strong>PCF — Controle Financeiro Pessoal</strong> trata seus dados pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD).</p>
+              <p>Esta Política explica como o <strong>PCF — Planejamento para Controle Pessoal</strong> trata seus dados pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD).</p>
 
               <h3>1. Dados pessoais tratados</h3>
               <p>Para criar e manter sua conta, podemos tratar <strong>nome completo, CPF, e-mail e data de nascimento</strong>. O telefone, quando informado, é opcional. Também são armazenados os conteúdos que você registra nos módulos do PCF e dados técnicos essenciais para autenticação e funcionamento da aplicação.</p>

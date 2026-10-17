@@ -4213,10 +4213,11 @@ html:not([data-theme]) .word-game-intro-icon {
 .cat-sistema-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--text-muted); }
 
 /* ---------- Logo PCF (login, Sobre, Apoie) ---------- */
-.pcf-logo-img { display: block; height: auto; background: #fff; border-radius: 14px; padding: 8px; }
-.landing-brand-logo { width: 34px; height: 34px; object-fit: contain; background: #fff; border-radius: 8px; padding: 2px; }
+.pcf-logo-img { display: block; height: auto; }
+.landing-brand-logo { width: 36px; height: 36px; object-fit: contain; }
 .auth-card .pcf-logo-img { width: 96px; margin: 0 auto 10px; }
-.auth-card .auth-desc { color: var(--text-muted); font-size: .9rem; margin: -16px 0 20px; }
+.auth-card .auth-title { font-size: 1.15rem; color: var(--text); font-weight: 600; margin-bottom: 4px; }
+.auth-card .auth-desc { color: var(--text-muted); font-size: .9rem; margin: 0 0 20px; }
 .landing-about-logo { width: 140px; margin-bottom: 18px; }
 .support-logo { width: 120px; margin: 0 auto 16px; }
 .landing-about-acronym { font-size: .95rem; color: var(--text); margin-bottom: 14px; line-height: 1.6; }
