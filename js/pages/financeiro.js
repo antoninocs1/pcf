@@ -605,6 +605,7 @@ PCF.Pages = PCF.Pages || {};
           <div class="chart-container"><h3>Investimentos</h3><canvas id="rel-pie-inv"></canvas><div id="rel-tab-inv" class="chart-table"></div></div>
           <div class="chart-container"><h3>Receitas por Mês</h3><canvas id="rel-bar-rec-mes"></canvas></div>
           <div class="chart-container"><h3>Despesas por Mês</h3><canvas id="rel-bar-desp-mes"></canvas></div>
+          <div class="chart-container"><h3>${H.esc(H.CAT_PAGAMENTO_FATURA)} por Mês</h3><p class="text-muted chart-note">Fora dos totais de despesa: quita compras já lançadas como ${H.esc(H.PGTO_CARTAO_COMPRA)}.</p><canvas id="rel-bar-fatura-mes"></canvas><div id="rel-tab-fatura" class="chart-table"></div></div>
         </div>
       </div>`;
 
@@ -706,6 +707,22 @@ PCF.Pages = PCF.Pages || {};
           options: { responsive: true, plugins: { legend: { display: false }, datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, anchor: 'center', formatter: (val) => H.formatarMoeda(val) } }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } },
         }));
       }
+
+      // pagamento de fatura de cartão por mês
+      const fatMes = {};
+      faturas.filter(t => (!mes || t.mes === mes) && (!ano || t.ano === Number(ano)))
+        .forEach(t => { fatMes[t.mes] = (fatMes[t.mes] || 0) + t.valor; });
+      const fmArr = H.MESES.filter(m => fatMes[m]).map(m => ({ mes: m, valor: fatMes[m] }));
+      if (fmArr.length) {
+        reg(new Chart(document.getElementById('rel-bar-fatura-mes'), {
+          type: 'bar', data: { labels: fmArr.map(m => m.mes), datasets: [{ label: 'Faturas pagas', data: fmArr.map(m => m.valor), backgroundColor: '#8b5cf6' }] },
+          options: { responsive: true, plugins: { legend: { display: false }, datalabels: { color: '#fff', font: { weight: 'bold', size: 11 }, anchor: 'center', formatter: (val) => H.formatarMoeda(val) } }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } },
+        }));
+      }
+      const totalFat = fmArr.reduce((s, m) => s + m.valor, 0);
+      document.getElementById('rel-tab-fatura').innerHTML = fmArr.map(m =>
+        `<div class="chart-table-row"><span>${H.esc(m.mes)}</span><span>${H.formatarMoeda(m.valor)}</span></div>`
+      ).join('') + (totalFat ? `<div class="chart-table-row total"><span>Total</span><span>${H.formatarMoeda(totalFat)}</span></div>` : '<div class="empty-text">Nenhum pagamento de fatura no período</div>');
     };
 
     document.getElementById('rel-ano').onchange = refresh;
