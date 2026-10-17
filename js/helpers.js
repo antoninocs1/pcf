@@ -7,18 +7,26 @@ PCF.Helpers = (() => {
   const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const DIAS_SEMANA = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 
-  const PGTO_CARTAO_COMPRA = 'Cartão Crédito Compra';
-  const PGTO_CARTAO_PAGAMENTO = 'Cartão Crédito Pagamento';
+  const PGTO_CARTAO_COMPRA = 'Cartão de Crédito (Compra)';
+  const PGTO_CARTAO_PAGAMENTO = 'Cartão de Crédito (Pagamento)';
   const CAT_PAGAMENTO_FATURA = 'Pagamento de Fatura de Cartão';
   const FORMAS_PAGAMENTO = ['Dinheiro','PIX','Boleto','Cartão Débito',PGTO_CARTAO_COMPRA,PGTO_CARTAO_PAGAMENTO,'Transferência/TED','Outros'];
   const ICONES_PAGAMENTO = {
     [PGTO_CARTAO_COMPRA]: 'Img/icons/cartao-compra.png',
     [PGTO_CARTAO_PAGAMENTO]: 'Img/icons/cartao-pagamento.png',
   };
+  /* Máscara do ícone no style do próprio elemento: url() dentro de variável CSS
+     seria resolvida relativa a css/styles.css, e o ícone não carregaria. */
+  const estiloIconePgto = (forma) => {
+    const path = ICONES_PAGAMENTO[forma];
+    if (!path) return '';
+    const url = new URL(path, document.baseURI).href;
+    return `-webkit-mask-image:url('${url}');mask-image:url('${url}')`;
+  };
   const TIPOS_DESPESA = ['Fixo','Variável'];
 
   /* O pagamento da fatura apenas quita compras já lançadas como despesa
-     (Cartão Crédito Compra); somá-lo de novo contaria o mesmo gasto duas vezes. */
+     (Cartão de Crédito (Compra)); somá-lo de novo contaria o mesmo gasto duas vezes. */
   const ehPagamentoFatura = (t) => t?.tipoOperacao === 'DESPESA' && t?.categoria === CAT_PAGAMENTO_FATURA;
   const semPagamentoFatura = (transacoes) => (transacoes || []).filter(t => !ehPagamentoFatura(t));
 
@@ -351,7 +359,7 @@ PCF.Helpers = (() => {
   return {
     MESES, DIAS_SEMANA, FORMAS_PAGAMENTO, TIPOS_DESPESA, ICONES_PAGAMENTO,
     PGTO_CARTAO_COMPRA, PGTO_CARTAO_PAGAMENTO, CAT_PAGAMENTO_FATURA,
-    ehPagamentoFatura, semPagamentoFatura, aplicarSufixoParcela,
+    ehPagamentoFatura, semPagamentoFatura, aplicarSufixoParcela, estiloIconePgto,
     formatarMoeda, formatarData, extrairInfoData, hoje, horaAtual,
     hashSenha, formatarCPF, formatarTelefone,
     calcularResumo, agruparPorCategoria, agruparPorMes, calcularIMC, IMC_CLASS,

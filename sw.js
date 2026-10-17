@@ -4,7 +4,7 @@
    usa o cache quando estiver offline. Firebase/Firestore e
    requisições de outras origens não passam pelo cache.
    ======================================================== */
-const CACHE_NAME = 'pcf-shell-v3';
+const CACHE_NAME = 'pcf-shell-v4';
 const SHELL = [
   './',
   './index.html',

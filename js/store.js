@@ -363,9 +363,10 @@ PCF.Store = (() => {
   const _normalizarCategoriaFinanceira = (categoria) => categoria === 'Sonhos' ? 'Propósitos' : categoria;
   const CAT_PAGAMENTO_FATURA = 'Pagamento de Fatura de Cartão';
   // "Cartão Crédito" foi dividido em Compra e Pagamento (da fatura).
+  const PGTO_CARTAO_COMPRA = 'Cartão de Crédito (Compra)';
   const _normalizarFormaPagamento = (t) => {
-    if (t?.categoria === CAT_PAGAMENTO_FATURA) return 'Cartão Crédito Pagamento';
-    if (t?.formaPagamento === 'Cartão Crédito') return 'Cartão Crédito Compra';
+    if (t?.categoria === CAT_PAGAMENTO_FATURA) return 'Cartão de Crédito (Pagamento)';
+    if (['Cartão Crédito', 'Cartão Crédito Compra'].includes(t?.formaPagamento)) return PGTO_CARTAO_COMPRA;
     return t?.formaPagamento;
   };
   const _normalizarTransacaoFinanceira = (t) => {

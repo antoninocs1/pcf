@@ -222,12 +222,12 @@ PCF.App = (() => {
               <h2 class="landing-section-title">Sobre o PCF</h2>
               <p class="landing-about-acronym">
                 <strong>PCF — Personal Control Function</strong><br>
-                <em>Em português: Planejamento para Controle Pessoal</em>
+                <em>Planejamento para Controle Pessoal</em>
               </p>
               <p class="landing-about-text">
                 O <strong>PCF</strong> é uma aplicação web completa desenvolvida para ajudar no planejamento
                 e organização da vida financeira, emocional e de bem-estar. Seu destaque é o
-                <strong>💰 Controle Financeiro Pessoal</strong>: receitas, despesas, investimentos, cartão de crédito,
+                <strong>Controle Financeiro Pessoal</strong>: receitas, despesas, investimentos, cartão de crédito,
                 relatórios e as 4 Forças do dinheiro.
               </p>
               <p class="landing-about-text">

@@ -88,7 +88,7 @@ PCF.Pages = PCF.Pages || {};
     const sync = () => {
       const icon = H.ICONES_PAGAMENTO[pgto.value];
       $('pgto-icon').hidden = !icon;
-      if (icon) $('pgto-icon').style.setProperty('--pgto-icon', `url("${icon}")`);
+      if (icon) $('pgto-icon').style.cssText = H.estiloIconePgto(pgto.value);
       $('parcelas-group').hidden = pgto.value !== H.PGTO_CARTAO_COMPRA;
       formaAnterior = pgto.value;
     };
@@ -190,7 +190,7 @@ PCF.Pages = PCF.Pages || {};
       if (comprasCartao || faturasPagas) {
         document.getElementById('dash-cards').insertAdjacentHTML('beforeend', `
           <div class="card card-cartao" title="As compras no cartão entram nas Despesas. O pagamento da fatura só quita essas compras, por isso não é somado de novo.">
-            <span class="pgto-icon" style="--pgto-icon:url('${H.ICONES_PAGAMENTO[H.PGTO_CARTAO_PAGAMENTO]}')"></span>
+            <span class="pgto-icon" style="${H.estiloIconePgto(H.PGTO_CARTAO_PAGAMENTO)}"></span>
             <div class="card-info"><span class="card-label">Cartão de crédito</span>
               <span class="card-value">${H.formatarMoeda(comprasCartao)}</span>
               <small class="card-note">compras (já nas despesas) · faturas pagas: ${H.formatarMoeda(faturasPagas)} (fora dos totais)</small>
@@ -648,7 +648,7 @@ PCF.Pages = PCF.Pages || {};
       const faturasPagas = faturas.filter(t => (!mes || t.mes === mes) && (!ano || t.ano === Number(ano))).reduce((s, t) => s + t.valor, 0);
       if (faturasPagas) {
         document.getElementById('rel-tab-desp').insertAdjacentHTML('beforeend',
-          `<div class="chart-table-row text-muted" title="Quita compras já lançadas como despesa (Cartão Crédito Compra)"><span>${H.esc(H.CAT_PAGAMENTO_FATURA)} (fora do total)</span><span>${H.formatarMoeda(faturasPagas)}</span><span>—</span></div>`);
+          `<div class="chart-table-row text-muted" title="Quita compras já lançadas como despesa (${H.esc(H.PGTO_CARTAO_COMPRA)})"><span>${H.esc(H.CAT_PAGAMENTO_FATURA)} (fora do total)</span><span>${H.formatarMoeda(faturasPagas)}</span><span>—</span></div>`);
       }
 
       // top subcategorias
