@@ -60,6 +60,59 @@ PCF.Pages = PCF.Pages || {};
     return '';
   };
 
+  const pgtoOptions = (selected = '') => H.FORMAS_PAGAMENTO.map(f => `<option value="${f}" ${f === selected ? 'selected' : ''}>${f}</option>`).join('');
+
+  const pgtoFieldsHtml = (prefix, tipoId, t = {}) => {
+    const parcelasAtual = Number((/Parcela \d+\/(\d+)/i.exec(t.item || '') || [])[1]) || 1;
+    const parcelas = Array.from({ length: 24 }, (_, i) => i + 1)
+      .map(n => `<option value="${n}" ${n === parcelasAtual ? 'selected' : ''}>${n === 1 ? 'À vista' : n + 'x'}</option>`).join('');
+    return `
+      <div class="form-group"><label>Forma de Pagamento</label>
+        <div class="pgto-select-wrap">
+          <span class="pgto-icon" id="${prefix}-pgto-icon" hidden></span>
+          <select id="${prefix}-pgto"><option value="">Selecione...</option>${pgtoOptions(t.formaPagamento)}</select>
+        </div>
+      </div>
+      <div class="form-group"><label>Tipo</label><select id="${tipoId}"><option value="">Selecione...</option>${H.TIPOS_DESPESA.map(f => `<option value="${f}" ${f === t.tipo ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
+      <div class="form-group" id="${prefix}-parcelas-group" hidden><label>Parcelamento</label><select id="${prefix}-parcelas">${parcelas}</select></div>`;
+  };
+
+  /* Regras do cartão de crédito no formulário de transação:
+     - Compra: preenche Item/Descrição com "À vista" ou "Parcela 1/X";
+     - Pagamento: fixa a categoria "Pagamento de Fatura de Cartão" com
+       subcategoria N/A — e escolher essa categoria seleciona o Pagamento. */
+  const bindCartaoCredito = (prefix, setCategoria) => {
+    const $ = (id) => document.getElementById(`${prefix}-${id}`);
+    const pgto = $('pgto'), parcelas = $('parcelas'), item = $('item'), cat = $('cat');
+    let formaAnterior = pgto.value;
+    const sync = () => {
+      const icon = H.ICONES_PAGAMENTO[pgto.value];
+      $('pgto-icon').hidden = !icon;
+      if (icon) $('pgto-icon').style.setProperty('--pgto-icon', `url("${icon}")`);
+      $('parcelas-group').hidden = pgto.value !== H.PGTO_CARTAO_COMPRA;
+      formaAnterior = pgto.value;
+    };
+    pgto.addEventListener('change', () => {
+      if (pgto.value === H.PGTO_CARTAO_COMPRA) item.value = H.aplicarSufixoParcela(item.value, Number(parcelas.value));
+      else if (formaAnterior === H.PGTO_CARTAO_COMPRA) item.value = H.aplicarSufixoParcela(item.value, null);
+      if (pgto.value === H.PGTO_CARTAO_PAGAMENTO) setCategoria(H.CAT_PAGAMENTO_FATURA);
+      else if (cat.value === H.CAT_PAGAMENTO_FATURA) setCategoria('');
+      sync();
+    });
+    parcelas.addEventListener('change', () => { item.value = H.aplicarSufixoParcela(item.value, Number(parcelas.value)); });
+    sync();
+    // Chamado sempre que a categoria muda.
+    return () => {
+      if (cat.value === H.CAT_PAGAMENTO_FATURA && pgto.value !== H.PGTO_CARTAO_PAGAMENTO) {
+        if (formaAnterior === H.PGTO_CARTAO_COMPRA) item.value = H.aplicarSufixoParcela(item.value, null);
+        pgto.value = H.PGTO_CARTAO_PAGAMENTO;
+      } else if (cat.value !== H.CAT_PAGAMENTO_FATURA && pgto.value === H.PGTO_CARTAO_PAGAMENTO) {
+        pgto.value = '';
+      }
+      sync();
+    };
+  };
+
   const saveFinanceSuccess = (transactionId) => {
     sessionStorage.setItem(FIN_SUCCESS_KEY, JSON.stringify({
       message: 'Transação registrada com sucesso',
@@ -77,8 +130,10 @@ PCF.Pages = PCF.Pages || {};
 
   /* ==================== DASHBOARD ==================== */
   PCF.Pages.dashboard = (container) => {
-    const trans = S.getTransacoes();
-    const anos = [...new Set(trans.map(t => t.ano))].sort();
+    const todas = S.getTransacoes();
+    const trans = H.semPagamentoFatura(todas);
+    const faturas = todas.filter(H.ehPagamentoFatura);
+    const anos = [...new Set(todas.map(t => t.ano))].sort();
     const chartVisibility = { receitas: true, despesas: true, investimentos: true };
     container.innerHTML = `
       <div class="page">
@@ -127,6 +182,21 @@ PCF.Pages = PCF.Pages || {};
         <div class="card card-despesa"><div class="card-icon">📉</div><div class="card-info"><span class="card-label">Despesas</span><span class="card-value">${H.formatarMoeda(r.totalDespesas)}</span></div></div>
         <div class="card card-saldo"><div class="card-icon">💰</div><div class="card-info"><span class="card-label">Saldo</span><span class="card-value">${H.formatarMoeda(r.saldo)}</span></div></div>
         <div class="card card-investimento"><div class="card-icon">🐷</div><div class="card-info"><span class="card-label">Investimentos</span><span class="card-value">${H.formatarMoeda(r.totalInvestimentos)}</span></div></div>`;
+
+      // Cartão de crédito: a compra já é a despesa; a fatura paga aparece à parte, fora dos totais.
+      const doPeriodo = (t) => (!mes || t.mes === mes) && (!ano || t.ano === Number(ano));
+      const comprasCartao = f.filter(t => t.tipoOperacao === 'DESPESA' && t.formaPagamento === H.PGTO_CARTAO_COMPRA).reduce((s, t) => s + t.valor, 0);
+      const faturasPagas = faturas.filter(doPeriodo).reduce((s, t) => s + t.valor, 0);
+      if (comprasCartao || faturasPagas) {
+        document.getElementById('dash-cards').insertAdjacentHTML('beforeend', `
+          <div class="card card-cartao" title="As compras no cartão entram nas Despesas. O pagamento da fatura só quita essas compras, por isso não é somado de novo.">
+            <span class="pgto-icon" style="--pgto-icon:url('${H.ICONES_PAGAMENTO[H.PGTO_CARTAO_PAGAMENTO]}')"></span>
+            <div class="card-info"><span class="card-label">Cartão de crédito</span>
+              <span class="card-value">${H.formatarMoeda(comprasCartao)}</span>
+              <small class="card-note">compras (já nas despesas) · faturas pagas: ${H.formatarMoeda(faturasPagas)} (fora dos totais)</small>
+            </div>
+          </div>`);
+      }
 
       // gráfico pizza despesas
       PCF.App.destroyCharts();
@@ -204,16 +274,26 @@ PCF.Pages = PCF.Pages || {};
             <div class="form-group"><label>Subcategoria</label><select id="ins-subcat"><option value="">N/A</option></select></div>
           </div>
           <div class="form-group"><label>Item / Descrição</label><input type="text" id="ins-item" placeholder="Descrição do lançamento"></div>
-          <div class="form-row" id="ins-desp-fields">
-            <div class="form-group"><label>Forma de Pagamento</label><select id="ins-pgto"><option value="">Selecione...</option>${H.FORMAS_PAGAMENTO.map(f => `<option value="${f}">${f}</option>`).join('')}</select></div>
-            <div class="form-group"><label>Tipo</label><select id="ins-tipo"><option value="">Selecione...</option>${H.TIPOS_DESPESA.map(t => `<option value="${t}">${t}</option>`).join('')}</select></div>
-          </div>
+          <div class="form-row" id="ins-desp-fields">${pgtoFieldsHtml('ins', 'ins-tipo')}</div>
           <button type="submit" class="btn btn-primary">Registrar Transação</button>
         </form>
       </div>`;
 
     if (window.lucide) lucide.createIcons();
     PCF.activateFinanceTabs(container);
+
+    const fillSubcats = () => {
+      const tipo = document.querySelector('input[name="tipoOp"]:checked').value;
+      const cat = cats.find(c => c.tipoOperacao === tipo && c.categoria === document.getElementById('ins-cat').value);
+      const subs = (cat?.subcategorias || []).map(s => typeof s === 'string' ? { nome: s, tipo: '' } : s);
+      document.getElementById('ins-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>' + subs.map(s => `<option value="${H.esc(s.nome)}">${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>';
+      const tipoSel = document.getElementById('ins-tipo');
+      if (tipoSel) tipoSel.value = '';
+    };
+    const onCategoria = bindCartaoCredito('ins', (nome) => {
+      document.getElementById('ins-cat').value = nome;
+      fillSubcats();
+    });
 
     const updateCats = () => {
       const tipo = document.querySelector('input[name="tipoOp"]:checked').value;
@@ -222,6 +302,7 @@ PCF.Pages = PCF.Pages || {};
       catSel.innerHTML = '<option value="">Selecione...</option>' + filtered.map(c => `<option value="${H.esc(c.categoria)}">${H.esc(c.categoria)}</option>`).join('');
       document.getElementById('ins-subcat').innerHTML = '<option value="">N/A</option>';
       document.getElementById('ins-desp-fields').style.display = tipo === 'DESPESA' ? '' : 'none';
+      onCategoria();
     };
 
     document.querySelectorAll('input[name="tipoOp"]').forEach(r => {
@@ -233,12 +314,8 @@ PCF.Pages = PCF.Pages || {};
     });
 
     document.getElementById('ins-cat').onchange = () => {
-      const tipo = document.querySelector('input[name="tipoOp"]:checked').value;
-      const cat = cats.find(c => c.tipoOperacao === tipo && c.categoria === document.getElementById('ins-cat').value);
-      const subs = (cat?.subcategorias || []).map(s => typeof s === 'string' ? { nome: s, tipo: '' } : s);
-      document.getElementById('ins-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>' + subs.map(s => `<option value="${H.esc(s.nome)}">${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>';
-      const tipoSel = document.getElementById('ins-tipo');
-      if (tipoSel) tipoSel.value = '';
+      fillSubcats();
+      onCategoria();
     };
 
     document.getElementById('ins-subcat').onchange = () => {
@@ -421,14 +498,7 @@ PCF.Pages = PCF.Pages || {};
             <div class="form-group"><label>Subcategoria</label><select id="et-subcat">${subsDoObj.length ? '<option value="">Selecione...</option>'+subsDoObj.map(s=>`<option value="${H.esc(s.nome)}" ${s.nome===t.subcategoria?'selected':''}>${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>'}</select></div>
           </div>
           <div class="form-group"><label>Item / Descrição</label><input type="text" id="et-item" value="${H.esc(t.item||'')}"></div>
-          <div class="form-row" id="et-desp-fields" style="${tipoAtual==='DESPESA'?'':'display:none'}">
-            <div class="form-group"><label>Forma de Pagamento</label>
-              <select id="et-pgto">${H.FORMAS_PAGAMENTO.map(f=>`<option value="${f}" ${f===t.formaPagamento?'selected':''}>${f}</option>`).join('')}</select>
-            </div>
-            <div class="form-group"><label>Tipo</label>
-              <select id="et-ftipo">${H.TIPOS_DESPESA.map(f=>`<option value="${f}" ${f===t.tipo?'selected':''}>${f}</option>`).join('')}</select>
-            </div>
-          </div>
+          <div class="form-row" id="et-desp-fields" style="${tipoAtual==='DESPESA'?'':'display:none'}">${pgtoFieldsHtml('et', 'et-ftipo', t)}</div>
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" id="et-cancel">Cancelar</button>
             <button type="submit" class="btn btn-primary">Salvar</button>
@@ -439,19 +509,30 @@ PCF.Pages = PCF.Pages || {};
     document.getElementById('et-cancel').onclick = () => overlay.remove();
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
+    const fillEditSubcats = () => {
+      const tipo = document.getElementById('et-tipo-op').value;
+      const catObj = cats.find(c => c.tipoOperacao === tipo && c.categoria === document.getElementById('et-cat').value);
+      const subs = (catObj?.subcategorias || []).map(s => typeof s === 'string' ? { nome: s, tipo: '' } : s);
+      document.getElementById('et-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>'+subs.map(s=>`<option value="${H.esc(s.nome)}">${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>';
+      document.getElementById('et-ftipo').value = '';
+    };
+    const onEditCategoria = bindCartaoCredito('et', (nome) => {
+      const catSel = document.getElementById('et-cat');
+      if (!nome && !catSel.querySelector('option[value=""]')) catSel.insertAdjacentHTML('afterbegin', '<option value="">Selecione...</option>');
+      catSel.value = nome;
+      fillEditSubcats();
+    });
     document.getElementById('et-tipo-op').onchange = function() {
       const tipo = this.value;
       const fc = cats.filter(c => c.tipoOperacao === tipo);
       document.getElementById('et-cat').innerHTML = fc.map(c=>`<option value="${H.esc(c.categoria)}">${H.esc(c.categoria)}</option>`).join('');
-      document.getElementById('et-subcat').innerHTML = '<option value="">N/A</option>';
       document.getElementById('et-desp-fields').style.display = tipo === 'DESPESA' ? '' : 'none';
+      fillEditSubcats();
+      onEditCategoria();
     };
-    document.getElementById('et-cat').onchange = function() {
-      const tipo = document.getElementById('et-tipo-op').value;
-      const catObj = cats.find(c => c.tipoOperacao === tipo && c.categoria === this.value);
-      const subs = (catObj?.subcategorias || []).map(s => typeof s === 'string' ? { nome: s, tipo: '' } : s);
-      document.getElementById('et-subcat').innerHTML = subs.length ? '<option value="">Selecione...</option>'+subs.map(s=>`<option value="${H.esc(s.nome)}">${H.esc(s.nome)}</option>`).join('') : '<option value="">N/A</option>';
-      document.getElementById('et-ftipo').value = '';
+    document.getElementById('et-cat').onchange = () => {
+      fillEditSubcats();
+      onEditCategoria();
     };
     document.getElementById('et-subcat').onchange = function() {
       const tipo = document.getElementById('et-tipo-op').value;
@@ -497,8 +578,10 @@ PCF.Pages = PCF.Pages || {};
 
   /* ==================== RELATÓRIOS ==================== */
   PCF.Pages.relatorios = (container) => {
-    const trans = S.getTransacoes();
-    const anos = [...new Set(trans.map(t => t.ano))].sort();
+    const todas = S.getTransacoes();
+    const trans = H.semPagamentoFatura(todas);
+    const faturas = todas.filter(H.ehPagamentoFatura);
+    const anos = [...new Set(todas.map(t => t.ano))].sort();
     const colors = ['#2563eb','#16a34a','#dc2626','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1','#14b8a6','#e11d48'];
 
     container.innerHTML = `
@@ -561,6 +644,11 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('rel-tab-desp').innerHTML = despCat.map(d =>
         `<div class="chart-table-row"><span>${H.esc(d.categoria)}</span><span>${H.formatarMoeda(d.valor)}</span><span>${totalDesp ? ((d.valor/totalDesp)*100).toFixed(1) : 0}%</span></div>`
       ).join('') + (totalDesp ? `<div class="chart-table-row total"><span>Total</span><span>${H.formatarMoeda(totalDesp)}</span><span>100%</span></div>` : '');
+      const faturasPagas = faturas.filter(t => (!mes || t.mes === mes) && (!ano || t.ano === Number(ano))).reduce((s, t) => s + t.valor, 0);
+      if (faturasPagas) {
+        document.getElementById('rel-tab-desp').insertAdjacentHTML('beforeend',
+          `<div class="chart-table-row text-muted" title="Quita compras já lançadas como despesa (Cartão Crédito Compra)"><span>${H.esc(H.CAT_PAGAMENTO_FATURA)} (fora do total)</span><span>${H.formatarMoeda(faturasPagas)}</span><span>—</span></div>`);
+      }
 
       // top subcategorias
       const despSub = {};
@@ -627,7 +715,7 @@ PCF.Pages = PCF.Pages || {};
 
   /* ==================== CICLO DO DINHEIRO ==================== */
   PCF.Pages.ciclo = (container) => {
-    const trans = S.getTransacoes();
+    const trans = H.semPagamentoFatura(S.getTransacoes());
     const r = H.calcularResumo(trans);
     const pDesp = r.totalReceitas ? ((r.totalDespesas / r.totalReceitas) * 100).toFixed(1) : '0.0';
     const pInv = r.totalReceitas ? ((r.totalInvestimentos / r.totalReceitas) * 100).toFixed(1) : '0.0';

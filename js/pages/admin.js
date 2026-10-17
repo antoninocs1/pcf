@@ -45,10 +45,11 @@ PCF.Pages = PCF.Pages || {};
               filtered.map(c => `<tr>
                 <td><span class="tipo-badge ${c.tipoOperacao.toLowerCase()}">${c.tipoOperacao}</span></td>
                 <td>${H.esc(c.categoria)}</td>
-                <td><div class="subcats-list">${(c.subcategorias || []).map(s => { const n = typeof s === 'string' ? s : s.nome; const tp = typeof s === 'string' ? '' : s.tipo; return `<span class="chip-small">${H.esc(n)}${tp ? ` <small style="opacity:.65;font-style:normal">(${H.esc(tp)})</small>` : ''}</span>`; }).join(' ') || '<em class="text-muted">Nenhuma</em>'}</div></td>
-                <td>
-                  <button class="btn-icon" data-edit="${c.id}" title="Editar"><i data-lucide="pencil"></i></button>
-                  <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover"><i data-lucide="trash-2"></i></button>
+                <td><div class="subcats-list">${c.sistema ? '<em class="text-muted">N/A</em>' : (c.subcategorias || []).map(s => { const n = typeof s === 'string' ? s : s.nome; const tp = typeof s === 'string' ? '' : s.tipo; return `<span class="chip-small">${H.esc(n)}${tp ? ` <small style="opacity:.65;font-style:normal">(${H.esc(tp)})</small>` : ''}</span>`; }).join(' ') || '<em class="text-muted">Nenhuma</em>'}</div></td>
+                <td>${c.sistema
+                  ? `<span class="cat-sistema-badge" title="Categoria padrão do sistema, usada com a forma de pagamento ${H.esc(H.PGTO_CARTAO_PAGAMENTO)}"><span class="pgto-icon pgto-icon-sm" style="--pgto-icon:url('${H.ICONES_PAGAMENTO[H.PGTO_CARTAO_PAGAMENTO]}')"></span> Padrão</span>`
+                  : `<button class="btn-icon" data-edit="${c.id}" title="Editar"><i data-lucide="pencil"></i></button>
+                  <button class="btn-icon btn-danger" data-del="${c.id}" title="Remover"><i data-lucide="trash-2"></i></button>`}
                 </td>
               </tr>`).join('')}
             </tbody>

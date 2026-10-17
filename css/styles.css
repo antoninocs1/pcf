@@ -4195,3 +4195,30 @@ html:not([data-theme]) .word-game-intro-icon {
   .quiz-options { grid-template-columns: 1fr; }
   .quiz-next .btn { width: 100%; justify-content: center; }
 }
+
+/* ---------- Forma de pagamento: ícones do cartão de crédito ---------- */
+.form-group[hidden] { display: none; }
+.pgto-select-wrap { display: flex; align-items: center; gap: 8px; }
+.pgto-select-wrap select { flex: 1; min-width: 0; }
+.pgto-icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  background: var(--accent);
+  -webkit-mask: var(--pgto-icon) center / contain no-repeat;
+  mask: var(--pgto-icon) center / contain no-repeat;
+}
+.pgto-icon[hidden] { display: none; }
+.pgto-icon-sm { width: 20px; height: 20px; display: inline-block; vertical-align: middle; }
+.cat-sistema-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--text-muted); }
+
+/* ---------- Logo PCF (login, Sobre, Apoie) ---------- */
+.pcf-logo-img { display: block; height: auto; background: #fff; border-radius: 14px; padding: 8px; }
+.landing-brand-logo { width: 34px; height: 34px; object-fit: contain; background: #fff; border-radius: 8px; padding: 2px; }
+.auth-card .pcf-logo-img { width: 96px; margin: 0 auto 10px; }
+.auth-card .auth-desc { color: var(--text-muted); font-size: .9rem; margin: -16px 0 20px; }
+.landing-about-logo { width: 140px; margin-bottom: 18px; }
+.support-logo { width: 120px; margin: 0 auto 16px; }
+.landing-about-acronym { font-size: .95rem; color: var(--text); margin-bottom: 14px; line-height: 1.6; }
+.landing-about-acronym em { color: var(--text-muted); }
+.card-cartao .card-note { display: block; margin-top: 2px; color: var(--text-muted); font-size: .72rem; line-height: 1.35; }

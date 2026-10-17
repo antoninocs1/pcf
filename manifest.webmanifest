@@ -1,14 +1,14 @@
 {
-  "name": "PCF - Controle Financeiro Pessoal",
+  "name": "PCF - Planejamento para o Sucesso Pessoal",
   "short_name": "PCF",
-  "description": "Finanças, emoções, hábitos, virtudes, roda da vida, saúde e jogos de autoconhecimento em um só lugar.",
+  "description": "💰 Controle Financeiro Pessoal — e também emoções, hábitos, virtudes, roda da vida, saúde e jogos de autoconhecimento em um só lugar.",
   "lang": "pt-BR",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0f172a",
+  "background_color": "#ffffff",
   "theme_color": "#1e40af",
   "categories": ["finance", "health", "lifestyle", "productivity"],
   "icons": [

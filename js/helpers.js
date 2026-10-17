@@ -7,8 +7,29 @@ PCF.Helpers = (() => {
   const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const DIAS_SEMANA = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 
-  const FORMAS_PAGAMENTO = ['Dinheiro','PIX','Boleto','Cartão Débito','Cartão Crédito','Transferência/TED','Outros'];
+  const PGTO_CARTAO_COMPRA = 'Cartão Crédito Compra';
+  const PGTO_CARTAO_PAGAMENTO = 'Cartão Crédito Pagamento';
+  const CAT_PAGAMENTO_FATURA = 'Pagamento de Fatura de Cartão';
+  const FORMAS_PAGAMENTO = ['Dinheiro','PIX','Boleto','Cartão Débito',PGTO_CARTAO_COMPRA,PGTO_CARTAO_PAGAMENTO,'Transferência/TED','Outros'];
+  const ICONES_PAGAMENTO = {
+    [PGTO_CARTAO_COMPRA]: 'Img/icons/cartao-compra.png',
+    [PGTO_CARTAO_PAGAMENTO]: 'Img/icons/cartao-pagamento.png',
+  };
   const TIPOS_DESPESA = ['Fixo','Variável'];
+
+  /* O pagamento da fatura apenas quita compras já lançadas como despesa
+     (Cartão Crédito Compra); somá-lo de novo contaria o mesmo gasto duas vezes. */
+  const ehPagamentoFatura = (t) => t?.tipoOperacao === 'DESPESA' && t?.categoria === CAT_PAGAMENTO_FATURA;
+  const semPagamentoFatura = (transacoes) => (transacoes || []).filter(t => !ehPagamentoFatura(t));
+
+  /* Sufixo de parcelamento no Item/Descrição: "À vista" ou "Parcela 1/X" */
+  const SUFIXO_PARCELA_RE = /\s*(?:-\s*)?(?:À vista|Parcela \d+\/\d+)\s*$/i;
+  const aplicarSufixoParcela = (item, parcelas) => {
+    const base = String(item || '').replace(SUFIXO_PARCELA_RE, '').trim();
+    if (parcelas === null) return base;
+    const sufixo = parcelas > 1 ? `Parcela 1/${parcelas}` : 'À vista';
+    return base ? `${base} - ${sufixo}` : sufixo;
+  };
 
   const formatarMoeda = (v) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -328,7 +349,9 @@ PCF.Helpers = (() => {
   };
 
   return {
-    MESES, DIAS_SEMANA, FORMAS_PAGAMENTO, TIPOS_DESPESA,
+    MESES, DIAS_SEMANA, FORMAS_PAGAMENTO, TIPOS_DESPESA, ICONES_PAGAMENTO,
+    PGTO_CARTAO_COMPRA, PGTO_CARTAO_PAGAMENTO, CAT_PAGAMENTO_FATURA,
+    ehPagamentoFatura, semPagamentoFatura, aplicarSufixoParcela,
     formatarMoeda, formatarData, extrairInfoData, hoje, horaAtual,
     hashSenha, formatarCPF, formatarTelefone,
     calcularResumo, agruparPorCategoria, agruparPorMes, calcularIMC, IMC_CLASS,

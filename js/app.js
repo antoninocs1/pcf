@@ -3,7 +3,7 @@
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
-PCF.APP_VERSION = '1.005';
+PCF.APP_VERSION = '1.006';
 
 PCF.App = (() => {
   const S = PCF.Store;
@@ -150,10 +150,10 @@ PCF.App = (() => {
         <header class="landing-header" id="landing-header">
           <div class="landing-header-inner">
             <a class="landing-brand" href="#inicio-section">
-              <span class="landing-brand-icon">💰</span>
+              <img src="Img/logo-pcf.png" alt="" class="landing-brand-logo">
               <span>
-                <span class="landing-brand-name">PCF</span>
-                <span class="landing-brand-sub">Controle Financeiro Pessoal</span>
+                <span class="landing-brand-name">PCF 💰</span>
+                <span class="landing-brand-sub">Planejamento para o Sucesso Pessoal</span>
               </span>
             </a>
             <nav class="landing-nav" id="landing-nav">
@@ -187,8 +187,10 @@ PCF.App = (() => {
         <section id="inicio-section" class="landing-hero">
           <div class="auth-container">
             <div class="auth-card">
-              <h1>💰 PCF</h1>
-              <h2>Controle Financeiro Pessoal</h2>
+              <img src="Img/logo-pcf.png" alt="Logotipo do PCF" class="pcf-logo-img">
+              <h1>PCF 💰</h1>
+              <h2>Planejamento para o Sucesso Pessoal</h2>
+              <p class="auth-desc">💰 Controle Financeiro Pessoal e muito mais</p>
               <div id="auth-tab-bar" class="auth-tabs">
                 <button class="auth-tab active" data-tab="login">Entrar</button>
                 <button class="auth-tab" data-tab="register">Cadastrar</button>
@@ -216,11 +218,18 @@ PCF.App = (() => {
         <section id="sobre-section" class="landing-section landing-about-section">
           <div class="landing-container landing-about-inner">
             <div>
+              <img src="Img/logo-pcf.png" alt="Logotipo do PCF" class="pcf-logo-img landing-about-logo">
               <span class="landing-badge">Sobre</span>
               <h2 class="landing-section-title">Sobre o PCF</h2>
+              <p class="landing-about-acronym">
+                <strong>PCF — Personal Control Function</strong><br>
+                <em>Em português: Planejamento para o Sucesso Pessoal</em>
+              </p>
               <p class="landing-about-text">
-                O <strong>PCF — Controle Financeiro Pessoal</strong> é uma aplicação web completa desenvolvida
-                para ajudar no controle e organização da vida financeira, emocional e de bem-estar.
+                O <strong>PCF</strong> é uma aplicação web completa desenvolvida para ajudar no planejamento
+                e organização da vida financeira, emocional e de bem-estar. Seu destaque é o
+                <strong>💰 Controle Financeiro Pessoal</strong>: receitas, despesas, investimentos, cartão de crédito,
+                relatórios e as 4 Forças do dinheiro.
               </p>
               <p class="landing-about-text">
                 O sistema reúne módulos integrados de finanças, hábitos, roda da vida, agenda, saúde e muito mais.
@@ -258,7 +267,7 @@ PCF.App = (() => {
         </section>
 
         <footer class="landing-footer">
-          <p>© ${new Date().getFullYear()} PCF — Controle Financeiro Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
+          <p>© ${new Date().getFullYear()} PCF — Planejamento para o Sucesso Pessoal &nbsp;·&nbsp; Desenvolvido por Antonino</p>
           <div class="landing-footer-links">
             <span class="app-version">Versão ${PCF.APP_VERSION}</span>
             <a href="#politica-privacidade" class="privacy-link" data-open-privacy>Política de Privacidade</a>
@@ -730,6 +739,7 @@ PCF.App = (() => {
         <button type="button" class="support-back-btn" id="support-back-home">
           <i data-lucide="arrow-left"></i> Voltar para a tela principal
         </button>
+        ${S.getSession() ? '' : '<img src="Img/logo-pcf.png" alt="Logotipo do PCF" class="pcf-logo-img support-logo">'}
         <div class="support-kicker"><i data-lucide="heart"></i> Nos apoie</div>
         <h2>Apoie o PCF</h2>
         <p class="support-subtitle">Ajude-nos a manter a ferramenta gratuita e em constante evolução.</p>

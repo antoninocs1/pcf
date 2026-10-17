@@ -361,7 +361,20 @@ PCF.Store = (() => {
   /* ---------- TRANSAÇÕES ---------- */
   const _tkU = () => `pcf_transacoes_${currentUserId()}`;
   const _normalizarCategoriaFinanceira = (categoria) => categoria === 'Sonhos' ? 'Propósitos' : categoria;
-  const _normalizarTransacaoFinanceira = (t) => ({ ...t, categoria: _normalizarCategoriaFinanceira(t?.categoria) });
+  const CAT_PAGAMENTO_FATURA = 'Pagamento de Fatura de Cartão';
+  // "Cartão Crédito" foi dividido em Compra e Pagamento (da fatura).
+  const _normalizarFormaPagamento = (t) => {
+    if (t?.categoria === CAT_PAGAMENTO_FATURA) return 'Cartão Crédito Pagamento';
+    if (t?.formaPagamento === 'Cartão Crédito') return 'Cartão Crédito Compra';
+    return t?.formaPagamento;
+  };
+  const _normalizarTransacaoFinanceira = (t) => {
+    const n = { ...t, categoria: _normalizarCategoriaFinanceira(t?.categoria) };
+    const formaPagamento = _normalizarFormaPagamento(n);
+    if (formaPagamento !== undefined) n.formaPagamento = formaPagamento;
+    if (n.categoria === CAT_PAGAMENTO_FATURA) n.subcategoria = '';
+    return n;
+  };
   const getTransacoes = () => {
     const raw = _get(_tkU()) || [];
     const normalizadas = raw.map(_normalizarTransacaoFinanceira);
@@ -395,13 +408,23 @@ PCF.Store = (() => {
     }
     return normalizada;
   };
+  // Categoria de sistema (sem subcategorias), sempre a última da lista.
+  const _garantirCategoriaFatura = (cats) => {
+    if (!cats.length) return cats;
+    const ehFatura = c => c.tipoOperacao === 'DESPESA' && c.categoria === CAT_PAGAMENTO_FATURA;
+    const existente = cats.find(ehFatura);
+    return [
+      ...cats.filter(c => !ehFatura(c)),
+      { ...(existente || { id: _uid() }), tipoOperacao: 'DESPESA', categoria: CAT_PAGAMENTO_FATURA, subcategorias: [], sistema: true },
+    ];
+  };
   const getCategorias = () => {
     const raw = _get(_ckU()) || [];
-    const normalizadas = raw.map(_normalizarCategoriaConfig);
+    const normalizadas = _garantirCategoriaFatura(raw.map(_normalizarCategoriaConfig));
     if (JSON.stringify(raw) !== JSON.stringify(normalizadas)) _set(_ckU(), normalizadas);
     return normalizadas;
   };
-  const saveCategorias = (c) => _set(_ckU(), (c || []).map(_normalizarCategoriaConfig));
+  const saveCategorias = (c) => _set(_ckU(), _garantirCategoriaFatura((c || []).map(_normalizarCategoriaConfig)));
   const addCategoria = (c) => { const all = getCategorias(); all.push({ id: _uid(), ...c }); saveCategorias(all); return all; };
   const updateCategoria = (id, data) => { const all = getCategorias(); const i = all.findIndex(c => c.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveCategorias(all); } return all; };
   const deleteCategoria = (id) => { const all = getCategorias().filter(c => c.id !== id); saveCategorias(all); return all; };
@@ -848,6 +871,7 @@ PCF.Store = (() => {
         { nome: 'Bolão', tipo: 'Variável' },
         { nome: 'Diversos', tipo: 'Variável' },
       ] },
+      { id: _uid(), tipoOperacao: 'DESPESA', categoria: CAT_PAGAMENTO_FATURA, subcategorias: [], sistema: true },
     ];
     _seedIfEmpty(`pcf_categorias_${userId}`, cats);
 

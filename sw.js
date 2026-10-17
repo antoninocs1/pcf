@@ -4,13 +4,15 @@
    usa o cache quando estiver offline. Firebase/Firestore e
    requisições de outras origens não passam pelo cache.
    ======================================================== */
-const CACHE_NAME = 'pcf-shell-v1';
+const CACHE_NAME = 'pcf-shell-v2';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './Img/icons/icon-192.png',
   './Img/icons/icon-512.png',
+  './Img/icons/favicon-64.png',
+  './Img/logo-pcf.png',
 ];
 
 self.addEventListener('install', (event) => {

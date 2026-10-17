@@ -139,7 +139,7 @@ PCF.Pages = PCF.Pages || {};
     if (catFin) {
       const hoje = new Date();
       const mes = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
-      const trans = S.getTransacoes().filter(t => t.data && t.data.startsWith(mes));
+      const trans = H.semPagamentoFatura(S.getTransacoes()).filter(t => t.data && t.data.startsWith(mes));
       const rec  = trans.filter(t => t.tipoOperacao === 'RECEITA').reduce((a, t) => a + (t.valor || 0), 0);
       const desp = trans.filter(t => t.tipoOperacao === 'DESPESA').reduce((a, t) => a + (t.valor || 0), 0);
       if (rec > 0) {
