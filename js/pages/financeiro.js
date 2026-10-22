@@ -65,7 +65,7 @@ PCF.Pages = PCF.Pages || {};
   const pgtoFieldsHtml = (prefix, tipoId, t = {}) => {
     const parcelasAtual = Number((/Parcela \d+\/(\d+)/i.exec(t.item || '') || [])[1]) || 1;
     const parcelas = Array.from({ length: 24 }, (_, i) => i + 1)
-      .map(n => `<option value="${n}" ${n === parcelasAtual ? 'selected' : ''}>${n === 1 ? 'À vista ou Parcela x/x' : n + 'x'}</option>`).join('');
+      .map(n => `<option value="${n}" ${n === parcelasAtual ? 'selected' : ''}>${n === 1 ? 'À vista' : n + 'x'}</option>`).join('');
     return `
       <div class="form-group"><label>Forma de Pagamento</label>
         <div class="pgto-select-wrap">
