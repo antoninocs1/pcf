@@ -1133,8 +1133,30 @@ PCF.Pages = PCF.Pages || {};
     const saveDiary = (arr) => S.saveDiario(arr);
     const fmtDate = (d) => { if (!d) return ''; const [y, m, dia] = d.split('-'); return `${dia}/${m}/${y}`; };
 
+    const HUMORES = [
+      { id: 'feliz', icon: '😊', label: 'Feliz' },
+      { id: 'triste', icon: '😢', label: 'Triste' },
+      { id: 'estressado', icon: '😓', label: 'Estressado' },
+      { id: 'calmo', icon: '😌', label: 'Calmo' },
+      { id: 'animado', icon: '🤩', label: 'Animado' },
+      { id: 'irritado', icon: '😠', label: 'Irritado' },
+      { id: 'grato', icon: '🙏', label: 'Grato' },
+      { id: 'ansioso', icon: '😰', label: 'Ansioso' },
+    ];
+    const getHumor = (id) => HUMORES.find(h => h.id === id);
+    const SONHO_FLAGS = [
+      { id: 'lucido', icon: '<i data-lucide="sparkles" style="color:#818cf8"></i>', label: 'Sonho Lúcido' },
+      { id: 'pesadelo', icon: '<i data-lucide="triangle-alert" style="color:var(--danger)"></i>', label: 'Foi um Pesadelo' },
+      { id: 'recorrente', icon: '<i data-lucide="repeat" style="color:var(--warning)"></i>', label: 'Sonho Recorrente' },
+    ];
+    const tipoDe = (e) => e.tipo || 'diario';
+
     let selectedDate = new Date().toISOString().slice(0, 10);
+    let tipoSel = 'diario';
     let sugestoesTab = '';
+    let stateKey = null;
+    let humorSel = null;
+    let sonho = {};
     const renderPreservingScroll = () => {
       const x = window.scrollX;
       const y = window.scrollY;
@@ -1147,9 +1169,17 @@ PCF.Pages = PCF.Pages || {};
       if (!TABS_SUGESTOES.find(t => t.id === sugestoesTab)) sugestoesTab = TABS_SUGESTOES[0]?.id || '';
       const today = new Date().toISOString().slice(0, 10);
       const entries = load();
-      const entry = entries.find(e => e.data === selectedDate);
+      const isSonho = tipoSel === 'sonho';
+      const entry = entries.find(e => e.data === selectedDate && tipoDe(e) === tipoSel);
       const isToday = selectedDate === today;
-      const sorted = [...entries].sort((a, b) => b.data.localeCompare(a.data));
+      const sorted = [...entries].sort((a, b) => b.data.localeCompare(a.data) || tipoDe(a).localeCompare(tipoDe(b)));
+      if (stateKey !== `${selectedDate}|${tipoSel}`) {
+        stateKey = `${selectedDate}|${tipoSel}`;
+        humorSel = entry?.humor || null;
+        sonho = { clareza: entry?.clareza || 3, lucido: !!entry?.lucido, pesadelo: !!entry?.pesadelo, recorrente: !!entry?.recorrente };
+      }
+      const humorAtual = getHumor(humorSel);
+      const humorPergunta = isSonho ? 'Como você se sentiu?' : 'Como você está se sentindo?';
 
       container.innerHTML = `
         <div class="page">
@@ -1160,9 +1190,14 @@ PCF.Pages = PCF.Pages || {};
               <input type="date" id="diario-data" value="${selectedDate}" max="${today}">
               <button class="btn btn-secondary btn-sm" id="btn-diario-next" title="Próximo dia" ${selectedDate >= today ? 'disabled' : ''}><i data-lucide="chevron-right"></i></button>
               <button class="btn btn-secondary btn-sm" id="btn-diario-hoje">Hoje</button>
+              <div class="diario-tipo" role="radiogroup" aria-label="Tipo de registro">
+                <label class="diario-tipo-opt${!isSonho ? ' active' : ''}"><input type="radio" name="diario-tipo" value="diario" ${!isSonho ? 'checked' : ''}> 📖 Diário</label>
+                <label class="diario-tipo-opt${isSonho ? ' active' : ''}"><input type="radio" name="diario-tipo" value="sonho" ${isSonho ? 'checked' : ''}> 🌙 Sonho</label>
+              </div>
             </div>
           </div>
 
+          ${isSonho ? '' : `
           <div class="diario-sugestoes">
             <div class="diario-sugestoes-header">
               <span>💡 <strong>Sugestões de reflexão</strong></span>
@@ -1172,15 +1207,48 @@ PCF.Pages = PCF.Pages || {};
               ${TABS_SUGESTOES.map(t => `<button class="diario-tab${t.id === sugestoesTab ? ' active' : ''}" data-tab="${t.id}">${t.icon} ${t.label}</button>`).join('')}
             </div>
             ${TABS_SUGESTOES.map(t => `<ul class="diario-tab-content${t.id === sugestoesTab ? ' active' : ''}" id="tab-${t.id}">${t.perguntas.map(p => `<li class="diario-question-item" data-question="${H.esc(p)}">${H.esc(p)}</li>`).join('')}</ul>`).join('')}
-          </div>
+          </div>`}
 
           <div class="card diario-today">
             <div class="diario-day-title">
-              <h3>${isToday ? '<i data-lucide="edit-3"></i> Hoje' : '<i data-lucide="calendar"></i> ' + fmtDate(selectedDate)}</h3>
+              <h3>${isSonho ? '<i data-lucide="moon"></i> ' + (isToday ? 'Sonho de hoje' : 'Sonho — ' + fmtDate(selectedDate)) : (isToday ? '<i data-lucide="edit-3"></i> Hoje' : '<i data-lucide="calendar"></i> ' + fmtDate(selectedDate))}</h3>
+              <div class="diario-humor" id="diario-humor">
+                <button type="button" class="diario-humor-btn" id="diario-humor-btn" aria-haspopup="listbox" aria-expanded="false">
+                  ${humorAtual ? `<span class="diario-humor-icon">${humorAtual.icon}</span><span>${humorAtual.label}</span>` : `<span class="text-muted">${humorPergunta}</span>`}
+                  <i data-lucide="chevron-down"></i>
+                </button>
+                <div class="diario-humor-list" role="listbox" hidden>
+                  <div class="diario-humor-list-title">${humorPergunta}</div>
+                  ${HUMORES.map(h => `
+                    <button type="button" role="option" class="diario-humor-opt${h.id === humorSel ? ' selected' : ''}" data-humor="${h.id}" aria-selected="${h.id === humorSel}">
+                      <span class="diario-humor-icon">${h.icon}</span><span>${h.label}</span>
+                      ${h.id === humorSel ? '<i data-lucide="check-circle-2" class="diario-humor-check"></i>' : ''}
+                    </button>`).join('')}
+                  ${humorSel ? '<button type="button" class="diario-humor-opt diario-humor-clear" data-humor=""><span class="text-muted">Limpar seleção</span></button>' : ''}
+                </div>
+              </div>
               ${entry && !isToday ? '<span class="badge badge-info">Editando registro salvo</span>' : ''}
             </div>
+            ${isSonho ? `
+            <div class="sonho-opcoes">
+              <div class="sonho-box">
+                <div class="sonho-clareza-head">
+                  <span>⭐ <strong>Clareza do Sonho</strong></span>
+                  <span class="sonho-clareza-val" id="sonho-clareza-val">${sonho.clareza}/5</span>
+                </div>
+                <input type="range" id="sonho-clareza" class="sonho-range" min="1" max="5" step="1" value="${sonho.clareza}">
+                <div class="sonho-range-legend"><small>Vago</small><small>Nítido</small></div>
+              </div>
+              <div class="sonho-box sonho-flags">
+                ${SONHO_FLAGS.map(f => `
+                  <label class="sonho-flag">
+                    <span class="sonho-flag-label">${f.icon}<strong>${f.label}</strong></span>
+                    <input type="checkbox" class="sonho-switch" data-flag="${f.id}" ${sonho[f.id] ? 'checked' : ''}>
+                  </label>`).join('')}
+              </div>
+            </div>` : ''}
             <textarea id="diario-texto" class="diario-textarea" rows="8"
-              placeholder="Escreva sobre este dia...">${H.esc(entry?.texto || '')}</textarea>
+              placeholder="${isSonho ? 'Descreva sobre o seu sonho...' : 'Escreva sobre este dia...'}">${H.esc(entry?.texto || '')}</textarea>
             <div class="diario-today-actions">
               <button id="diario-salvar" class="btn btn-primary"><i data-lucide="save"></i> Salvar</button>
               ${entry ? `<button id="diario-apagar" class="btn btn-danger"><i data-lucide="trash-2"></i> Apagar</button>` : ''}
@@ -1192,8 +1260,8 @@ PCF.Pages = PCF.Pages || {};
           <h3 style="margin:24px 0 10px">📚 Dias com registro <span class="badge badge-neutral">${sorted.length}</span></h3>
           <div class="diario-index">
             ${sorted.map(e => `
-              <div class="diario-index-item ${e.data === selectedDate ? 'active' : ''}" data-goto="${e.data}">
-                <span class="diario-index-date">${fmtDate(e.data)}${e.data === today ? ' <small>(hoje)</small>' : ''}</span>
+              <div class="diario-index-item ${e.data === selectedDate && tipoDe(e) === tipoSel ? 'active' : ''}" data-goto="${e.data}" data-goto-tipo="${tipoDe(e)}">
+                <span class="diario-index-date">${tipoDe(e) === 'sonho' ? '<span title="Sonho">🌙</span> ' : ''}${getHumor(e.humor) ? `<span title="${getHumor(e.humor).label}">${getHumor(e.humor).icon}</span> ` : ''}${fmtDate(e.data)}${e.data === today ? ' <small>(hoje)</small>' : ''}${e.lucido ? ' <small class="text-muted">· lúcido</small>' : ''}${e.pesadelo ? ' <small class="text-muted">· pesadelo</small>' : ''}${e.recorrente ? ' <small class="text-muted">· recorrente</small>' : ''}</span>
                 <span class="diario-index-preview">${H.esc((e.texto || '').slice(0, 90))}${(e.texto || '').length > 90 ? '…' : ''}</span>
               </div>`).join('')}
           </div>` : ''}
@@ -1218,26 +1286,67 @@ PCF.Pages = PCF.Pages || {};
           renderPreservingScroll();
         }
       };
+      container.querySelectorAll('input[name="diario-tipo"]').forEach(r => {
+        r.onchange = () => { tipoSel = r.value; renderPreservingScroll(); };
+      });
+
+      const clarezaInput = document.getElementById('sonho-clareza');
+      if (clarezaInput) clarezaInput.oninput = () => {
+        sonho.clareza = parseInt(clarezaInput.value, 10);
+        document.getElementById('sonho-clareza-val').textContent = `${sonho.clareza}/5`;
+      };
+      container.querySelectorAll('.sonho-switch').forEach(sw => {
+        sw.onchange = () => { sonho[sw.dataset.flag] = sw.checked; };
+      });
 
       document.getElementById('diario-salvar').onclick = () => {
         const texto = document.getElementById('diario-texto').value;
-        const arr = load().filter(e => e.data !== selectedDate);
-        if (texto.trim()) arr.push({ data: selectedDate, texto: texto.trim() });
+        const arr = load().filter(e => !(e.data === selectedDate && tipoDe(e) === tipoSel));
+        if (texto.trim() || humorSel) {
+          const novo = { data: selectedDate, texto: texto.trim() };
+          if (humorSel) novo.humor = humorSel;
+          if (isSonho) Object.assign(novo, { tipo: 'sonho', clareza: sonho.clareza, lucido: sonho.lucido, pesadelo: sonho.pesadelo, recorrente: sonho.recorrente });
+          arr.push(novo);
+        }
         saveDiary(arr);
         const ok = document.getElementById('diario-ok');
         if (ok) { ok.style.display = 'inline'; setTimeout(() => { if (ok) ok.style.display = 'none'; }, 2000); }
         render();
       };
 
+      const humorWrap = document.getElementById('diario-humor');
+      const humorBtn = document.getElementById('diario-humor-btn');
+      const humorList = humorWrap.querySelector('.diario-humor-list');
+      const setHumorOpen = (open) => {
+        humorList.hidden = !open;
+        humorBtn.setAttribute('aria-expanded', String(open));
+      };
+      humorBtn.onclick = (ev) => { ev.stopPropagation(); setHumorOpen(humorList.hidden); };
+      humorList.querySelectorAll('[data-humor]').forEach(opt => {
+        opt.onclick = () => {
+          humorSel = opt.dataset.humor || null;
+          const texto = document.getElementById('diario-texto').value;
+          render();
+          document.getElementById('diario-texto').value = texto;
+        };
+      });
+      if (PCF._diarioHumorClose) document.removeEventListener('click', PCF._diarioHumorClose);
+      PCF._diarioHumorClose = (ev) => {
+        const w = document.getElementById('diario-humor');
+        if (w && !w.contains(ev.target)) { const l = w.querySelector('.diario-humor-list'); if (l) l.hidden = true; }
+      };
+      document.addEventListener('click', PCF._diarioHumorClose);
+
       const delBtn = document.getElementById('diario-apagar');
       if (delBtn) delBtn.onclick = () => {
         if (!confirm('Apagar este registro?')) return;
-        saveDiary(load().filter(e => e.data !== selectedDate));
+        stateKey = null;
+        saveDiary(load().filter(e => !(e.data === selectedDate && tipoDe(e) === tipoSel)));
         render();
       };
 
       container.querySelectorAll('[data-goto]').forEach(item => {
-        item.onclick = () => { selectedDate = item.dataset.goto; renderPreservingScroll(); };
+        item.onclick = () => { selectedDate = item.dataset.goto; tipoSel = item.dataset.gotoTipo || 'diario'; renderPreservingScroll(); };
       });
 
       container.querySelectorAll('.diario-tab').forEach(tab => {
@@ -1603,14 +1712,14 @@ PCF.Pages = PCF.Pages || {};
           ${entries.length === 0 ? '<p class="empty-text">Nenhum registro no diário</p>' : `
           <div class="table-wrapper">
             <table class="table">
-              <thead><tr><th style="width:120px">Data</th><th>Prévia do Texto</th><th style="width:90px">Ações</th></tr></thead>
+              <thead><tr><th style="width:120px">Data</th><th style="width:90px">Tipo</th><th>Prévia do Texto</th><th style="width:90px">Ações</th></tr></thead>
               <tbody>
                 ${entries.map(e => `<tr>
-                  <td><strong>${_fmtDate(e.data)}</strong></td>
+                  <td><strong>${_fmtDate(e.data)}</strong></td><td>${e.tipo === 'sonho' ? '🌙 Sonho' : '📖 Diário'}</td>
                   <td>${H.esc((e.texto || '').slice(0, 120))}${(e.texto || '').length > 120 ? '…' : ''}</td>
                   <td>
-                    <button class="btn-icon" data-gb-edit-diario="${H.esc(e.data)}" title="Editar"><i data-lucide="pencil"></i></button>
-                    <button class="btn-icon btn-danger" data-gb-del-diario="${H.esc(e.data)}" title="Remover"><i data-lucide="trash-2"></i></button>
+                    <button class="btn-icon" data-gb-edit-diario="${H.esc(e.data)}|${e.tipo || 'diario'}" title="Editar"><i data-lucide="pencil"></i></button>
+                    <button class="btn-icon btn-danger" data-gb-del-diario="${H.esc(e.data)}|${e.tipo || 'diario'}" title="Remover"><i data-lucide="trash-2"></i></button>
                   </td>
                 </tr>`).join('')}
               </tbody>
@@ -1935,9 +2044,9 @@ PCF.Pages = PCF.Pages || {};
 
         /* Diário */
         const editDiario = e.target.closest('[data-gb-edit-diario]');
-        if (editDiario) { const date = editDiario.dataset.gbEditDiario; const entry = S.getDiario().find(x => x.data === date); showDiarioModal(date, entry?.texto || ''); return; }
+        if (editDiario) { const [date, tipo] = editDiario.dataset.gbEditDiario.split('|'); const entry = S.getDiario().find(x => x.data === date && (x.tipo || 'diario') === tipo); showDiarioModal(date, tipo, entry); return; }
         const delDiario = e.target.closest('[data-gb-del-diario]');
-        if (delDiario && confirm('Remover este registro do diário?')) { S.saveDiario(S.getDiario().filter(x => x.data !== delDiario.dataset.gbDelDiario)); render(); return; }
+        if (delDiario && confirm('Remover este registro do diário?')) { const [date, tipo] = delDiario.dataset.gbDelDiario.split('|'); S.saveDiario(S.getDiario().filter(x => !(x.data === date && (x.tipo || 'diario') === tipo))); render(); return; }
 
         /* Plano de Ação */
         const delPa = e.target.closest('[data-gb-del-pa]');
@@ -2139,12 +2248,13 @@ PCF.Pages = PCF.Pages || {};
     };
 
     /* ---- Modal: Diário ---- */
-    const showDiarioModal = (date, texto) => {
+    const showDiarioModal = (date, tipo, entry) => {
+      const texto = entry?.texto || '';
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal modal-lg">
-          <h3>📖 Editar Diário — ${_fmtDate(date)}</h3>
+          <h3>${tipo === 'sonho' ? '🌙 Editar Sonho' : '📖 Editar Diário'} — ${_fmtDate(date)}</h3>
           <form id="gb-diario-form">
             <div class="form-group">
               <label>Texto</label>
@@ -2162,8 +2272,8 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('gb-diario-form').onsubmit = (e) => {
         e.preventDefault();
         const novoTexto = document.getElementById('gb-diario-texto').value.trim();
-        const arr = S.getDiario().filter(x => x.data !== date);
-        if (novoTexto) arr.push({ data: date, texto: novoTexto });
+        const arr = S.getDiario().filter(x => !(x.data === date && (x.tipo || 'diario') === tipo));
+        if (novoTexto || entry?.humor) arr.push({ ...(entry || {}), data: date, texto: novoTexto });
         S.saveDiario(arr);
         overlay.remove();
         render();
