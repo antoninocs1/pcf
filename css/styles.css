@@ -4196,7 +4196,7 @@ html:not([data-theme]) .word-game-intro-icon {
   .quiz-next .btn { width: 100%; justify-content: center; }
 }
 
-/* ---------- Forma de pagamento: ícones do cartão de crédito ---------- */
+/* ---------- Forma de pagamento: ícones ---------- */
 .form-group[hidden] { display: none; }
 .pgto-select-wrap { display: flex; align-items: center; gap: 8px; }
 .pgto-select-wrap select { flex: 1; min-width: 0; }
@@ -4211,6 +4211,14 @@ html:not([data-theme]) .word-game-intro-icon {
 .pgto-icon[hidden] { display: none; }
 .pgto-icon-sm { width: 20px; height: 20px; display: inline-block; vertical-align: middle; }
 .cat-sistema-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--text-muted); }
+/* ---------- Base de Dados: Nova transação + importar/exportar Excel ---------- */
+.base-acoes { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; }
+.base-acoes .btn-icon-only { flex: 0 0 38px; width: 38px; min-width: 38px; padding-inline: 0; }
+.base-acoes .btn-icon-only svg { width: 18px; height: 18px; }
+@media (max-width: 768px) {
+  .base-acoes { flex: 1 1 100%; min-width: 0; }
+  .page-actions .base-acoes .btn-primary { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+}
 
 /* ---------- Logo PCF (login, Sobre, Apoie) ---------- */
 .pcf-logo-img { display: block; height: auto; }

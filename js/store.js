@@ -18,7 +18,7 @@ PCF.Store = (() => {
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
     'rodavida_reg', 'rodavida_config', 'plano_acao', 'saude_eventos', 'saude_medicamentos',
     'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades',
-    'jogo_palavras', 'jogo_palavras_estado', 'jogos_historico'
+    'jogo_palavras', 'jogo_palavras_estado', 'jogos_historico', 'financeiro_filtros'
   ];
 
   /* ---------- Resolve chave de cache → {col, uid} ---------- */
@@ -386,6 +386,13 @@ PCF.Store = (() => {
   const addTransacao = (t) => { const all = getTransacoes(); all.push({ id: _uid(), ..._normalizarTransacaoFinanceira(t) }); saveTransacoes(all); return all; };
   const updateTransacao = (id, data) => { const all = getTransacoes(); const i = all.findIndex(t => t.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveTransacoes(all); } return all; };
   const deleteTransacao = (id) => { const all = getTransacoes().filter(t => t.id !== id); saveTransacoes(all); return all; };
+  const addTransacoesLote = (lista) => { const all = getTransacoes(); (lista || []).forEach(t => all.push({ id: _uid(), ..._normalizarTransacaoFinanceira(t) })); saveTransacoes(all); return all; };
+
+  /* ---------- FILTROS FINANCEIROS (compartilhados por Painel, Base e Relatório) ---------- */
+  const _ffU = () => `pcf_financeiro_filtros_${currentUserId()}`;
+  const FILTROS_FINANCEIRO_PADRAO = { tipo: '', mes: '', ano: '', cat: '', receitas: true, despesas: true, investimentos: true };
+  const getFiltrosFinanceiro = () => ({ ...FILTROS_FINANCEIRO_PADRAO, ...(_get(_ffU()) || {}) });
+  const saveFiltrosFinanceiro = (parcial) => { const f = { ...getFiltrosFinanceiro(), ...parcial }; _set(_ffU(), f); return f; };
 
   /* ---------- CATEGORIAS ---------- */
   const _ckU = () => `pcf_categorias_${currentUserId()}`;
@@ -2736,7 +2743,8 @@ PCF.Store = (() => {
     getUsers, saveUsers, getUserById, getUserByLogin, createUser, updateUser, deleteUser,
     getSession, setSession, clearSession, currentUserId, currentUserIsAdmin,
     getLinhaTempo, saveLinhaTempo, addEventoLinhaTempo, updateEventoLinhaTempo, deleteEventoLinhaTempo,
-    getTransacoes, saveTransacoes, addTransacao, updateTransacao, deleteTransacao,
+    getTransacoes, saveTransacoes, addTransacao, updateTransacao, deleteTransacao, addTransacoesLote,
+    getFiltrosFinanceiro, saveFiltrosFinanceiro,
     getCategorias, saveCategorias, addCategoria, updateCategoria, deleteCategoria,
     getEmocoes, saveEmocoes, addEmocao, updateEmocao, deleteEmocao,
     getEmocoesConfig, saveEmocoesConfig,

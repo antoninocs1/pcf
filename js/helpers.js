@@ -12,8 +12,14 @@ PCF.Helpers = (() => {
   const CAT_PAGAMENTO_FATURA = 'Pagamento de Fatura de Cartão';
   const FORMAS_PAGAMENTO = ['Dinheiro','PIX','Boleto','Cartão Débito',PGTO_CARTAO_COMPRA,PGTO_CARTAO_PAGAMENTO,'Transferência/TED','Outros'];
   const ICONES_PAGAMENTO = {
+    'Dinheiro': 'Img/icons/pgto-dinheiro.svg',
+    'PIX': 'Img/icons/pgto-pix.svg',
+    'Boleto': 'Img/icons/pgto-boleto.svg',
+    'Cartão Débito': 'Img/icons/pgto-cartao-debito.svg',
     [PGTO_CARTAO_COMPRA]: 'Img/icons/cartao-compra.png',
     [PGTO_CARTAO_PAGAMENTO]: 'Img/icons/cartao-pagamento.png',
+    'Transferência/TED': 'Img/icons/pgto-transferencia.svg',
+    'Outros': 'Img/icons/pgto-outros.svg',
   };
   /* Máscara do ícone no style do próprio elemento: url() dentro de variável CSS
      seria resolvida relativa a css/styles.css, e o ícone não carregaria. */
