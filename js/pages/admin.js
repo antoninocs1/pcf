@@ -1143,7 +1143,15 @@ PCF.Pages = PCF.Pages || {};
       { id: 'grato', icon: '🙏', label: 'Grato' },
       { id: 'ansioso', icon: '😰', label: 'Ansioso' },
     ];
-    const getHumor = (id) => HUMORES.find(h => h.id === id);
+    const HUMORES_SONHO = [
+      { id: 'com_medo', icon: '😨', label: 'Com medo' },
+      { id: 'assustado', icon: '😱', label: 'Assustado' },
+      { id: 'confuso', icon: '😕', label: 'Confuso' },
+      { id: 'tranquilo', icon: '😌', label: 'Tranquilo' },
+      { id: 'neutro', icon: '😐', label: 'Neutro' },
+      { id: 'agitado', icon: '😵‍💫', label: 'Agitado' },
+    ];
+    const getHumor = (id) => [...HUMORES, ...HUMORES_SONHO].find(h => h.id === id);
     const SONHO_FLAGS = [
       { id: 'lucido', icon: '<i data-lucide="sparkles" style="color:#818cf8"></i>', label: 'Sonho Lúcido' },
       { id: 'pesadelo', icon: '<i data-lucide="triangle-alert" style="color:var(--danger)"></i>', label: 'Foi um Pesadelo' },
@@ -1173,6 +1181,7 @@ PCF.Pages = PCF.Pages || {};
       const entry = entries.find(e => e.data === selectedDate && tipoDe(e) === tipoSel);
       const isToday = selectedDate === today;
       const sorted = [...entries].sort((a, b) => b.data.localeCompare(a.data) || tipoDe(a).localeCompare(tipoDe(b)));
+      const humoresDisponiveis = isSonho ? [...HUMORES, ...HUMORES_SONHO] : HUMORES;
       if (stateKey !== `${selectedDate}|${tipoSel}`) {
         stateKey = `${selectedDate}|${tipoSel}`;
         humorSel = entry?.humor || null;
@@ -1219,7 +1228,7 @@ PCF.Pages = PCF.Pages || {};
                 </button>
                 <div class="diario-humor-list" role="listbox" hidden>
                   <div class="diario-humor-list-title">${humorPergunta}</div>
-                  ${HUMORES.map(h => `
+                  ${humoresDisponiveis.map(h => `
                     <button type="button" role="option" class="diario-humor-opt${h.id === humorSel ? ' selected' : ''}" data-humor="${h.id}" aria-selected="${h.id === humorSel}">
                       <span class="diario-humor-icon">${h.icon}</span><span>${h.label}</span>
                       ${h.id === humorSel ? '<i data-lucide="check-circle-2" class="diario-humor-check"></i>' : ''}

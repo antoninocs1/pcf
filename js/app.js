@@ -541,6 +541,7 @@ PCF.App = (() => {
             <button type="button" class="auth-password-toggle" data-target="login-pass" aria-label="Mostrar senha" title="Mostrar senha"><i data-lucide="eye"></i></button>
           </div>
         </div>
+        <button type="button" id="btn-forgot-password" class="auth-forgot-link">Esqueci minha senha</button>
         <div id="login-error" class="alert alert-error" style="display:none"></div>
         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
       </form>
@@ -551,6 +552,43 @@ PCF.App = (() => {
       <p class="auth-privacy">Ao acessar, você declara estar ciente da nossa <a href="#politica-privacidade" data-open-privacy>Política de Privacidade</a>.</p>`;
     if (window.lucide) lucide.createIcons();
     bindPasswordToggles();
+    const emailInput = document.getElementById('login-email');
+    const loginMessage = document.getElementById('login-error');
+    const showLoginMessage = (message, type = 'error') => {
+      loginMessage.textContent = message;
+      loginMessage.className = `alert alert-${type}`;
+      loginMessage.style.display = 'block';
+    };
+    document.getElementById('btn-forgot-password').onclick = async (e) => {
+      const button = e.currentTarget;
+      const email = emailInput.value.trim();
+      if (!emailInput.checkValidity()) {
+        emailInput.reportValidity();
+        emailInput.focus();
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Enviando...';
+      emailInput.disabled = true;
+      loginMessage.style.display = 'none';
+      try {
+        await PCF.Firebase.auth.sendPasswordResetEmail(email);
+        showLoginMessage('Se este e-mail estiver cadastrado, você receberá instruções para redefinir sua senha.', 'success');
+      } catch (err) {
+        if (err.code === 'auth/user-not-found') {
+          showLoginMessage('Se este e-mail estiver cadastrado, você receberá instruções para redefinir sua senha.', 'success');
+        } else {
+          showLoginMessage(err.code === 'auth/too-many-requests'
+            ? 'Muitas tentativas. Aguarde alguns minutos e tente novamente.'
+            : err.message);
+        }
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Esqueci minha senha';
+        emailInput.disabled = false;
+      }
+    };
+    emailInput.oninput = () => { loginMessage.style.display = 'none'; };
     document.getElementById('login-form').onsubmit = async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
@@ -561,6 +599,7 @@ PCF.App = (() => {
         // onAuthStateChanged cuida do loadAll + initApp
       } catch (err) {
         const el = document.getElementById('login-error');
+        el.className = 'alert alert-error';
         el.textContent = ['auth/invalid-credential','auth/wrong-password','auth/user-not-found'].includes(err.code)
           ? 'E-mail ou senha inválidos' : err.message;
         el.style.display = 'block';
