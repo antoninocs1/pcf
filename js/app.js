@@ -533,7 +533,8 @@ PCF.App = (() => {
             <input type="email" id="login-email" required autocomplete="email" placeholder="Digite seu e-mail">
           </div>
         </div>
-        <div class="form-group auth-input-group">
+        <p id="login-reset-hint" class="auth-reset-hint" hidden>Informe seu e-mail para receber o link de redefinição de senha.</p>
+        <div id="login-pass-group" class="form-group auth-input-group">
           <label class="sr-only" for="login-pass">Senha</label>
           <div class="auth-input-wrap">
             <i class="auth-field-icon" data-lucide="key-round" aria-hidden="true"></i>
@@ -543,7 +544,8 @@ PCF.App = (() => {
         </div>
         <button type="button" id="btn-forgot-password" class="auth-forgot-link">Esqueci minha senha</button>
         <div id="login-error" class="alert alert-error" style="display:none"></div>
-        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+        <button type="submit" id="login-submit" class="btn btn-primary btn-block">Entrar</button>
+        <button type="button" id="btn-cancel-reset" class="btn btn-outline btn-block auth-cancel-btn" hidden>Cancelar</button>
       </form>
       <div class="auth-divider"><span>ou</span></div>
       <button type="button" id="btn-google-login" class="btn btn-google btn-block">
@@ -559,17 +561,29 @@ PCF.App = (() => {
       loginMessage.className = `alert alert-${type}`;
       loginMessage.style.display = 'block';
     };
-    document.getElementById('btn-forgot-password').onclick = async (e) => {
-      const button = e.currentTarget;
-      const email = emailInput.value.trim();
-      if (!emailInput.checkValidity()) {
-        emailInput.reportValidity();
-        emailInput.focus();
-        return;
-      }
-      button.disabled = true;
-      button.textContent = 'Enviando...';
-      emailInput.disabled = true;
+    const passInput = document.getElementById('login-pass');
+    const submitBtn = document.getElementById('login-submit');
+    let resetMode = false;
+    // Alterna entre login e recuperação de senha: oculta senha, Google e troca Entrar por Enviar
+    const setResetMode = (on) => {
+      resetMode = on;
+      document.getElementById('login-pass-group').hidden = on;
+      document.getElementById('login-reset-hint').hidden = !on;
+      document.getElementById('btn-forgot-password').hidden = on;
+      document.getElementById('btn-cancel-reset').hidden = !on;
+      document.querySelector('#auth-content .auth-divider').hidden = on;
+      document.getElementById('btn-google-login').hidden = on;
+      passInput.required = !on;
+      submitBtn.textContent = on ? 'Enviar' : 'Entrar';
+      loginMessage.style.display = 'none';
+      emailInput.focus();
+    };
+    document.getElementById('btn-forgot-password').onclick = () => setResetMode(true);
+    document.getElementById('btn-cancel-reset').onclick = () => setResetMode(false);
+    const sendPasswordReset = async (email) => {
+      const cancelBtn = document.getElementById('btn-cancel-reset');
+      submitBtn.disabled = cancelBtn.disabled = emailInput.disabled = true;
+      submitBtn.textContent = 'Enviando...';
       loginMessage.style.display = 'none';
       try {
         await PCF.Firebase.auth.sendPasswordResetEmail(email);
@@ -583,15 +597,15 @@ PCF.App = (() => {
             : err.message);
         }
       } finally {
-        button.disabled = false;
-        button.textContent = 'Esqueci minha senha';
-        emailInput.disabled = false;
+        submitBtn.disabled = cancelBtn.disabled = emailInput.disabled = false;
+        submitBtn.textContent = 'Enviar';
       }
     };
     emailInput.oninput = () => { loginMessage.style.display = 'none'; };
     document.getElementById('login-form').onsubmit = async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
+      if (resetMode) return sendPasswordReset(email);
       const pass  = document.getElementById('login-pass').value;
       try {
         const cred = await PCF.Firebase.auth.signInWithEmailAndPassword(email, pass);

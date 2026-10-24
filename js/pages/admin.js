@@ -1144,14 +1144,14 @@ PCF.Pages = PCF.Pages || {};
       { id: 'ansioso', icon: '😰', label: 'Ansioso' },
     ];
     const HUMORES_SONHO = [
-      { id: 'com_medo', icon: '😨', label: 'Com medo' },
-      { id: 'assustado', icon: '😱', label: 'Assustado' },
+      { id: 'assustado', icon: '😱', label: 'Assustado (com medo)' },
       { id: 'confuso', icon: '😕', label: 'Confuso' },
-      { id: 'tranquilo', icon: '😌', label: 'Tranquilo' },
       { id: 'neutro', icon: '😐', label: 'Neutro' },
       { id: 'agitado', icon: '😵‍💫', label: 'Agitado' },
     ];
-    const getHumor = (id) => [...HUMORES, ...HUMORES_SONHO].find(h => h.id === id);
+    // Humores unificados por redundância; mantém registros antigos legíveis
+    const HUMOR_ALIASES = { com_medo: 'assustado', tranquilo: 'calmo' };
+    const getHumor = (id) => [...HUMORES, ...HUMORES_SONHO].find(h => h.id === (HUMOR_ALIASES[id] || id));
     const SONHO_FLAGS = [
       { id: 'lucido', icon: '<i data-lucide="sparkles" style="color:#818cf8"></i>', label: 'Sonho Lúcido' },
       { id: 'pesadelo', icon: '<i data-lucide="triangle-alert" style="color:var(--danger)"></i>', label: 'Foi um Pesadelo' },
