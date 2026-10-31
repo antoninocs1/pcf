@@ -3,7 +3,7 @@
    ======================================================== */
 window.PCF = window.PCF || {};
 PCF.Pages = PCF.Pages || {};
-PCF.APP_VERSION = '1.007';
+PCF.APP_VERSION = '1.008';
 
 PCF.App = (() => {
   const S = PCF.Store;
@@ -739,6 +739,12 @@ PCF.App = (() => {
 
     mc.innerHTML = `
       <div class="page home-page">
+        <div class="home-tabs" role="tablist" aria-label="Tela inicial">
+          <button type="button" class="home-tab" role="tab" data-home-aba="inicio"><i data-lucide="home"></i> Início</button>
+          <button type="button" class="home-tab" role="tab" data-home-aba="hoje"><i data-lucide="list-checks"></i> Hoje <span class="badge badge-neutral" id="home-pendencias"></span></button>
+        </div>
+        <div class="home-painel" id="home-painel-hoje" hidden></div>
+        <div class="home-painel" id="home-painel-inicio">
         <div class="home-banner">
           <div class="home-clock" id="home-clock"></div>
           <div class="home-date">${H.esc(dateStr.charAt(0).toUpperCase() + dateStr.slice(1))}</div>
@@ -763,9 +769,35 @@ PCF.App = (() => {
               <span class="home-module-label">${m.label}</span>
             </a>`).join('')}
         </div>
+        </div>
       </div>`;
 
     if (window.lucide) lucide.createIcons();
+
+    const atualizarPendencias = () => {
+      const el = document.getElementById('home-pendencias');
+      if (!el) return;
+      const qtd = PCF.Pages.pendenciasHoje();
+      el.textContent = qtd;
+      el.hidden = qtd === 0;
+    };
+    const mostrarAba = (aba) => {
+      mc.querySelectorAll('[data-home-aba]').forEach(b => {
+        const ativa = b.dataset.homeAba === aba;
+        b.classList.toggle('active', ativa);
+        b.setAttribute('aria-selected', String(ativa));
+      });
+      document.getElementById('home-painel-inicio').hidden = aba !== 'inicio';
+      const painel = document.getElementById('home-painel-hoje');
+      painel.hidden = aba !== 'hoje';
+      if (aba === 'hoje') PCF.Pages.painelHoje(painel, atualizarPendencias);
+      try { localStorage.setItem('pcf_home_aba', aba); } catch (_) {}
+    };
+    mc.querySelectorAll('[data-home-aba]').forEach(b => { b.onclick = () => mostrarAba(b.dataset.homeAba); });
+    let abaInicial = 'inicio';
+    try { abaInicial = localStorage.getItem('pcf_home_aba') === 'hoje' ? 'hoje' : 'inicio'; } catch (_) {}
+    mostrarAba(abaInicial);
+    atualizarPendencias();
 
     if (_homeClockInterval) { clearInterval(_homeClockInterval); _homeClockInterval = null; }
     const tick = () => {
@@ -855,6 +887,13 @@ PCF.App = (() => {
   };
 
   /* ==================== SIDEBAR ==================== */
+  const QUICK_ADD = [
+    { hash: '#inserir', icon: 'wallet', label: 'Despesa' },
+    { hash: '#emocoes', icon: 'brain', label: 'Emoção' },
+    { hash: '#saude-medicamentos', icon: 'pill', label: 'Dose' },
+    { hash: '#saude-sinais', icon: 'activity', label: 'Medição', abrirForm: true },
+    { hash: '#diario', icon: 'book-open', label: 'Diário' },
+  ];
   const navGroups = [
     { standalone: true, hash: '#home', icon: 'home', label: 'Início' },
     { standalone: true, hash: '#linha-tempo', icon: 'milestone', label: 'Linha do Tempo' },
@@ -921,9 +960,16 @@ PCF.App = (() => {
     {
       id: 'saude', label: 'Saúde', icon: 'heart-pulse',
       items: [
-        { hash: '#saude-consultas', icon: 'clipboard-plus', label: 'Consultas e Exames' },
-        { hash: '#saude-medicamentos', icon: 'pill', label: 'Medicamentos / Posologia' },
-        { hash: '#imc', icon: 'heart', label: 'IMC' },
+        { hash: '#saude-consultas', icon: 'clipboard-plus', label: 'Consultas e Exames', secao: 'Acompanhamento' },
+        { hash: '#saude-medicamentos', icon: 'pill', label: 'Medicamentos / Posologia', secao: 'Acompanhamento' },
+        { hash: '#saude-vacinas', icon: 'syringe', label: 'Vacinas', secao: 'Acompanhamento' },
+        { hash: '#imc', icon: 'heart', label: 'IMC', secao: 'Medições' },
+        { hash: '#saude-sinais', icon: 'activity', label: 'Sinais vitais', secao: 'Medições' },
+        { hash: '#saude-sintomas', icon: 'thermometer', label: 'Sintomas', secao: 'Medições' },
+        { hash: '#saude-sono', icon: 'bed', label: 'Sono', secao: 'Medições' },
+        { hash: '#saude-ficha', icon: 'id-card', label: 'Ficha médica', secao: 'Ficha e relatórios' },
+        { hash: '#saude-resumo', icon: 'file-text', label: 'Resumo para consulta', secao: 'Ficha e relatórios' },
+        { hash: '#saude-semanal', icon: 'calendar-range', label: 'Relatório semanal', secao: 'Ficha e relatórios' },
       ]
     },
     {
@@ -979,6 +1025,13 @@ PCF.App = (() => {
     '#imc': { label: 'IMC', grupo: 'Saúde' },
     '#saude-consultas': { label: 'Consultas e Exames', grupo: 'Saúde' },
     '#saude-medicamentos': { label: 'Medicamentos / Posologia', grupo: 'Saúde' },
+    '#saude-sinais': { label: 'Sinais vitais', grupo: 'Saúde' },
+    '#saude-sintomas': { label: 'Sintomas', grupo: 'Saúde' },
+    '#saude-sono': { label: 'Sono', grupo: 'Saúde' },
+    '#saude-vacinas': { label: 'Vacinas', grupo: 'Saúde' },
+    '#saude-ficha': { label: 'Ficha médica', grupo: 'Saúde' },
+    '#saude-resumo': { label: 'Resumo para consulta', grupo: 'Saúde' },
+    '#saude-semanal': { label: 'Relatório semanal', grupo: 'Saúde' },
     '#contatos': { label: 'Contatos Pessoais', grupo: 'Contatos' },
     '#linha-tempo': { label: 'Linha do Tempo', grupo: 'Linha do Tempo' },
     '#usuarios': { label: 'Configuração de usuários', grupo: 'Administração' },
@@ -1073,9 +1126,17 @@ PCF.App = (() => {
 
   const renderGroupTabs = (group, activeHash) => {
     if (!group || !group.items || group.items.length < 2) return '';
+    // Módulos com seções: primeiro escolhe a seção, depois a tela dentro dela
+    const secaoAtiva = group.items.find(tab => tab.hash === activeHash)?.secao;
+    const secoes = [...new Set(group.items.map(tab => tab.secao).filter(Boolean))];
+    const abas = secaoAtiva ? group.items.filter(tab => tab.secao === secaoAtiva) : group.items;
     return `
+      ${secaoAtiva ? `
+      <div class="gb-secoes" aria-label="Seções de ${group.label}">
+        ${secoes.map(secao => `<a class="gb-secao${secao === secaoAtiva ? ' active' : ''}" href="${group.items.find(tab => tab.secao === secao).hash}">${secao}</a>`).join('')}
+      </div>` : ''}
       <div class="app-tabs gb-tabs" aria-label="NavegaÃ§Ã£o de ${group.label}">
-        ${group.items.map(tab => `
+        ${abas.map(tab => `
           <a class="app-tab gb-tab${tab.hash === activeHash ? ' active' : ''}" href="${tab.hash}">
             <i data-lucide="${tab.icon}"></i> ${tab.label}
           </a>`).join('')}
@@ -1343,6 +1404,10 @@ PCF.App = (() => {
               <button id="btn-logout" class="btn-link" title="Sair"><i data-lucide="log-out"></i> Sair</button>
             </div>
           </div>
+          <div class="sidebar-busca">
+            <input type="search" id="busca-geral" placeholder="Buscar telas e registros..." aria-label="Buscar telas e registros" autocomplete="off">
+            <div class="busca-resultados" id="busca-resultados" hidden></div>
+          </div>
           <nav class="sidebar-nav" id="sidebar-nav">
             ${renderNav()}
           </nav>
@@ -1354,6 +1419,12 @@ PCF.App = (() => {
         <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false"><i data-lucide="menu"></i></button>
         <button id="btn-home-back" class="btn-home-back" title="Tela Inicial"><i data-lucide="home"></i></button>
         <main class="main-content" id="main-content"></main>
+        <div class="quick-add" id="quick-add">
+          <div class="quick-add-menu" id="quick-add-menu" hidden>
+            ${QUICK_ADD.map(q => `<a href="${q.hash}" class="quick-add-item" data-abrir-form="${q.abrirForm ? '1' : ''}"><i data-lucide="${q.icon}"></i> ${q.label}</a>`).join('')}
+          </div>
+          <button type="button" class="quick-add-btn" id="quick-add-btn" aria-label="Registro rápido" aria-expanded="false" title="Registro rápido"><i data-lucide="plus"></i></button>
+        </div>
       </div>`;
     document.getElementById('btn-logout').onclick = () => { S.clearSession(); };
     // onAuthStateChanged cuidará do renderLogin após signOut
@@ -1404,6 +1475,71 @@ PCF.App = (() => {
         closeMobileSidebar();
       }
     });
+
+    // Registro rápido
+    const quickMenu = document.getElementById('quick-add-menu');
+    const quickBtn = document.getElementById('quick-add-btn');
+    const setQuickOpen = (open) => {
+      quickMenu.hidden = !open;
+      quickBtn.setAttribute('aria-expanded', String(open));
+    };
+    quickBtn.onclick = (e) => { e.stopPropagation(); setQuickOpen(quickMenu.hidden); };
+    quickMenu.addEventListener('click', (e) => {
+      const link = e.target.closest('.quick-add-item');
+      if (!link) return;
+      setQuickOpen(false);
+      if (link.dataset.abrirForm) H.pedirAbrirFormulario();
+      // Já na mesma tela o hash não muda: redesenha para abrir o formulário
+      if (link.getAttribute('href') === location.hash) { e.preventDefault(); route(); }
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#quick-add')) setQuickOpen(false);
+    }, { signal: _sidebarKeyboardController.signal });
+
+    // Busca geral
+    const buscaInput = document.getElementById('busca-geral');
+    const buscaBox = document.getElementById('busca-resultados');
+    let buscaAtual = [];
+    let buscaTimer = null;
+    const telasBusca = () => navGroups.flatMap(g => g.standalone
+      ? ((g.adminOnly && !S.currentUserIsAdmin()) ? [] : [{ hash: g.hash, label: g.label }])
+      : g.items.filter(n => S.currentUserIsAdmin() || !ADMIN_ROUTES.has(n.hash)));
+    const pesquisar = () => {
+      const termo = buscaInput.value;
+      if (termo.trim().length < 2) { buscaBox.hidden = true; buscaAtual = []; return; }
+      buscaAtual = PCF.Pages.buscaGeral(termo, telasBusca());
+      buscaBox.hidden = false;
+      buscaBox.innerHTML = buscaAtual.length
+        ? buscaAtual.map((r, i) => `
+            <a href="${r.hash}" class="busca-item" data-busca="${i}">
+              <small class="busca-tipo">${H.esc(r.tipo)}${r.detalhe ? ' · ' + H.esc(r.detalhe) : ''}</small>
+              <span>${H.esc(r.titulo)}</span>
+            </a>`).join('')
+        : '<p class="busca-vazia">Nada encontrado.</p>';
+    };
+    const abrirResultado = (i) => {
+      buscaAtual[i]?.abrir?.();
+      buscaInput.value = '';
+      buscaBox.hidden = true;
+      closeMobileSidebar();
+    };
+    buscaInput.oninput = () => { clearTimeout(buscaTimer); buscaTimer = setTimeout(pesquisar, 150); };
+    buscaInput.onkeydown = (e) => {
+      if (e.key === 'Escape') { buscaInput.value = ''; buscaBox.hidden = true; }
+      if (e.key === 'Enter' && buscaAtual[0]) {
+        e.preventDefault();
+        const destino = buscaAtual[0].hash;
+        abrirResultado(0);
+        location.hash = destino;
+      }
+    };
+    buscaBox.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-busca]');
+      if (!item) return;
+      const mesmaTela = item.getAttribute('href') === location.hash;
+      abrirResultado(Number(item.dataset.busca));
+      if (mesmaTela) { e.preventDefault(); route(); }
+    });
   };
 
   const updateActiveNav = () => {
@@ -1430,6 +1566,18 @@ PCF.App = (() => {
   };
 
   /* ==================== ROUTER ==================== */
+  // Formulário da página com alterações ainda não salvas
+  const formularioAlterado = () => document.querySelector('#main-content form[data-alterado]');
+  document.addEventListener('input', (e) => {
+    e.target.closest?.('#main-content form')?.setAttribute('data-alterado', '1');
+  });
+  document.addEventListener('reset', (e) => { e.target.removeAttribute?.('data-alterado'); });
+  window.addEventListener('beforeunload', (e) => {
+    if (formularioAlterado()) e.preventDefault();
+  });
+  let _rotaAtual = null;
+  let _revertendoRota = false;
+
   const route = () => {
     if (!S.getSession()) {
       if ((location.hash || '').split('?')[0] === '#apoie') {
@@ -1441,6 +1589,14 @@ PCF.App = (() => {
       renderLogin();
       return;
     }
+    if (_revertendoRota) { _revertendoRota = false; return; }
+    if (_rotaAtual !== null && location.hash !== _rotaAtual && formularioAlterado()
+      && !confirm('Há dados não salvos neste formulário. Deseja sair mesmo assim?')) {
+      _revertendoRota = true;
+      location.hash = _rotaAtual;
+      return;
+    }
+    _rotaAtual = location.hash;
     destroyCharts();
     const hash = location.hash.split('?')[0] || '#dashboard';
     // Guarda rotas exclusivas de administrador
@@ -1464,6 +1620,13 @@ PCF.App = (() => {
       '#imc': pages.imc,
       '#saude-consultas': pages.saudeConsultas,
       '#saude-medicamentos': pages.saudeMedicamentos,
+      '#saude-sinais': pages.saudeSinais,
+      '#saude-sintomas': pages.saudeSintomas,
+      '#saude-sono': pages.saudeSono,
+      '#saude-vacinas': pages.saudeVacinas,
+      '#saude-ficha': pages.saudeFicha,
+      '#saude-resumo': pages.saudeResumo,
+      '#saude-semanal': pages.saudeSemanal,
       '#emocoes': pages.emocoes,
       '#emocoes-relatorios': pages.emocoesRelatorios,
       '#agenda': pages.agenda,
@@ -1551,7 +1714,7 @@ PCF.App = (() => {
   const getCompromissoUrgente = (compromisso, agora = new Date()) => {
     if (compromisso.status !== 'Pendente') return null;
 
-    const hj = agora.toISOString().split('T')[0];
+    const hj = H.dataISO(agora);
     if (compromisso.hora) {
       const compDateTime = getCompromissoDateTime(compromisso);
       if (!compDateTime || Number.isNaN(compDateTime.getTime())) return null;
@@ -1588,7 +1751,7 @@ PCF.App = (() => {
 
   const getPlanoAcaoUrgente = (acao, agora = new Date()) => {
     if (acao.status !== 'Pendente' || !acao.agendaAtivo || !acao.whenDate) return null;
-    const hj = agora.toISOString().split('T')[0];
+    const hj = H.dataISO(agora);
     if (acao.whenTime) {
       const acaoDateTime = getPlanoAcaoDateTime(acao);
       if (!acaoDateTime || Number.isNaN(acaoDateTime.getTime())) return null;
@@ -1624,7 +1787,7 @@ PCF.App = (() => {
 
   const getSaudeEventoUrgente = (evento, agora = new Date()) => {
     if (evento.status !== 'Pendente' || !evento.agendaAtivo || !evento.data) return null;
-    const hj = agora.toISOString().split('T')[0];
+    const hj = H.dataISO(agora);
     if (evento.hora) {
       const eventoDateTime = getSaudeEventoDateTime(evento);
       if (!eventoDateTime || Number.isNaN(eventoDateTime.getTime())) return null;
@@ -1642,16 +1805,6 @@ PCF.App = (() => {
     S.updateSaudeEvento(evento.id, { ultimoAvisoChave: chave });
   };
 
-  const extrairHorariosMedicamento = (med) => {
-    if (Array.isArray(med.horariosParsed) && med.horariosParsed.length) {
-      return [...new Set(med.horariosParsed.map(h => H.normalizarHora ? H.normalizarHora(h) : h).filter(Boolean))].sort();
-    }
-    return H.extrairHorarios ? H.extrairHorarios(med.horarios) : [];
-  };
-
-  const getMedicamentoDoseAvisoChave = (med, data, hora) =>
-    `${med.id}|${data || ''}|${hora || ''}|${med.agendaAtivo ? '1' : '0'}`;
-
   const getMedicamentoDosesUrgentes = (med, agora = new Date()) => {
     if (med.status !== 'Em uso' || !med.agendaAtivo || !med.dataInicio) return [];
     if (med.adiadoAte) {
@@ -1659,45 +1812,13 @@ PCF.App = (() => {
       if (!Number.isNaN(adiadoAte.getTime()) && adiadoAte > agora) return [];
     }
 
-    const hoje = agora.toISOString().split('T')[0];
-    if (med.dataInicio > hoje) return [];
-    if (med.dataFim && med.dataFim < hoje) return [];
-
-    const ultimaDoseNotificada = (() => {
-      if (!med.ultimoAvisoChave) return null;
-      const partes = String(med.ultimoAvisoChave).split('|');
-      if (partes.length < 3) return null;
-      const [, data, hora] = partes;
-      if (!data || !hora) return null;
-      const dt = new Date(`${data}T${hora}:00`);
-      return Number.isNaN(dt.getTime()) ? null : dt;
-    })();
-
-    const doses = extrairHorariosMedicamento(med)
-      .map(hora => {
-        const doseDateTime = new Date(`${hoje}T${hora}:00`);
-        if (Number.isNaN(doseDateTime.getTime()) || doseDateTime > agora) return null;
-        if (ultimaDoseNotificada && doseDateTime <= ultimaDoseNotificada) return null;
-        return {
-          med,
-          data: hoje,
-          hora,
-          sort: doseDateTime.getTime(),
-          chave: getMedicamentoDoseAvisoChave(med, hoje, hora),
-          tipo: 'agora',
-        };
-      })
-      .filter(Boolean);
-
-    if (doses.length === 0) return [];
-
-    return doses.sort((a, b) => b.sort - a.sort).slice(0, 1);
-  };
-
-  const markMedicamentoAlertShown = (dose) => {
-    const atual = S.getSaudeMedicamentos().find(m => m.id === dose.med.id);
-    if (!atual || atual.ultimoAvisoChave === dose.chave) return;
-    S.updateSaudeMedicamento(dose.med.id, { ultimoAvisoChave: dose.chave });
+    // Toda dose vencida de hoje sem registro é avisada, da mais antiga para a mais recente
+    const hoje = H.dataISO(agora);
+    const registradas = S.getSaudeDoses().filter(d => d.medId === med.id && d.data === hoje);
+    return H.dosesDoDia(med, hoje)
+      .filter(hora => !registradas.some(d => d.hora === hora))
+      .map(hora => ({ med, data: hoje, hora, sort: new Date(`${hoje}T${hora}:00`).getTime() }))
+      .filter(dose => dose.sort <= agora.getTime());
   };
 
   const playCompromissoAlertSound = () => {
@@ -1789,8 +1910,7 @@ PCF.App = (() => {
 
       const alertaMedicamento = medicamentos
         .flatMap(med => getMedicamentoDosesUrgentes(med, agora))
-        .sort((a, b) => a.sort - b.sort)
-        .find(dose => dose.med.ultimoAvisoChave !== dose.chave);
+        .sort((a, b) => a.sort - b.sort)[0];
 
       const compromissoSort = alertaCompromisso ? getCompromissoSortValue(alertaCompromisso.comp) : Number.MAX_SAFE_INTEGER;
       const planoSort = alertaPlanoAcao ? getPlanoAcaoSortValue(alertaPlanoAcao.acao) : Number.MAX_SAFE_INTEGER;
@@ -1812,7 +1932,6 @@ PCF.App = (() => {
       }
 
       if (medicamentoSort <= planoSort) {
-        markMedicamentoAlertShown(alertaMedicamento);
         showMedicamentoModalGlobal(alertaMedicamento);
         return;
       }
@@ -1985,24 +2104,29 @@ PCF.App = (() => {
         </div>
         <div class="modal-actions">
           <button class="btn btn-secondary" id="medicamento-adiar">Lembrar depois</button>
+          <button class="btn btn-secondary" id="medicamento-pular">Pular</button>
           <button class="btn btn-primary" id="medicamento-ok">Tomado</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
     playCompromissoAlertSound();
 
-    document.getElementById('medicamento-ok').onclick = () => {
-      S.updateSaudeMedicamento(med.id, { ultimoAvisoChave: dose.chave, adiadoAte: null });
+    const responder = (status) => {
+      S.registrarDose({ medId: med.id, data: dose.data, hora: dose.hora, status });
       overlay.remove();
       setTimeout(checkGlobalAlerts, 200);
     };
-    document.getElementById('medicamento-adiar').onclick = () => {
-      S.updateSaudeMedicamento(med.id, { ultimoAvisoChave: null, adiadoAte: new Date(Date.now() + 10 * 60 * 1000).toISOString() });
+    const adiar = () => {
+      S.updateSaudeMedicamento(med.id, { adiadoAte: new Date(Date.now() + 10 * 60 * 1000).toISOString() });
       overlay.remove();
       setTimeout(checkGlobalAlerts, 200);
     };
+    document.getElementById('medicamento-ok').onclick = () => responder('tomado');
+    document.getElementById('medicamento-pular').onclick = () => responder('pulado');
+    document.getElementById('medicamento-adiar').onclick = adiar;
+    // Fechar clicando fora não encerra a dose: ela volta a ser lembrada
     overlay.onclick = (e) => {
-      if (e.target === overlay) overlay.remove();
+      if (e.target === overlay) adiar();
     };
   };
 

@@ -1133,25 +1133,7 @@ PCF.Pages = PCF.Pages || {};
     const saveDiary = (arr) => S.saveDiario(arr);
     const fmtDate = (d) => { if (!d) return ''; const [y, m, dia] = d.split('-'); return `${dia}/${m}/${y}`; };
 
-    const HUMORES = [
-      { id: 'feliz', icon: '😊', label: 'Feliz' },
-      { id: 'triste', icon: '😢', label: 'Triste' },
-      { id: 'estressado', icon: '😓', label: 'Estressado' },
-      { id: 'calmo', icon: '😌', label: 'Calmo' },
-      { id: 'animado', icon: '🤩', label: 'Animado' },
-      { id: 'irritado', icon: '😠', label: 'Irritado' },
-      { id: 'grato', icon: '🙏', label: 'Grato' },
-      { id: 'ansioso', icon: '😰', label: 'Ansioso' },
-    ];
-    const HUMORES_SONHO = [
-      { id: 'assustado', icon: '😱', label: 'Assustado (com medo)' },
-      { id: 'confuso', icon: '😕', label: 'Confuso' },
-      { id: 'neutro', icon: '😐', label: 'Neutro' },
-      { id: 'agitado', icon: '😵‍💫', label: 'Agitado' },
-    ];
-    // Humores unificados por redundância; mantém registros antigos legíveis
-    const HUMOR_ALIASES = { com_medo: 'assustado', tranquilo: 'calmo' };
-    const getHumor = (id) => [...HUMORES, ...HUMORES_SONHO].find(h => h.id === (HUMOR_ALIASES[id] || id));
+    const { HUMORES, HUMORES_SONHO, getHumor } = H;
     const SONHO_FLAGS = [
       { id: 'lucido', icon: '<i data-lucide="sparkles" style="color:#818cf8"></i>', label: 'Sonho Lúcido' },
       { id: 'pesadelo', icon: '<i data-lucide="triangle-alert" style="color:var(--danger)"></i>', label: 'Foi um Pesadelo' },
@@ -1159,12 +1141,51 @@ PCF.Pages = PCF.Pages || {};
     ];
     const tipoDe = (e) => e.tipo || 'diario';
 
-    let selectedDate = new Date().toISOString().slice(0, 10);
+    let selectedDate = H.hoje();
     let tipoSel = 'diario';
     let sugestoesTab = '';
     let stateKey = null;
     let humorSel = null;
+    let humorSugerido = false;
     let sonho = {};
+    // Vindo da busca geral: abre direto o registro encontrado
+    if (PCF._diarioAbrir) {
+      selectedDate = PCF._diarioAbrir.data;
+      tipoSel = PCF._diarioAbrir.tipo;
+      PCF._diarioAbrir = null;
+    }
+    // Rascunho em edição: gravado logo após a digitação e antes de trocar de dia ou de tipo
+    let rascunho = null;
+    let rascunhoTimer = null;
+    const gravarRascunho = () => {
+      clearTimeout(rascunhoTimer);
+      if (!rascunho) return false;
+      const { data, tipo, texto, humor, opcoes } = rascunho;
+      rascunho = null;
+      const arr = load().filter(e => !(e.data === data && tipoDe(e) === tipo));
+      if (texto.trim() || humor) {
+        const novo = { data, texto: texto.trim() };
+        if (humor) novo.humor = humor;
+        if (tipo === 'sonho') Object.assign(novo, { tipo: 'sonho', clareza: opcoes.clareza, lucido: opcoes.lucido, pesadelo: opcoes.pesadelo, recorrente: opcoes.recorrente });
+        arr.push(novo);
+      }
+      saveDiary(arr);
+      if (tipo !== 'sonho') H.compartilharSentimento(data, null);
+      return true;
+    };
+    const avisarSalvo = () => {
+      const ok = document.getElementById('diario-ok');
+      if (!ok) return;
+      ok.style.display = 'inline';
+      setTimeout(() => { ok.style.display = 'none'; }, 2000);
+    };
+    const prepararRascunho = () => {
+      const textoEl = document.getElementById('diario-texto');
+      if (!textoEl) return;
+      rascunho = { data: selectedDate, tipo: tipoSel, texto: textoEl.value, humor: humorSel, opcoes: { ...sonho } };
+      clearTimeout(rascunhoTimer);
+      rascunhoTimer = setTimeout(() => { if (gravarRascunho()) avisarSalvo(); }, 800);
+    };
     const renderPreservingScroll = () => {
       const x = window.scrollX;
       const y = window.scrollY;
@@ -1173,9 +1194,10 @@ PCF.Pages = PCF.Pages || {};
     };
 
     const render = () => {
+      gravarRascunho();
       const TABS_SUGESTOES = S.getDiarioTabs();
       if (!TABS_SUGESTOES.find(t => t.id === sugestoesTab)) sugestoesTab = TABS_SUGESTOES[0]?.id || '';
-      const today = new Date().toISOString().slice(0, 10);
+      const today = H.hoje();
       const entries = load();
       const isSonho = tipoSel === 'sonho';
       const entry = entries.find(e => e.data === selectedDate && tipoDe(e) === tipoSel);
@@ -1185,6 +1207,12 @@ PCF.Pages = PCF.Pages || {};
       if (stateKey !== `${selectedDate}|${tipoSel}`) {
         stateKey = `${selectedDate}|${tipoSel}`;
         humorSel = entry?.humor || null;
+        // O modo Sonho fica fora da integração: o que se sentiu no sonho não é o estado atual
+        humorSugerido = false;
+        if (!isSonho && !humorSel) {
+          humorSel = H.sentimentoParaDiario(selectedDate);
+          humorSugerido = !!humorSel;
+        }
         sonho = { clareza: entry?.clareza || 3, lucido: !!entry?.lucido, pesadelo: !!entry?.pesadelo, recorrente: !!entry?.recorrente };
       }
       const humorAtual = getHumor(humorSel);
@@ -1236,6 +1264,7 @@ PCF.Pages = PCF.Pages || {};
                   ${humorSel ? '<button type="button" class="diario-humor-opt diario-humor-clear" data-humor=""><span class="text-muted">Limpar seleção</span></button>' : ''}
                 </div>
               </div>
+              ${humorSugerido ? '<small class="text-muted">Trazido das Emoções</small>' : ''}
               ${entry && !isToday ? '<span class="badge badge-info">Editando registro salvo</span>' : ''}
             </div>
             ${isSonho ? `
@@ -1283,13 +1312,13 @@ PCF.Pages = PCF.Pages || {};
       document.getElementById('btn-diario-prev').onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
         d.setDate(d.getDate() - 1);
-        selectedDate = d.toISOString().slice(0, 10);
+        selectedDate = H.dataISO(d);
         renderPreservingScroll();
       };
       document.getElementById('btn-diario-next').onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
         d.setDate(d.getDate() + 1);
-        const next = d.toISOString().slice(0, 10);
+        const next = H.dataISO(d);
         if (next <= today) {
           selectedDate = next;
           renderPreservingScroll();
@@ -1303,24 +1332,20 @@ PCF.Pages = PCF.Pages || {};
       if (clarezaInput) clarezaInput.oninput = () => {
         sonho.clareza = parseInt(clarezaInput.value, 10);
         document.getElementById('sonho-clareza-val').textContent = `${sonho.clareza}/5`;
+        prepararRascunho();
       };
       container.querySelectorAll('.sonho-switch').forEach(sw => {
-        sw.onchange = () => { sonho[sw.dataset.flag] = sw.checked; };
+        sw.onchange = () => { sonho[sw.dataset.flag] = sw.checked; prepararRascunho(); };
       });
 
+      const textoEl = document.getElementById('diario-texto');
+      textoEl.oninput = prepararRascunho;
+      textoEl.onblur = () => { if (gravarRascunho()) avisarSalvo(); };
+
       document.getElementById('diario-salvar').onclick = () => {
-        const texto = document.getElementById('diario-texto').value;
-        const arr = load().filter(e => !(e.data === selectedDate && tipoDe(e) === tipoSel));
-        if (texto.trim() || humorSel) {
-          const novo = { data: selectedDate, texto: texto.trim() };
-          if (humorSel) novo.humor = humorSel;
-          if (isSonho) Object.assign(novo, { tipo: 'sonho', clareza: sonho.clareza, lucido: sonho.lucido, pesadelo: sonho.pesadelo, recorrente: sonho.recorrente });
-          arr.push(novo);
-        }
-        saveDiary(arr);
-        const ok = document.getElementById('diario-ok');
-        if (ok) { ok.style.display = 'inline'; setTimeout(() => { if (ok) ok.style.display = 'none'; }, 2000); }
+        prepararRascunho();
         render();
+        avisarSalvo();
       };
 
       const humorWrap = document.getElementById('diario-humor');
@@ -1334,9 +1359,10 @@ PCF.Pages = PCF.Pages || {};
       humorList.querySelectorAll('[data-humor]').forEach(opt => {
         opt.onclick = () => {
           humorSel = opt.dataset.humor || null;
-          const texto = document.getElementById('diario-texto').value;
+          humorSugerido = false;
+          prepararRascunho();
           render();
-          document.getElementById('diario-texto').value = texto;
+          avisarSalvo();
         };
       });
       if (PCF._diarioHumorClose) document.removeEventListener('click', PCF._diarioHumorClose);
@@ -1350,6 +1376,9 @@ PCF.Pages = PCF.Pages || {};
       if (delBtn) delBtn.onclick = () => {
         if (!confirm('Apagar este registro?')) return;
         stateKey = null;
+        clearTimeout(rascunhoTimer);
+        rascunho = null;
+        if (!isSonho) H.compartilharSentimento(selectedDate, null);
         saveDiary(load().filter(e => !(e.data === selectedDate && tipoDe(e) === tipoSel)));
         render();
       };
@@ -1697,7 +1726,7 @@ PCF.Pages = PCF.Pages || {};
       if (!data) return false;
       const agora = new Date();
       if (!hora) {
-        const hoje = agora.toISOString().split('T')[0];
+        const hoje = H.dataISO(agora);
         return data < hoje;
       }
       const horaCompleta = hora.length === 5 ? `${hora}:00` : hora;
@@ -1918,15 +1947,15 @@ PCF.Pages = PCF.Pages || {};
           ${medicamentos.length === 0 ? '<p class="empty-text">Nenhum medicamento registrado</p>' : `
           <div class="table-wrapper">
             <table class="table">
-              <thead><tr><th>Medicamento</th><th>Dose</th><th>Frequencia</th><th>Para quem</th><th>Periodo</th><th>Status</th><th class="col-hide-mobile">Agenda</th><th style="width:60px">Ações</th></tr></thead>
+              <thead><tr><th>Medicamento</th><th>Dose</th><th>Frequência</th><th>Para quem</th><th>Período</th><th>Status</th><th class="col-hide-mobile">Agenda</th><th style="width:60px">Ações</th></tr></thead>
               <tbody>
                 ${medicamentos.map(med => {
                   const cor = STATUS_COLORS_SM[med.status] || '#6b7280';
-                  const responsavel = med.responsavelContatoId ? (contatosMap[med.responsavelContatoId]?.nome || 'Contato removido') : 'Propria pessoa';
+                  const responsavel = med.responsavelContatoId ? (contatosMap[med.responsavelContatoId]?.nome || 'Contato removido') : 'Própria pessoa';
                   return `<tr>
                     <td><strong>${H.esc(med.nome || '—')}</strong>${med.posologia ? `<br><small class="text-muted">${H.esc(med.posologia.slice(0, 70))}${med.posologia.length > 70 ? '…' : ''}</small>` : ''}</td>
                     <td>${H.esc(med.dose || '—')}</td>
-                    <td>${H.esc(med.frequencia || '—')}${med.horarios ? `<br><small class="text-muted">${H.esc(med.horarios)}</small>` : ''}</td>
+                    <td>${H.esc(med.frequencia ? H.normalizarFrequencia(med.frequencia) : '—')}${med.horarios ? `<br><small class="text-muted">${H.esc(med.horarios)}</small>` : ''}</td>
                     <td>${H.esc(responsavel)}</td>
                     <td>${med.dataInicio ? _fmtDate(med.dataInicio) : '—'}${med.dataFim ? '<br><small class="text-muted">até ' + _fmtDate(med.dataFim) + '</small>' : ''}</td>
                     <td><span class="status-badge" style="background:${cor}">${H.esc(med.status || 'Em uso')}</span></td>

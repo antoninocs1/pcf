@@ -453,6 +453,23 @@ PCF.Pages = PCF.Pages || {};
 
     updateCats();
 
+    // Vindo da reposição de estoque de um medicamento
+    if (PCF._inserirPrefill) {
+      const { categoria, subcategoria, item } = PCF._inserirPrefill;
+      PCF._inserirPrefill = null;
+      const catSel = document.getElementById('ins-cat');
+      if ([...catSel.options].some(o => o.value === categoria)) {
+        catSel.value = categoria;
+        fillSubcats();
+        onCategoria();
+        const subSel = document.getElementById('ins-subcat');
+        const sub = [...subSel.options].find(o => subcategoria.test(o.value));
+        if (sub) { subSel.value = sub.value; subSel.onchange(); }
+      }
+      document.getElementById('ins-item').value = item;
+      document.getElementById('ins-valor').focus();
+    }
+
     document.getElementById('form-inserir').onsubmit = (e) => {
       e.preventDefault();
       setFieldError('inserir-msg', '');

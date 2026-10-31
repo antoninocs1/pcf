@@ -67,7 +67,7 @@ PCF.Pages = PCF.Pages || {};
         (filtro === 'Todas' || e.categoria === filtro) &&
         (!termo || [e.titulo, e.descricao, e.local, e.categoria].some(v => (v || '').toLowerCase().includes(termo)))
       );
-      const idadeAtual = nasc ? idadeNaData(nasc, new Date().toISOString().slice(0, 10)) : null;
+      const idadeAtual = nasc ? idadeNaData(nasc, H.hoje()) : null;
       const anos = new Set(todos.map(e => (e.dataInicio || '').slice(0, 4)).filter(Boolean)).size;
 
       container.innerHTML = `

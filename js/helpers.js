@@ -58,7 +58,9 @@ PCF.Helpers = (() => {
     return { dia: d.getDate(), mes: MESES[d.getMonth()], ano: d.getFullYear(), diaSemana: DIAS_SEMANA[d.getDay()] };
   };
 
-  const hoje = () => new Date().toISOString().split('T')[0];
+  // Datas sempre no fuso local do aparelho (toISOString usa UTC e vira o dia às 21h no Brasil)
+  const dataISO = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const hoje = () => dataISO();
   const horaAtual = () => new Date().toTimeString().slice(0, 5);
 
   /* Hash simples para senha (NÃO é criptograficamente seguro - uso local apenas) */
@@ -296,6 +298,238 @@ PCF.Helpers = (() => {
     return [...new Set(matches.map(normalizarHora).filter(Boolean))].sort();
   };
 
+  /* ---- Medicamentos: frequência e doses ---- */
+  const FREQUENCIAS_MEDICAMENTO = ['Uso contínuo', 'Diário', 'A cada 4 horas', 'A cada 6 horas', 'A cada 8 horas', 'A cada 12 horas', 'Semanal', 'Conforme necessidade', 'Outro'];
+  const normalizarFrequencia = (f) => ({ 'Uso continuo': 'Uso contínuo', 'Diario': 'Diário' }[f] || f || FREQUENCIAS_MEDICAMENTO[0]);
+  const intervaloFrequencia = (f) => {
+    const m = String(f || '').match(/^A cada (\d+) horas$/);
+    return m ? parseInt(m[1], 10) : null;
+  };
+  // A partir do horário inicial, define os demais horários do dia conforme o intervalo
+  const gerarHorariosDose = (inicial, frequencia) => {
+    const base = normalizarHora(inicial);
+    if (!base) return [];
+    const intervalo = intervaloFrequencia(frequencia);
+    if (!intervalo) return [base];
+    const [h, m] = base.split(':');
+    return Array.from({ length: Math.floor(24 / intervalo) }, (_, i) =>
+      `${String((parseInt(h, 10) + i * intervalo) % 24).padStart(2, '0')}:${m}`);
+  };
+  const horariosMedicamento = (med) => {
+    if (Array.isArray(med.horariosParsed) && med.horariosParsed.length) {
+      return [...new Set(med.horariosParsed.map(normalizarHora).filter(Boolean))].sort();
+    }
+    return extrairHorarios(med.horarios);
+  };
+  const diaSemanaMedicamento = (med) => {
+    if (med.diaSemana !== undefined && med.diaSemana !== null && med.diaSemana !== '') return Number(med.diaSemana);
+    return med.dataInicio ? new Date(`${med.dataInicio}T12:00:00`).getDay() : null;
+  };
+  // Horários previstos do medicamento em uma data (não considera o status)
+  const dosesDoDia = (med, data) => {
+    if (!med.dataInicio || data < med.dataInicio) return [];
+    if (med.dataFim && data > med.dataFim) return [];
+    const frequencia = normalizarFrequencia(med.frequencia);
+    if (frequencia === 'Conforme necessidade') return [];
+    if (frequencia === 'Semanal' && new Date(`${data}T12:00:00`).getDay() !== diaSemanaMedicamento(med)) return [];
+    let horarios = horariosMedicamento(med);
+    if (data === med.dataInicio && med.horarioInicial) horarios = horarios.filter(h => h >= med.horarioInicial);
+    if (med.criadoEm) {
+      const criado = new Date(med.criadoEm);
+      if (dataISO(criado) === data) horarios = horarios.filter(h => h >= criado.toTimeString().slice(0, 5));
+    }
+    return horarios;
+  };
+  // Dias de estoque restantes; null quando o estoque não é controlado ou não há previsão de consumo
+  const diasEstoqueMedicamento = (med) => {
+    if (typeof med.estoqueQtd !== 'number') return null;
+    const frequencia = normalizarFrequencia(med.frequencia);
+    if (frequencia === 'Conforme necessidade') return null;
+    const dosesPorDia = horariosMedicamento(med).length / (frequencia === 'Semanal' ? 7 : 1);
+    const qtd = Number(med.qtdPorDose) > 0 ? Number(med.qtdPorDose) : 1;
+    return dosesPorDia > 0 ? Math.floor(med.estoqueQtd / (qtd * dosesPorDia)) : null;
+  };
+
+  // Adesão no período: doses tomadas ÷ doses previstas até agora; null quando não havia dose prevista
+  const adesaoPeriodo = (medicamentos, doses, de, ate) => {
+    const hojeISO = hoje();
+    const agoraHora = horaAtual();
+    let previstas = 0;
+    let tomadas = 0;
+    medicamentos.filter(m => m.status === 'Em uso').forEach(med => {
+      const dosesMed = doses.filter(d => d.medId === med.id);
+      // Medicamentos anteriores ao registro de doses só contam a partir da primeira dose registrada
+      const desde = med.criadoEm ? dataISO(new Date(med.criadoEm)) : (dosesMed.map(d => d.data).sort()[0] || hojeISO);
+      const d = new Date(`${de}T12:00:00`);
+      for (let data = de; data <= ate; d.setDate(d.getDate() + 1), data = dataISO(d)) {
+        if (data < desde) continue;
+        dosesDoDia(med, data).forEach(hora => {
+          if (data > hojeISO || (data === hojeISO && hora > agoraHora)) return;
+          previstas += 1;
+          if (dosesMed.some(r => r.data === data && r.hora === hora && r.status === 'tomado')) tomadas += 1;
+        });
+      }
+    });
+    return previstas ? Math.round((tomadas / previstas) * 100) : null;
+  };
+
+  /* ---- Hábitos: regras usadas na tela de hábitos e no painel Hoje ---- */
+  const tipoHabito = (habito) =>
+    habito.tipoExecucao || (/água|agua/i.test(habito.nome || '') ? 'ocorrencias' : 'duracao');
+  const metaOcorrencias = (habito) =>
+    Math.max(1, parseInt(habito.metaDiaria, 10) || (/água|agua/i.test(habito.nome || '') ? 8 : 1));
+  const alternarHabito = (habitoId, data) => {
+    const S = PCF.Store;
+    const reg = S.getRegistrosHabitos().find(r => r.habitoId === habitoId && r.data === data);
+    const execucao = reg?.execucao?.status === 'executando'
+      ? { ...reg.execucao, status: 'cancelado', canceladoEm: Date.now() }
+      : reg?.execucao;
+    S.upsertRegistroHabito({
+      habitoId, data, completo: !reg?.completo,
+      intensidade: reg && 'intensidade' in reg ? reg.intensidade : 100,
+      modoRegistro: 'manual',
+      ...(execucao ? { execucao } : {}),
+    });
+  };
+  const registrarOcorrenciaHabito = (habitoId, data, resultado) => {
+    const S = PCF.Store;
+    const habito = S.getHabitos().find(h => h.id === habitoId);
+    if (!habito) return;
+    const reg = S.getRegistrosHabitos().find(r => r.habitoId === habitoId && r.data === data);
+    const ocorrencias = [...(reg?.ocorrencias || []), { id: S._uid(), resultado, registradoEm: new Date().toISOString() }];
+    const ok = ocorrencias.filter(o => o.resultado === 'ok').length;
+    const meta = metaOcorrencias(habito);
+    S.upsertRegistroHabito({
+      habitoId, data, ocorrencias,
+      completo: ok >= meta,
+      momento: reg?.momento || 'ao_longo_dia',
+      intensidade: Math.min(100, Math.round((ok / meta) * 100)),
+      modoRegistro: 'execucao',
+    });
+  };
+
+  /* ---- Formulário recolhido: mostra primeiro os dados e abre com um botão ---- */
+  let _abrirProximoFormulario = false;
+  const pedirAbrirFormulario = () => { _abrirProximoFormulario = true; };
+  const formRecolhivel = (card, rotulo, aberto = false) => {
+    const barra = document.createElement('div');
+    barra.className = 'form-recolhivel-barra';
+    barra.innerHTML = `<button type="button" class="btn btn-primary"><i data-lucide="plus"></i> ${esc(rotulo)}</button>`;
+    card.before(barra);
+    if (window.lucide) lucide.createIcons();
+    const abrir = (rolar = true) => {
+      card.hidden = false;
+      barra.hidden = true;
+      if (rolar) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    const fechar = () => { card.hidden = true; barra.hidden = false; };
+    barra.firstElementChild.onclick = () => abrir();
+    if (aberto || _abrirProximoFormulario) abrir(false); else fechar();
+    _abrirProximoFormulario = false;
+    return { abrir, fechar };
+  };
+
+  /* ---- Como você está se sentindo: humores do Diário ↔ Emoções ---- */
+  const HUMORES = [
+    { id: 'feliz', icon: '😊', label: 'Feliz' },
+    { id: 'triste', icon: '😢', label: 'Triste' },
+    { id: 'estressado', icon: '😓', label: 'Estressado' },
+    { id: 'calmo', icon: '😌', label: 'Calmo' },
+    { id: 'animado', icon: '🤩', label: 'Animado' },
+    { id: 'irritado', icon: '😠', label: 'Irritado' },
+    { id: 'grato', icon: '🙏', label: 'Grato' },
+    { id: 'ansioso', icon: '😰', label: 'Ansioso' },
+    { id: 'surpreso', icon: '😲', label: 'Surpreso' },
+    { id: 'amoroso', icon: '🥰', label: 'Amoroso' },
+  ];
+  const HUMORES_SONHO = [
+    { id: 'assustado', icon: '😱', label: 'Assustado (com medo)' },
+    { id: 'confuso', icon: '😕', label: 'Confuso' },
+    { id: 'neutro', icon: '😐', label: 'Neutro' },
+    { id: 'agitado', icon: '😵‍💫', label: 'Agitado' },
+  ];
+  // Humores unificados por redundância; mantém registros antigos legíveis
+  const HUMOR_ALIASES = { com_medo: 'assustado', tranquilo: 'calmo' };
+  const getHumor = (id) => [...HUMORES, ...HUMORES_SONHO].find(h => h.id === (HUMOR_ALIASES[id] || id));
+
+  // Caminho na Configuração de emoções: [principal, nível médio, nível inferior]
+  const HUMOR_EMOCAO = {
+    feliz: ['Feliz'],
+    triste: ['Triste'],
+    irritado: ['Irritado'],
+    surpreso: ['Surpreso'],
+    amoroso: ['Amoroso'],
+    animado: ['Feliz', 'Animado'],
+    grato: ['Feliz', 'Otimista', 'Agradecido'],
+    estressado: ['Mal', 'Estressado'],
+    ansioso: ['Temeroso', 'Ansioso'],
+    calmo: ['Amoroso', 'Pacífico'],
+    assustado: ['Temeroso', 'Assustado'],
+    confuso: ['Surpreso', 'Confuso'],
+  };
+  const HUMOR_PADRAO_POR_PRINCIPAL = { mal: 'estressado', temeroso: 'ansioso' };
+  const EMOCOES_POSITIVAS = new Set(['feliz', 'surpreso', 'amoroso']);
+  // Compara pela primeira palavra: "Triste (Tristeza)" e "Triste" são a mesma emoção
+  const chaveEmocao = (nome) => String(nome || '').trim().split(/[\s(]/)[0]
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  const emocaoDeHumor = (humorId, config) => {
+    const caminho = HUMOR_EMOCAO[HUMOR_ALIASES[humorId] || humorId];
+    if (!caminho) return null;
+    const achar = (lista, nome) => nome ? (lista || []).find(i => chaveEmocao(i.nome) === chaveEmocao(nome)) : null;
+    const superior = achar(config, caminho[0]);
+    if (!superior) return null;
+    const media = achar(superior.medias, caminho[1]);
+    const inferior = media ? achar(media.inferiores, caminho[2]) : null;
+    return { superior: superior.nome, media: media?.nome || '', inferior: inferior?.nome || '' };
+  };
+  const humorDeEmocao = ({ superior, media, inferior }) => {
+    const chaves = [superior, media, inferior].map(chaveEmocao);
+    const candidatos = HUMORES.filter(h => {
+      const caminho = HUMOR_EMOCAO[h.id];
+      return caminho && caminho.every((nome, i) => chaveEmocao(nome) === chaves[i]);
+    }).sort((a, b) => HUMOR_EMOCAO[b.id].length - HUMOR_EMOCAO[a.id].length);
+    return candidatos[0]?.id || HUMOR_PADRAO_POR_PRINCIPAL[chaves[0]] || null;
+  };
+
+  const emocaoPositiva = (nome) => EMOCOES_POSITIVAS.has(chaveEmocao(nome));
+
+  // Grava só o humor do dia no Diário, preservando o texto já escrito
+  const salvarHumorDiario = (data, humor) => {
+    const S = PCF.Store;
+    const eDoDia = (e) => e.data === data && (e.tipo || 'diario') === 'diario';
+    const todas = S.getDiario();
+    const atual = todas.find(eDoDia);
+    const novo = { ...(atual || { data, texto: '' }) };
+    if (humor) novo.humor = humor; else delete novo.humor;
+    const resto = todas.filter(e => !eDoDia(e));
+    S.saveDiario((novo.humor || (novo.texto || '').trim()) ? [...resto, novo] : resto);
+    compartilharSentimento(data, null);
+  };
+
+  // Escolha ainda não salva: vale em memória até salvar em uma das telas
+  let _sentimentoPendente = null;
+  const compartilharSentimento = (data, escolha) => {
+    _sentimentoPendente = escolha ? { uid: PCF.Store.currentUserId(), data, ...escolha } : null;
+  };
+  const _pendenteDa = (data) =>
+    (_sentimentoPendente && _sentimentoPendente.data === data && _sentimentoPendente.uid === PCF.Store.currentUserId())
+      ? _sentimentoPendente : null;
+  const sentimentoParaDiario = (data) => {
+    const pendente = _pendenteDa(data);
+    if (pendente) return pendente.humor || humorDeEmocao(pendente.emocao);
+    const ultima = PCF.Store.getEmocoes().filter(e => e.data === data)
+      .sort((a, b) => (a.hora || '').localeCompare(b.hora || '')).pop();
+    return ultima ? humorDeEmocao({ superior: ultima.emocaoSuperior, media: ultima.emocaoMedia, inferior: ultima.emocaoInferior }) : null;
+  };
+  const sentimentoParaEmocao = (data, config) => {
+    const pendente = _pendenteDa(data);
+    if (pendente?.emocao) return { ...pendente.emocao, origem: 'emocoes' };
+    const humor = pendente?.humor || PCF.Store.getDiario().find(e => e.data === data && (e.tipo || 'diario') === 'diario')?.humor;
+    const emocao = humor ? emocaoDeHumor(humor, config) : null;
+    return emocao ? { ...emocao, origem: 'diario' } : null;
+  };
+
   /* ---- Leitura de arquivo com fallback de encoding ---- */
   const readFileAutoEncoding = (file, callback) => {
     const reader = new FileReader();
@@ -366,7 +600,10 @@ PCF.Helpers = (() => {
     MESES, DIAS_SEMANA, FORMAS_PAGAMENTO, TIPOS_DESPESA, ICONES_PAGAMENTO,
     PGTO_CARTAO_COMPRA, PGTO_CARTAO_PAGAMENTO, CAT_PAGAMENTO_FATURA,
     ehPagamentoFatura, semPagamentoFatura, aplicarSufixoParcela, estiloIconePgto,
-    formatarMoeda, formatarData, extrairInfoData, hoje, horaAtual,
+    formatarMoeda, formatarData, extrairInfoData, dataISO, hoje, horaAtual,
+    FREQUENCIAS_MEDICAMENTO, normalizarFrequencia, gerarHorariosDose, horariosMedicamento, diaSemanaMedicamento, dosesDoDia, diasEstoqueMedicamento,
+    HUMORES, HUMORES_SONHO, getHumor, humorDeEmocao, emocaoDeHumor, emocaoPositiva, salvarHumorDiario, compartilharSentimento, sentimentoParaDiario, sentimentoParaEmocao,
+    adesaoPeriodo, tipoHabito, metaOcorrencias, alternarHabito, registrarOcorrenciaHabito, formRecolhivel, pedirAbrirFormulario,
     hashSenha, formatarCPF, formatarTelefone,
     calcularResumo, agruparPorCategoria, agruparPorMes, calcularIMC, IMC_CLASS,
     toCSV, parseCSV, downloadCSV, parseValorBR, parseDateBR, normalizarHora, extrairHorarios, readFileAutoEncoding, esc,

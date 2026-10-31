@@ -64,11 +64,11 @@ PCF.Pages = PCF.Pages || {};
   const calcStreak = (virtudeId) => {
     let streak = 0;
     const d = new Date();
-    const hoje = d.toISOString().split('T')[0];
+    const hoje = H.dataISO(d);
     const temHoje = S.getVirtudesReg().some(r => r.virtudeId === virtudeId && r.data === hoje);
     if (!temHoje) d.setDate(d.getDate() - 1);
     while (true) {
-      const iso = d.toISOString().split('T')[0];
+      const iso = H.dataISO(d);
       if (!S.getVirtudesReg().some(r => r.virtudeId === virtudeId && r.data === iso)) break;
       streak++;
       d.setDate(d.getDate() - 1);
@@ -177,12 +177,12 @@ PCF.Pages = PCF.Pages || {};
       }
       container.querySelector('#virt-prev-day')?.addEventListener('click', () => {
         const d = new Date(selectedDate + 'T12:00:00'); d.setDate(d.getDate() - 1);
-        selectedDate = d.toISOString().split('T')[0]; renderPreservingScroll();
+        selectedDate = H.dataISO(d); renderPreservingScroll();
       });
       container.querySelector('#virt-next-day')?.addEventListener('click', () => {
         const d = new Date(selectedDate + 'T12:00:00'); d.setDate(d.getDate() + 1);
         const hoje = H.hoje();
-        if (d.toISOString().split('T')[0] <= hoje) { selectedDate = d.toISOString().split('T')[0]; renderPreservingScroll(); }
+        if (H.dataISO(d) <= hoje) { selectedDate = H.dataISO(d); renderPreservingScroll(); }
       });
       container.querySelector('#virt-today')?.addEventListener('click', () => {
         selectedDate = H.hoje();
@@ -227,7 +227,7 @@ PCF.Pages = PCF.Pages || {};
       const virtudes = S.getVirtudesConfig().filter(v => v.ativo !== false);
       const regs = S.getVirtudesReg();
       const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - periodo + 1);
-      const cutStr = cutoff.toISOString().split('T')[0];
+      const cutStr = H.dataISO(cutoff);
       const regsPerido = regs.filter(r => r.data >= cutStr && r.data <= hoje);
 
       // Estatísticas por virtude

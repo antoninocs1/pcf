@@ -684,7 +684,7 @@ PCF.Pages = PCF.Pages || {};
   const recentGamesSummary = () => {
     const hist = S.getJogosHistorico ? S.getJogosHistorico() : [];
     const cut = new Date(); cut.setDate(cut.getDate() - 30);
-    const cutStr = cut.toISOString().split('T')[0];
+    const cutStr = H.dataISO(cut);
     const recent = hist.filter(j => j.data >= cutStr);
     return { partidas: recent.length, dias: new Set(recent.map(j => j.data)).size };
   };

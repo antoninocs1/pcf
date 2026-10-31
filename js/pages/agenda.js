@@ -21,7 +21,7 @@ const checkAndShowAlerts = () => {};
     if (!data) return false;
     const agora = new Date();
     if (!hora) {
-      const hoje = agora.toISOString().split('T')[0];
+      const hoje = H.dataISO(agora);
       return data < hoje;
     }
     const horaCompleta = hora.length === 5 ? `${hora}:00` : hora;
@@ -67,13 +67,6 @@ const checkAndShowAlerts = () => {};
       .filter(med => med.agendaAtivo && med.dataInicio)
       .sort((a, b) => a.dataInicio.localeCompare(b.dataInicio) || (a.nome || '').localeCompare(b.nome || ''));
 
-    const extrairHorariosMedicamento = (med) => {
-      if (Array.isArray(med.horariosParsed) && med.horariosParsed.length) {
-        return [...new Set(med.horariosParsed.map(h => H.normalizarHora ? H.normalizarHora(h) : h).filter(Boolean))].sort();
-      }
-      return H.extrairHorarios ? H.extrairHorarios(med.horarios) : [];
-    };
-
     const getCombinedMonthCounts = (compromissos, acoesVinculadas, saudeVinculados, medicamentosVinculados = []) => {
       const counts = getMonthCounts(compromissos);
       acoesVinculadas.forEach(acao => {
@@ -82,8 +75,13 @@ const checkAndShowAlerts = () => {};
       saudeVinculados.forEach(evento => {
         counts[evento.data] = (counts[evento.data] || 0) + 1;
       });
-      medicamentosVinculados.forEach(med => {
-        counts[med.dataInicio] = (counts[med.dataInicio] || 0) + 1;
+      // Medicamento em uso conta em todos os dias do mês exibido com dose prevista
+      const totalDias = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+      medicamentosVinculados.filter(med => med.status === 'Em uso').forEach(med => {
+        for (let dia = 1; dia <= totalDias; dia += 1) {
+          const dateKey = normalizeDateKey(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dia));
+          if (H.dosesDoDia(med, dateKey).length) counts[dateKey] = (counts[dateKey] || 0) + 1;
+        }
       });
       return counts;
     };
@@ -119,7 +117,7 @@ const checkAndShowAlerts = () => {};
       const saudeVinculados = getSaudeEventosVinculados();
       const medicamentosVinculados = getSaudeMedicamentosVinculados();
       const agora = new Date();
-      const hj = agora.toISOString().split('T')[0];
+      const hj = H.dataISO(agora);
       const alertas = [];
 
       compromissos.forEach(c => {
@@ -196,9 +194,8 @@ const checkAndShowAlerts = () => {};
       });
       medicamentosVinculados.forEach(med => {
         if (med.status !== 'Em uso') return;
-        if (med.dataFim && med.dataFim < hj) return;
-        if (med.dataInicio > hj) return;
-        extrairHorariosMedicamento(med).forEach(hora => {
+        const registradas = S.getSaudeDoses().filter(d => d.medId === med.id && d.data === hj);
+        H.dosesDoDia(med, hj).filter(hora => !registradas.some(d => d.hora === hora)).forEach(hora => {
           const comp = {
             compromisso: `[Medicamento] ${med.nome || 'Medicamento'} - ${med.dose || ''}`,
             data: hj,
@@ -545,7 +542,7 @@ const checkAndShowAlerts = () => {};
                     <th>Medicamento</th>
                     <th>Posologia</th>
                     <th>Para quem</th>
-                    <th>Inicio</th>
+                    <th>Início</th>
                     <th>Status</th>
                     <th>Origem</th>
                   </tr>
@@ -553,10 +550,10 @@ const checkAndShowAlerts = () => {};
                 <tbody>
                   ${medicamentosVinculados.map(med => {
                     const statusCor = STATUS_COLORS[med.status] || '#6b7280';
-                    const responsavel = med.responsavelContatoId ? (contatosMap[med.responsavelContatoId]?.nome || 'Contato removido') : 'Propria pessoa';
+                    const responsavel = med.responsavelContatoId ? (contatosMap[med.responsavelContatoId]?.nome || 'Contato removido') : 'Própria pessoa';
                     return `<tr>
                       <td><strong>${H.esc(med.nome || '')}</strong><br><small>${H.esc(med.dose || '')}</small></td>
-                      <td>${H.esc(med.frequencia || '')}${med.horarios ? `<br><small>${H.esc(med.horarios)}</small>` : ''}</td>
+                      <td>${H.esc(H.normalizarFrequencia(med.frequencia))}${med.horarios ? `<br><small>${H.esc(med.horarios)}</small>` : ''}</td>
                       <td>${H.esc(responsavel)}</td>
                       <td>${H.formatarData(med.dataInicio)}</td>
                       <td><span class="status-badge" style="background:${statusCor}">${H.esc(med.status || 'Em uso')}</span></td>

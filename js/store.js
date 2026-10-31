@@ -17,6 +17,7 @@ PCF.Store = (() => {
     'transacoes', 'categorias', 'emocoes', 'emocoes_config', 'imc', 'agenda',
     'habitos', 'reg_habitos', 'frases', 'contatos', 'diario', 'diario_tabs',
     'rodavida_reg', 'rodavida_config', 'plano_acao', 'saude_eventos', 'saude_medicamentos',
+    'saude_doses', 'saude_ficha', 'saude_sinais', 'saude_sintomas', 'saude_sono', 'saude_vacinas',
     'virtudes_config', 'virtudes_reg', 'linha_tempo', 'uso_funcionalidades', 'atividades',
     'jogo_palavras', 'jogo_palavras_estado', 'jogos_historico', 'financeiro_filtros'
   ];
@@ -136,7 +137,7 @@ PCF.Store = (() => {
           cpf: '', telefone: '', dataNascimento: '',
           login: fbUser.email || '',
           isAdmin: isFirst,
-          dataCadastro: new Date().toISOString().split('T')[0],
+          dataCadastro: _hojeISO(),
         };
         await _db().collection('users').doc(fbUser.uid).set(profile);
         await registrarAtividade(fbUser.uid, 'conta_criada');
@@ -168,7 +169,7 @@ PCF.Store = (() => {
         telefone: data.telefone || '', dataNascimento: data.dataNascimento || '',
         login: data.login || data.email,
         isAdmin: isFirst,
-        dataCadastro: new Date().toISOString().split('T')[0],
+        dataCadastro: _hojeISO(),
       };
       // O create é permitido pela regra request.auth.uid == userId (usuário recém autenticado)
       await _db().collection('users').doc(cred.user.uid).set(profile);
@@ -203,7 +204,7 @@ PCF.Store = (() => {
         telefone: data.telefone || '', dataNascimento: data.dataNascimento || '',
         login: data.login || data.email,
         isAdmin: !!data.isAdmin,
-        dataCadastro: new Date().toISOString().split('T')[0],
+        dataCadastro: _hojeISO(),
       };
       await _db().collection('users').doc(cred.user.uid).set(profile);
       await registrarAtividade(cred.user.uid, 'conta_criada');
@@ -531,7 +532,9 @@ PCF.Store = (() => {
 
   /* ---------- IMC ---------- */
   const _imcU = () => `pcf_imc_${currentUserId()}`;
-  const _hojeISO = () => new Date().toISOString().split('T')[0];
+  // Datas sempre no fuso local do aparelho (toISOString usa UTC e vira o dia às 21h no Brasil)
+  const _dataISO = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const _hojeISO = () => _dataISO(new Date());
   const _calcIMC = (peso, altura) => (altura > 0 && peso > 0) ? peso / (altura * altura) : 0;
   const _normalizeIMC = (raw) => {
     const base = raw || {};
@@ -625,7 +628,7 @@ PCF.Store = (() => {
   const addSaudeEvento = (evento) => {
     const novo = {
       id: _uid(),
-      dataCadastro: new Date().toISOString().split('T')[0],
+      dataCadastro: _hojeISO(),
       status: 'Pendente',
       agendaAtivo: false,
       ultimoAvisoChave: null,
@@ -669,7 +672,8 @@ PCF.Store = (() => {
   const addSaudeMedicamento = (medicamento) => {
     const novo = {
       id: _uid(),
-      dataCadastro: new Date().toISOString().split('T')[0],
+      dataCadastro: _hojeISO(),
+      criadoEm: new Date().toISOString(),
       status: 'Em uso',
       agendaAtivo: false,
       ultimoAvisoChave: null,
@@ -705,6 +709,70 @@ PCF.Store = (() => {
     return all;
   };
 
+  /* ---------- SAUDE / REGISTRO DE DOSES ---------- */
+  // Tudo fica em um único documento do Firestore (limite de 1 MB): guarda os últimos 2 anos.
+  const DOSES_RETENCAO_DIAS = 730;
+  const _sdU = () => `pcf_saude_doses_${currentUserId()}`;
+  const getSaudeDoses = () => _get(_sdU()) || [];
+  const saveSaudeDoses = (doses) => {
+    const corte = new Date();
+    corte.setDate(corte.getDate() - DOSES_RETENCAO_DIAS);
+    const corteISO = _dataISO(corte);
+    _set(_sdU(), (doses || []).filter(d => d.data >= corteISO));
+    window.dispatchEvent(new CustomEvent('pcf:doses-changed'));
+  };
+  const _ajustarEstoqueMedicamento = (medId, delta) => {
+    const med = getSaudeMedicamentos().find(m => m.id === medId);
+    if (!med || !delta || typeof med.estoqueQtd !== 'number') return;
+    updateSaudeMedicamento(medId, { estoqueQtd: Math.max(0, med.estoqueQtd + delta) });
+  };
+  const registrarDose = ({ medId, data, hora, status }) => {
+    const med = getSaudeMedicamentos().find(m => m.id === medId);
+    if (!med) return null;
+    const all = getSaudeDoses();
+    const i = all.findIndex(d => d.medId === medId && d.data === data && d.hora === hora);
+    const qtd = Number(med.qtdPorDose) > 0 ? Number(med.qtdPorDose) : 1;
+    const anterior = i >= 0 ? all[i] : null;
+    const novo = { id: anterior?.id || _uid(), medId, medNome: med.nome || '', dose: med.dose || '', data, hora, status, qtd, registradoEm: new Date().toISOString() };
+    if (anterior) all[i] = novo; else all.push(novo);
+    const consumoAntes = anterior?.status === 'tomado' ? (Number(anterior.qtd) || 0) : 0;
+    const consumoDepois = status === 'tomado' ? qtd : 0;
+    _ajustarEstoqueMedicamento(medId, consumoAntes - consumoDepois);
+    saveSaudeDoses(all);
+    return novo;
+  };
+  const desfazerDose = (id) => {
+    const all = getSaudeDoses();
+    const dose = all.find(d => d.id === id);
+    if (!dose) return;
+    if (dose.status === 'tomado') _ajustarEstoqueMedicamento(dose.medId, Number(dose.qtd) || 0);
+    // Quem desfaz está corrigindo o registro: o aviso da dose volta só depois de 10 minutos
+    updateSaudeMedicamento(dose.medId, { adiadoAte: new Date(Date.now() + 10 * 60 * 1000).toISOString() });
+    saveSaudeDoses(all.filter(d => d.id !== id));
+  };
+
+  /* ---------- SAUDE / SINAIS VITAIS, SINTOMAS, SONO E VACINAS ---------- */
+  const _listaSaude = (col) => {
+    const key = () => `pcf_${col}_${currentUserId()}`;
+    const get = () => _get(key()) || [];
+    const save = (arr) => _set(key(), arr || []);
+    return {
+      get, save,
+      add: (item) => { const novo = { id: _uid(), ...item }; save([...get(), novo]); return novo; },
+      update: (id, data) => { save(get().map(r => r.id === id ? { ...r, ...data } : r)); },
+      remove: (id) => { save(get().filter(r => r.id !== id)); },
+    };
+  };
+  const _sinais = _listaSaude('saude_sinais');
+  const _sintomas = _listaSaude('saude_sintomas');
+  const _sono = _listaSaude('saude_sono');
+  const _vacinas = _listaSaude('saude_vacinas');
+
+  /* ---------- SAUDE / FICHA MEDICA ---------- */
+  const _sfU = () => `pcf_saude_ficha_${currentUserId()}`;
+  const getSaudeFicha = () => _get(_sfU()) || {};
+  const saveSaudeFicha = (ficha) => _set(_sfU(), ficha || {});
+
   /* ---------- PLANO DE ACAO / 5W2H ---------- */
   const _paU = () => `pcf_plano_acao_${currentUserId()}`;
   const getPlanoAcoes = () => _get(_paU()) || [];
@@ -715,7 +783,7 @@ PCF.Store = (() => {
   const addPlanoAcao = (acao) => {
     const nova = {
       id: _uid(),
-      dataCadastro: new Date().toISOString().split('T')[0],
+      dataCadastro: _hojeISO(),
       ultimoAvisoChave: null,
       ...acao,
     };
@@ -770,7 +838,7 @@ PCF.Store = (() => {
 
   const _criarHabitosDoModelo = () => _modeloHabitosDefault().map(({ id, dataCriacao, ...h }) => ({
     id: _uid(),
-    dataCriacao: new Date().toISOString().split('T')[0],
+    dataCriacao: _hojeISO(),
     ...h,
   }));
 
@@ -2516,7 +2584,7 @@ PCF.Store = (() => {
     _set(_hkU(), h);
     _publishHabitosDefault(h);
   };
-  const addHabito = (h) => { const all = getHabitos(); all.push({ id: _uid(), dataCriacao: new Date().toISOString().split('T')[0], ...h }); saveHabitos(all); return all; };
+  const addHabito = (h) => { const all = getHabitos(); all.push({ id: _uid(), dataCriacao: _hojeISO(), ...h }); saveHabitos(all); return all; };
   const updateHabito = (id, data) => { const all = getHabitos(); const i = all.findIndex(h => h.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveHabitos(all); } return all; };
   const deleteHabito = (id) => { const all = getHabitos().filter(h => h.id !== id); saveHabitos(all); return all; };
 
@@ -2545,7 +2613,7 @@ PCF.Store = (() => {
   const _ctkU = () => `pcf_contatos_${currentUserId()}`;
   const getContatos = () => _get(_ctkU()) || [];
   const saveContatos = (c) => _set(_ctkU(), c);
-  const addContato = (c) => { const all = getContatos(); all.push({ id: _uid(), dataCadastro: new Date().toISOString().split('T')[0], ...c }); saveContatos(all); return all; };
+  const addContato = (c) => { const all = getContatos(); all.push({ id: _uid(), dataCadastro: _hojeISO(), ...c }); saveContatos(all); return all; };
   const updateContato = (id, data) => { const all = getContatos(); const i = all.findIndex(c => c.id === id); if (i >= 0) { all[i] = { ...all[i], ...data }; saveContatos(all); } return all; };
   const deleteContato = (id) => { const all = getContatos().filter(c => c.id !== id); saveContatos(all); return all; };
 
@@ -2686,7 +2754,7 @@ PCF.Store = (() => {
   const JOGOS_HISTORICO_MAX = 500;
   const getJogosHistorico = () => _get(_jhU()) || [];
   const addJogoHistorico = (item) => {
-    const all = [...getJogosHistorico(), { id: _uid(), data: new Date().toISOString().split('T')[0], ...item }];
+    const all = [...getJogosHistorico(), { id: _uid(), data: _hojeISO(), ...item }];
     _set(_jhU(), all.slice(-JOGOS_HISTORICO_MAX));
     return all;
   };
@@ -2699,7 +2767,7 @@ PCF.Store = (() => {
   const getVirtudesReg = () => _get(_vrU()) || [];
   const saveVirtudesReg = (r) => _set(_vrU(), r);
   const toggleVirtude = (virtudeId, data) => {
-    const hoje = data || new Date().toISOString().split('T')[0];
+    const hoje = data || _hojeISO();
     const all = getVirtudesReg();
     const idx = all.findIndex(r => r.virtudeId === virtudeId && r.data === hoje);
     if (idx >= 0) { all.splice(idx, 1); }
@@ -2720,6 +2788,12 @@ PCF.Store = (() => {
       imc: _get(`pcf_imc_${uid}`) || { peso: 0, altura: 0 },
       saude_eventos: _get(`pcf_saude_eventos_${uid}`) || [],
       saude_medicamentos: _get(`pcf_saude_medicamentos_${uid}`) || [],
+      saude_doses: _get(`pcf_saude_doses_${uid}`) || [],
+      saude_ficha: _get(`pcf_saude_ficha_${uid}`) || {},
+      saude_sinais: _get(`pcf_saude_sinais_${uid}`) || [],
+      saude_sintomas: _get(`pcf_saude_sintomas_${uid}`) || [],
+      saude_sono: _get(`pcf_saude_sono_${uid}`) || [],
+      saude_vacinas: _get(`pcf_saude_vacinas_${uid}`) || [],
       habitos: _get(`pcf_habitos_${uid}`) || [],
       reg_habitos: _get(`pcf_reg_habitos_${uid}`) || [],
       frases: _get(`pcf_frases_${uid}`) || [],
@@ -2754,6 +2828,12 @@ PCF.Store = (() => {
     getAgendaConfig, saveAgendaConfig,
     getSaudeEventos, saveSaudeEventos, addSaudeEvento, updateSaudeEvento, deleteSaudeEvento,
     getSaudeMedicamentos, saveSaudeMedicamentos, addSaudeMedicamento, updateSaudeMedicamento, deleteSaudeMedicamento,
+    getSaudeDoses, saveSaudeDoses, registrarDose, desfazerDose,
+    getSaudeFicha, saveSaudeFicha,
+    getSaudeSinais: _sinais.get, addSaudeSinal: _sinais.add, updateSaudeSinal: _sinais.update, deleteSaudeSinal: _sinais.remove,
+    getSaudeSintomas: _sintomas.get, addSaudeSintoma: _sintomas.add, updateSaudeSintoma: _sintomas.update, deleteSaudeSintoma: _sintomas.remove,
+    getSaudeSono: _sono.get, saveSaudeSono: _sono.save, deleteSaudeSono: _sono.remove,
+    getSaudeVacinas: _vacinas.get, addSaudeVacina: _vacinas.add, updateSaudeVacina: _vacinas.update, deleteSaudeVacina: _vacinas.remove,
     getCompromissos, saveCompromissos, addCompromisso, updateCompromisso, deleteCompromisso,
     getPlanoAcoes, savePlanoAcoes, addPlanoAcao, updatePlanoAcao, deletePlanoAcao,
     getHabitos, saveHabitos, addHabito, updateHabito, deleteHabito,

@@ -15,11 +15,11 @@ PCF.Pages = PCF.Pages || {};
     let streak = 0;
     const d = new Date();
     // Se hoje ainda não foi marcado, começa verificando ontem
-    const hoje = d.toISOString().split('T')[0];
+    const hoje = H.dataISO(d);
     const temHoje = registros.find(r => r.habitoId === habitoId && r.data === hoje && r.completo);
     if (!temHoje) d.setDate(d.getDate() - 1);
     while (true) {
-      const iso = d.toISOString().split('T')[0];
+      const iso = H.dataISO(d);
       const found = registros.find(r => r.habitoId === habitoId && r.data === iso && r.completo);
       if (!found) break;
       streak++;
@@ -76,10 +76,7 @@ PCF.Pages = PCF.Pages || {};
       : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
-  const tipoHabito = (habito) =>
-    habito.tipoExecucao || (/água|agua/i.test(habito.nome || '') ? 'ocorrencias' : 'duracao');
-  const metaOcorrencias = (habito) =>
-    Math.max(1, parseInt(habito.metaDiaria, 10) || (/água|agua/i.test(habito.nome || '') ? 8 : 1));
+  const { tipoHabito, metaOcorrencias } = H;
   const duracaoSegundos = (habito) => Math.max(60, (parseInt(habito.duracaoMinutos, 10) || 1) * 60);
   const momentoAtualHabito = () => {
     const hora = new Date().getHours();
@@ -95,6 +92,16 @@ PCF.Pages = PCF.Pages || {};
     let fraseExibida = getFraseHoje();
     let timerInterval = null;
     const paineisAbertos = new Set();
+    // Observações digitadas: gravadas logo após a digitação e antes de qualquer redesenho da tela
+    const obsPendentes = new Map();
+    let obsTimer = null;
+    const gravarObservacoes = () => {
+      clearTimeout(obsTimer);
+      obsPendentes.forEach((pendente, habitoId) => {
+        S.upsertRegistroHabito({ habitoId, data: pendente.data, observacao: pendente.texto });
+      });
+      obsPendentes.clear();
+    };
     const renderPreservingScroll = () => {
       const x = window.scrollX;
       const y = window.scrollY;
@@ -134,6 +141,7 @@ PCF.Pages = PCF.Pages || {};
     };
 
     const render = () => {
+      gravarObservacoes();
       if (timerInterval) clearInterval(timerInterval);
       const habitos = S.getHabitos().filter(h => h.ativo !== false);
       const registros = S.getRegistrosHabitos();
@@ -309,7 +317,7 @@ PCF.Pages = PCF.Pages || {};
                 </div>`;
               }).join('')}
             </div>
-            <button type="button" class="btn btn-primary" id="btn-salvar-obs" style="margin-top:16px"><i data-lucide="save"></i> Salvar Observações</button>
+            ${completosHoje > 0 ? '<small class="form-hint">As observações são salvas automaticamente.</small>' : ''}
           `}
         </div>`;
 
@@ -324,13 +332,13 @@ PCF.Pages = PCF.Pages || {};
       const _btnPrev = document.getElementById('btn-hab-prev'); if (_btnPrev) _btnPrev.onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
         d.setDate(d.getDate() - 1);
-        selectedDate = d.toISOString().slice(0, 10);
+        selectedDate = H.dataISO(d);
         renderPreservingScroll();
       };
       const _btnNext = document.getElementById('btn-hab-next'); if (_btnNext) _btnNext.onclick = () => {
         const d = new Date(selectedDate + 'T12:00:00');
         d.setDate(d.getDate() + 1);
-        const next = d.toISOString().slice(0, 10);
+        const next = H.dataISO(d);
         if (next <= H.hoje()) {
           selectedDate = next;
           renderPreservingScroll();
@@ -374,23 +382,7 @@ PCF.Pages = PCF.Pages || {};
       container.querySelectorAll('[data-occ-ok], [data-occ-nok]').forEach(btn => {
         btn.onclick = () => {
           const habitoId = btn.dataset.occOk || btn.dataset.occNok;
-          const habito = S.getHabitos().find(h => h.id === habitoId);
-          const reg = getRegistro(habitoId);
-          const ocorrencias = [...(reg?.ocorrencias || []), {
-            id: S._uid(),
-            resultado: btn.dataset.occOk ? 'ok' : 'nok',
-            registradoEm: new Date().toISOString(),
-          }];
-          const ok = ocorrencias.filter(o => o.resultado === 'ok').length;
-          S.upsertRegistroHabito({
-            habitoId,
-            data: selectedDate,
-            ocorrencias,
-            completo: ok >= metaOcorrencias(habito),
-            momento: reg?.momento || 'ao_longo_dia',
-            intensidade: Math.min(100, Math.round((ok / metaOcorrencias(habito)) * 100)),
-            modoRegistro: 'execucao',
-          });
+          H.registrarOcorrenciaHabito(habitoId, selectedDate, btn.dataset.occOk ? 'ok' : 'nok');
           render();
         };
       });
@@ -550,28 +542,14 @@ PCF.Pages = PCF.Pages || {};
       // remove duplicate bare oninput block below
       void 0;
 
-      const _btnSalvarObs = document.getElementById('btn-salvar-obs'); if (_btnSalvarObs) _btnSalvarObs.onclick = () => {
-        const habAtivos = S.getHabitos().filter(h => h.ativo !== false);
-        habAtivos.forEach(h => {
-          const obsEl     = container.querySelector(`[data-obs="${h.id}"]`);
-          if (!obsEl) return;
-          const momentoEl = container.querySelector(`[data-momento="${h.id}"]`);
-          const sliderEl  = container.querySelector(`.hab-int-slider[data-int="${h.id}"]`);
-          const reg       = S.getRegistrosHabitos().find(r => r.habitoId === h.id && r.data === selectedDate);
-          S.upsertRegistroHabito({
-            habitoId: h.id, data: selectedDate, completo: reg?.completo || false,
-            observacao:  obsEl.value.trim(),
-            momento:     momentoEl?.value || '',
-            intensidade: sliderEl ? intensidadeDoSlider(sliderEl) : (reg && 'intensidade' in reg ? reg.intensidade : 100),
-          });
-        });
-        const msg = document.createElement('div');
-        msg.className = 'alert alert-success';
-        msg.textContent = '✔ Observações salvas!';
-        msg.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:200px';
-        document.body.appendChild(msg);
-        setTimeout(() => msg.remove(), 2500);
-      };
+      container.querySelectorAll('.hab-obs-input').forEach(input => {
+        input.oninput = () => {
+          obsPendentes.set(input.dataset.obs, { data: selectedDate, texto: input.value.trim() });
+          clearTimeout(obsTimer);
+          obsTimer = setTimeout(gravarObservacoes, 600);
+        };
+        input.onblur = gravarObservacoes;
+      });
     };
 
     render();
@@ -704,7 +682,7 @@ PCF.Pages = PCF.Pages || {};
       for (let i = 29; i >= 0; i--) {
         const d = new Date(hoje);
         d.setDate(d.getDate() - i);
-        labels.push(d.toISOString().split('T')[0]);
+        labels.push(H.dataISO(d));
       }
 
       // Estatísticas gerais

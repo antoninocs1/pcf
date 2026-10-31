@@ -13,7 +13,7 @@ PCF.Pages = PCF.Pages || {};
   ───────────────────────────────────────────────────── */
   const _diasAtras = (dias) => {
     const d = new Date(); d.setDate(d.getDate() - dias);
-    return d.toISOString().split('T')[0];
+    return H.dataISO(d);
   };
   const _escala = (pct) => Math.max(1, Math.min(10, Math.round(pct * 9) + 1));
 
@@ -31,7 +31,7 @@ PCF.Pages = PCF.Pages || {};
   /* Consultas/exames dos últimos 12 meses: realizados × pendentes já vencidos */
   const _scoreConsultas = () => {
     if (!S.getSaudeEventos) return undefined;
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = H.hoje();
     const desde = _diasAtras(365);
     const eventos = S.getSaudeEventos().filter(e => e.data && e.data >= desde && e.data <= hoje && e.status !== 'Cancelado');
     const realizados = eventos.filter(e => e.status === 'Realizado').length;
@@ -43,7 +43,7 @@ PCF.Pages = PCF.Pages || {};
   /* Medicamentos: penaliza tratamentos "Em uso" cujo fim previsto já passou sem atualização */
   const _scoreMedicamentos = () => {
     if (!S.getSaudeMedicamentos) return undefined;
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = H.hoje();
     const emUso = S.getSaudeMedicamentos().filter(m => m.status === 'Em uso');
     if (!emUso.length) return undefined;
     const emDia = emUso.filter(m => !m.dataFim || m.dataFim >= hoje).length;
@@ -120,13 +120,12 @@ PCF.Pages = PCF.Pages || {};
     const catEmo = allCats.find(c => c.integracaoFonte === 'emocoes');
     if (catEmo) {
       const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
-      const cutStr = cutoff.toISOString().split('T')[0];
+      const cutStr = H.dataISO(cutoff);
       const recentes = S.getEmocoes().filter(e => e.data >= cutStr);
       if (recentes.length >= 2) {
-        const positivas = new Set(['Feliz', 'Surpreso']);
         let pos = 0, neg = 0;
         recentes.forEach(e => {
-          if (positivas.has(e.emocaoPrimaria)) pos++;
+          if (H.emocaoPositiva(e.emocaoSuperior)) pos++;
           else neg++;
         });
         const total = pos + neg;
@@ -162,7 +161,7 @@ PCF.Pages = PCF.Pages || {};
       if (habitos.length > 0) {
         const ids = new Set(habitos.map(h => h.id));
         const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
-        const cutStr = cutoff.toISOString().split('T')[0];
+        const cutStr = H.dataISO(cutoff);
         const feitos = S.getRegistrosHabitos().filter(r => ids.has(r.habitoId) && r.data >= cutStr && r.completo);
         const expected = habitos.length * 30;
         sug[catInt.id] = Math.max(1, Math.min(10, Math.round((feitos.length / expected) * 9) + 1));
@@ -175,7 +174,7 @@ PCF.Pages = PCF.Pages || {};
       const virtudes = S.getVirtudesConfig().filter(v => v.ativo !== false);
       if (virtudes.length > 0) {
         const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
-        const cutStr = cutoff.toISOString().split('T')[0];
+        const cutStr = H.dataISO(cutoff);
         const regs = (S.getVirtudesReg ? S.getVirtudesReg() : []).filter(r => r.data >= cutStr);
         // Dias únicos com pelo menos 1 virtude praticada
         const diasUnicos = new Set(regs.map(r => r.data)).size;
@@ -341,7 +340,7 @@ PCF.Pages = PCF.Pages || {};
     const config   = _getConfig();
     const sugestoes = _calcSugestoes(config);
     let registros  = S.getRodaVidaRegistros();
-    let curDate    = new Date().toISOString().split('T')[0];
+    let curDate    = H.hoje();
     const renderPreservingScroll = () => {
       const x = window.scrollX;
       const y = window.scrollY;
@@ -489,11 +488,11 @@ PCF.Pages = PCF.Pages || {};
         if (e.target.value) { curDate = e.target.value; renderPreservingScroll(); }
       };
       document.getElementById('rv-hoje').onclick = () => {
-        curDate = new Date().toISOString().split('T')[0];
+        curDate = H.hoje();
         renderPreservingScroll();
       };
       document.getElementById('rv-nova').onclick = () => {
-        curDate = new Date().toISOString().split('T')[0];
+        curDate = H.hoje();
         renderPreservingScroll();
       };
 
@@ -515,7 +514,7 @@ PCF.Pages = PCF.Pages || {};
           if (!confirm(`Excluir avaliação de ${_fmt(curDate)}?`)) return;
           registros = registros.filter(r => r.data !== curDate);
           S.saveRodaVidaRegistros(registros);
-          curDate = new Date().toISOString().split('T')[0];
+          curDate = H.hoje();
           render();
         };
       }
