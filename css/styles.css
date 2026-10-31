@@ -4439,3 +4439,10 @@ a.hoje-item-nome:hover { color: var(--accent); }
 @media print {
   .quick-add, .gb-secoes { display: none !important; }
 }
+
+/* ==================== LISTA COMPACTA DOS COMBOBOX ==================== */
+.diario-humor-list.pcf-combo-lista { position: fixed; top: auto; left: 0; z-index: 3000; }
+.pcf-combo-lista .diario-humor-opt { flex-shrink: 0; }
+.pcf-combo-lista .diario-humor-opt:disabled { opacity: .5; cursor: not-allowed; }
+.pcf-combo-lista .diario-humor-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media print { .pcf-combo-lista { display: none !important; } }
